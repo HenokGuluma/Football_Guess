@@ -9,6 +9,6 @@
             android:gravity="center"
             android:layout_width="250dp"
             android:layout_height="250dp"
-            android:src="@mipmap/asyiz2" />
+            android:src="@mipmap/splash" />
     </item>
 </layer-list>
