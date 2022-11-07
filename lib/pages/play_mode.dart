@@ -86,7 +86,7 @@ void handleTimeout() {  // callback function
               height: height*0.05,
             ),
             Text(
-                'Pick a Category', style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 35, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
+                'Pick a Game Mode', style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 35, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
               ),
             SizedBox(
               height: height*0.05,
@@ -107,6 +107,7 @@ void handleTimeout() {  // callback function
   padding: const EdgeInsets.all(5),
   children: <Widget>[
    menuOption(width, height, 0, modes),
+   SizedBox(height: height*0.08,),
    menuOption(width, height, 1, modes),
   ],
 ),

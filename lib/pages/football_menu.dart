@@ -152,7 +152,25 @@ void handleTimeout() {  // callback function
    menuOption(width, height, 3, menuImages),
   ],
 ),
-          )
+          ), 
+
+          SizedBox(height: height*0.02,),
+          GestureDetector(
+            onTap: (){
+              Navigator.pop(context);
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.3,
+              height: height*0.06,
+              child: Center(
+                child: Text('Go Back', style: TextStyle(color: Colors.black, fontSize: 20, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            ),
+            )
 
           ],
         )

@@ -291,20 +291,20 @@ void handleTimeout() {  // callback function
                 ),
               ),
             ),
-            SizedBox(height: 10,),
+            SizedBox(height: height*0.05,),
              MaterialButton(
                 onPressed: (){
                   Navigator.pop(context);
                 },
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Color(0xffff2378),
                     borderRadius: BorderRadius.circular(20)
                   ),
                   width: width*0.3,
                   height: 40,
                   child: Center(
-                    child: Text('Go Back', style: TextStyle(color: Colors.black, fontSize:18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                    child: Text('Go Back', style: TextStyle(color: Colors.white, fontSize:18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
                   ),
                 ),
               ),
@@ -352,7 +352,7 @@ void handleTimeout() {  // callback function
             ),
 
             Container(
-              height: height*0.5,
+              height: height*0.55,
               width: width,
               child: defeated
               ?Center(
@@ -415,7 +415,7 @@ void handleTimeout() {  // callback function
               )
                 
             ),
-            SizedBox(height: height*0.05,),
+            
             Center(
               child: Text('Score: ' + (currentPage*10).toString(), style: TextStyle(color: Colors.white, fontFamily: 'Muli', fontSize: 25, fontWeight: FontWeight.w900),),
              
