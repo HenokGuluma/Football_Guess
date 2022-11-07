@@ -22,6 +22,11 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: 0.1.2
+  flutter_fortune_wheel: 
+  flutter_spinning_wheel :
+  animated_check: ^1.0.5
+  flutter_countdown_timer:
+  flutter_shake_animated: 
   storage_path: 0.2.0
   transparent_image: 1.0.0
   scrollable_positioned_list: 0.1.8
@@ -33,34 +38,20 @@ dependencies:
   image_picker: 0.6.0
   file_picker: 
   firebase_storage: 4.0.1
-  font_awesome_flutter:
-  shared_preferences:
-  google_api_headers:
-  flutter_google_places: 0.2.8
-  google_maps_webservice:
   cached_network_image: 2.5.1
   provider: 4.0.1
   image:
   animator: 2.0.0
   flutter_svg: 0.19.3
-  preload_page_view: 0.1.4
-  # permission_handler: 5.0.1+1
   path_provider: 1.6.24
   image_gallery: 1.2.0
   image_crop: 0.3.4
   media_gallery: 0.1.5
-  auto_size_text_field: 0.1.7
-  video_player: 1.0.1
-  # camera: 0.5.8+17
   fluttertoast: 7.1.5
   flutter_image_compress: ^0.7.0
   flushbar: 1.10.4
-  http: 0.12.2
   flutter_cache_manager: 2.1.0
   progressive_image: 1.0.1
-  inview_notifier_list: 1.0.0
-  video_trimmer: 0.3.5
-  stacked: 1.7.6
   photo_manager: 1.0.0
   image_size_getter: 0.2.1
   confirm_dialog: 0.1.1
@@ -115,6 +106,8 @@ flutter:
     - assets/comment.svg
     - assets/comment_empty.svg
     - assets/heart_fill.svg
+    - assets/telebirr.png
+    - assets/delivery.png
     - assets/icon-06.svg
     - assets/u-turn.svg
     - assets/screw.svg

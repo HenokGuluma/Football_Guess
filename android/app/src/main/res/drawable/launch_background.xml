@@ -9,6 +9,6 @@
             android:gravity="center"
             android:layout_width="250dp"
             android:layout_height="250dp"
-            android:src="@mipmap/homes_splash_screen" />
+            android:src="@mipmap/asyiz2" />
     </item>
 </layer-list>

@@ -8,7 +8,7 @@ class User {
    String uid;
    String email;
    String photoUrl;
-   String displayName;
+   String userName;
    String followers;
    String following;
    int posts;
@@ -19,14 +19,14 @@ class User {
    int dailyTimer;
    int recentActivity;
 
-   User({this.uid, this.email, this.photoUrl, this.displayName, this.followers, this.following, this.bio, this.posts, this.phone, this.trending, this.keys, this.dailyTimer, this.recentActivity});
+   User({this.uid, this.email, this.photoUrl, this.userName, this.followers, this.following, this.bio, this.posts, this.phone, this.trending, this.keys, this.dailyTimer, this.recentActivity});
 
     Map toMap(User user) {
     var data = Map<String, dynamic>();
     data['uid'] = user.uid;
     data['email'] = user.email;
     data['photoUrl'] = user.photoUrl;
-    data['displayName'] = user.displayName;
+    data['userName'] = user.userName;
     data['followers'] = user.followers;
     data['following'] = user.following;
     data['trending'] = user.trending;
@@ -43,7 +43,7 @@ class User {
     this.uid = mapData['uid'];
     this.email = mapData['email'];
     this.photoUrl = mapData['photoUrl'];
-    this.displayName = mapData['displayName'];
+    this.userName = mapData['userName'];
     this.followers = mapData['followers'];
     this.following = mapData['following'];
     this.trending = mapData['trending'];
@@ -57,7 +57,7 @@ class User {
 
   User.fromDoc(DocumentSnapshot doc){
       this.uid = doc['uid'];
-      this.displayName=  doc['displayName'];
+      this.userName=  doc['userName'];
       this.photoUrl = doc['photoUrl'];
       this.email = doc['email'];
       this.bio = doc['bio'] ?? '';

@@ -1,61 +1,79 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart' as auth;
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:instagram_clone/models/user.dart';
-import 'package:instagram_clone/resources/repository.dart';
-import 'package:instagram_clone/ui/insta_home_screen.dart';
-import 'package:instagram_clone/ui/login_screen.dart';
-import 'package:instagram_clone/ui/setup_profile.dart';
-import 'package:provider/provider.dart';
+import 'package:instagram_clone/new_spinner.dart';
+import 'package:instagram_clone/pages/football_menu.dart';
+import 'package:instagram_clone/pages/footballers.dart';
+import 'package:instagram_clone/pages/main_page.dart';
+import 'package:instagram_clone/pages/play_mode.dart';
+import 'package:instagram_clone/spinner-wheel.dart';
 
-void main() async {
+Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+  ]);
   runApp(MyApp());
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
+  // This widget is the root of your application.
   @override
-  MyAppState createState() {
-    return new MyAppState();
+  Widget build(BuildContext context) {
+   
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: "Let's bet",
+      theme: ThemeData(
+        primarySwatch: Colors.red,
+      ),
+      home: 
+      PlayMode()
+      // MainPage(),
+    );
   }
 }
 
-class MyAppState extends State<MyApp> {
-  var _repository = Repository();
+class UserVariables extends ChangeNotifier {
+  int keys = 0;
+  User currentUser = User();
+  List<String> unlockedListings = [];
+  Map<String, Image> cachedImages = {};
+  List<String> phoneList = [];
+  bool trial = false;
 
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-        color: Colors.white,
-        title: 'Homes',
-        debugShowCheckedModeBanner: false,
-        theme: new ThemeData(
-            primarySwatch: Colors.blue,
-            primaryColor: Colors.white,
-            primaryIconTheme: IconThemeData(color: Colors.white),
-            primaryTextTheme: TextTheme(
-               ),
-            textTheme: TextTheme()),
-        home: FutureBuilder(
-          future: _repository.getCurrentUser(),
-          builder: (context, AsyncSnapshot<auth.User> snapshot) {
-            if (snapshot.hasData) {
-              print(snapshot.data.phoneNumber);
-              if (snapshot.data.photoURL==null) {
-                return SetupProfile(
-                    userId: snapshot.data.uid,
-                    emailAddress: snapshot.data.email,
-                    name: snapshot.data.displayName);
-              } else {
-                return InstaHomeScreen();
-              }
-            } else {
-              return LoginScreen();
-              // return InstaHomeScreen();
-            }
-          },
-        ));
+  void addkeys(int amount) {
+    keys += amount;
+  }
+
+  void removekeys(int amount) {
+    keys -= amount;
+  }
+
+   void updatePhones (List<String> phones){
+    phoneList = phones;
+  }
+
+  void setCurrentUser(User _user) {
+    currentUser = _user;
+  }
+
+  void setTrial(bool trialPeriod){
+    trial = trialPeriod;
+  }
+
+  void unlockListing(String listing) {
+    unlockedListings.add(listing);
+  }
+
+  void setImages(Map<String, Image> images) {
+    cachedImages = images;
+  }
+
+
+  void reset() {
+    keys = 0;
+    User currentUser = User();
+    List<String> unlockedListings = [];
   }
 }

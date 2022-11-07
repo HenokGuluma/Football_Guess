@@ -39,12 +39,12 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId "com.homes.eth"
+        applicationId "com.letsBet.eth"
         minSdkVersion 21
         targetSdkVersion 31
         compileSdkVersion 31
-        versionCode 29
-        versionName "1.2.8"
+        versionCode 1
+        versionName "1.0.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
     }
