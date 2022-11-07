@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
    
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: "Let's bet",
+      title: "BetMania",
       theme: ThemeData(
         primarySwatch: Colors.red,
       ),
