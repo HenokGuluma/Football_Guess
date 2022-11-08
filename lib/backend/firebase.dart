@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
 import 'dart:math';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:instagram_clone/models/lobby.dart';
 import 'package:instagram_clone/models/user.dart';
 
 
@@ -23,6 +24,7 @@ class FirebaseProvider {
         uid: currentUser.uid,
         email: currentUser.email,
         userName: '',
+        hasLobby: false,
         photoUrl: currentUser.photoURL,
         followers: '0',
         following: '0',
@@ -105,6 +107,20 @@ class FirebaseProvider {
       return snapshot['uid'];
     }
     return null;
+  }
+  
+  Future<DocumentSnapshot> fetchLobbyById(String id) async{
+    DocumentSnapshot snapshot = await _firestore.collection("lobbies").doc(id).get();
+     if (snapshot.data() != null) {
+      return snapshot;
+    }
+    return null;
+  }
+
+  Future<void> addLobbyById(String id, Lobby lobby, String creatorId) async{
+    _firestore.collection('users').doc(creatorId).collection('lobby').doc(id).set(lobby.toMap(lobby));
+    _firestore.collection('users').doc(creatorId).update({'hasLobby': true});
+    return _firestore.collection("lobbies").doc(id).set(lobby.toMap(lobby));
   }
 
     void addPhone(String phone, String userId) async{

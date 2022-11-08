@@ -18,7 +18,7 @@
          FlutterApplication and put your custom class here. -->
     <application
         android:name="io.flutter.app.FlutterApplication"
-        android:label="BetMania"
+        android:label="Medib"
         android:icon="@mipmap/asyiz2"
         android:requestLegacyExternalStorage="true">
         <!--<activity android:name=".MainActivity"

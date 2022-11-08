@@ -15,11 +15,12 @@ class User {
    int trending;
    String bio;
    String phone;
+   bool hasLobby;
    int keys;
    int dailyTimer;
    int recentActivity;
 
-   User({this.uid, this.email, this.photoUrl, this.userName, this.followers, this.following, this.bio, this.posts, this.phone, this.trending, this.keys, this.dailyTimer, this.recentActivity});
+   User({this.uid, this.email, this.photoUrl, this.userName, this.hasLobby, this.followers, this.following, this.bio, this.posts, this.phone, this.trending, this.keys, this.dailyTimer, this.recentActivity});
 
     Map toMap(User user) {
     var data = Map<String, dynamic>();
@@ -29,6 +30,7 @@ class User {
     data['userName'] = user.userName;
     data['followers'] = user.followers;
     data['following'] = user.following;
+    data['hasLobby'] = user.hasLobby;
     data['trending'] = user.trending;
     data['bio'] = user.bio;
     data['posts'] = user.posts;
@@ -53,6 +55,7 @@ class User {
     this.dailyTimer = mapData['dailyTimer'];
     this.recentActivity = mapData['recentActivity'];
     this.keys = mapData['keys'];
+    this.hasLobby = mapData['hasLobby'];
   }
 
   User.fromDoc(DocumentSnapshot doc){
@@ -69,6 +72,7 @@ class User {
       this.dailyTimer = doc['dailyTimer'];
       this.recentActivity = doc['recentActivity'];
       this.keys = doc['keys'];
+      this.hasLobby = doc['hasLobby'];
   }
 }
 

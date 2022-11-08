@@ -76,7 +76,7 @@ class _SetupProfileState extends State<SetupProfile> {
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.black,
       appBar: AppBar(
         brightness: Brightness.dark,
         backgroundColor: new Color(0xff1a1a1a),
@@ -98,7 +98,7 @@ class _SetupProfileState extends State<SetupProfile> {
                     child: Container(
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        border: Border.all(color: Colors.black),
+                        border: Border.all(color: Colors.white),
                         image: DecorationImage(
                           image: imageFile != null
                               ? FileImage(File(imageFile.path))
@@ -124,7 +124,7 @@ class _SetupProfileState extends State<SetupProfile> {
                     child: Text('Choose Photo',
                         style: TextStyle(
                             fontFamily: 'Muli',
-                            color: Colors.black,
+                            color: Colors.white,
                             fontSize: 20.0,
                             fontWeight: FontWeight.bold)),
                   ),
@@ -144,7 +144,7 @@ class _SetupProfileState extends State<SetupProfile> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 15.0),
                 child: TextFormField(
-                    style: TextStyle(fontFamily: 'Muli', color: Colors.black),
+                    style: TextStyle(fontFamily: 'Muli', color: Colors.white),
                     controller: _nameController,
                     decoration: InputDecoration(
                       hintText: 'Name',
@@ -155,58 +155,16 @@ class _SetupProfileState extends State<SetupProfile> {
                       labelText: 'Name',
                       labelStyle: TextStyle(
                           fontFamily: 'Muli',
-                          color: Colors.black,
+                          color: Colors.white,
                           fontSize: 16.0),
                     ),
                     onChanged: changeText),
               ),
-              /* Row(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                    child: TextFormField(
-                        style:
-                            TextStyle(fontFamily: 'Muli', color: Colors.black),
-                        controller: _usernameController,
-                        decoration: InputDecoration(
-                          hintText: 'Name',
-                          hintStyle: TextStyle(
-                              fontFamily: 'Muli',
-                              color: Colors.grey,
-                              fontSize: 16.0),
-                          labelText: 'Name',
-                          labelStyle: TextStyle(
-                              fontFamily: 'Muli',
-                              color: Colors.black,
-                              fontSize: 16.0),
-                        ),
-                        onChanged: changeText),
-                  ),
-                  checkingUsername
-                      ? Center(
-                          child: JumpingDotsProgressIndicator(
-                            fontSize: 40.0,
-                            color: Colors.black,
-                          ),
-                        )
-                      : Text(
-                          usernameChecked
-                              ? ''
-                              : usernameExists
-                                  ? 'Not available'
-                                  : 'Available',
-                          style: TextStyle(
-                              color: usernameExists ? Colors.red : Colors.green,
-                              fontFamily: 'Muli',
-                              fontSize: 14),
-                        )
-                ],
-              ), */
               Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8.0),
                 child: TextFormField(
-                    style: TextStyle(fontFamily: 'Muli', color: Colors.black),
+                    style: TextStyle(fontFamily: 'Muli', color: Colors.white),
                     controller: _bioController,
                     maxLines: 3,
                     maxLength: 150,
@@ -219,12 +177,12 @@ class _SetupProfileState extends State<SetupProfile> {
                         labelText: 'Bio',
                         labelStyle: TextStyle(
                             fontFamily: 'Muli',
-                            color: Colors.black,
+                            color: Colors.white,
                             fontSize: 16.0)),
                     onChanged: changeText),
               ),
               Divider(
-                color: Colors.black,
+                color: Colors.white,
                 thickness: 0.5,
               ),
               Padding(
@@ -233,7 +191,7 @@ class _SetupProfileState extends State<SetupProfile> {
                   'Private Information',
                   style: TextStyle(
                       fontFamily: 'Muli',
-                      color: Colors.black,
+                      color: Colors.white,
                       fontSize: 18.0,
                       fontWeight: FontWeight.bold),
                 ),
@@ -242,7 +200,7 @@ class _SetupProfileState extends State<SetupProfile> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8.0),
                 child: TextFormField(
-                    style: TextStyle(fontFamily: 'Muli', color: Colors.black),
+                    style: TextStyle(fontFamily: 'Muli', color: Colors.white),
                     controller: _emailController,
                     enabled: false,
                     decoration: InputDecoration(
@@ -254,7 +212,7 @@ class _SetupProfileState extends State<SetupProfile> {
                         labelText: 'Email address',
                         labelStyle: TextStyle(
                             fontFamily: 'Muli',
-                            color: Colors.black,
+                            color: Colors.white,
                             fontSize: 16.0)),
                     onChanged: changeText),
               ),
@@ -262,7 +220,7 @@ class _SetupProfileState extends State<SetupProfile> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 15.0, vertical: 4.0),
                 child: TextFormField(
-                    style: TextStyle(fontFamily: 'Muli', color: Colors.black),
+                    style: TextStyle(fontFamily: 'Muli', color: Colors.white),
                     controller: _phoneController,
                     autofocus: false,
                     decoration: InputDecoration(
@@ -274,7 +232,7 @@ class _SetupProfileState extends State<SetupProfile> {
                         labelText: 'Phone Number',
                         labelStyle: TextStyle(
                             fontFamily: 'Muli',
-                            color: Colors.black,
+                            color: Colors.white,
                             fontSize: 16.0)),
                     onChanged: changeText),
               ),
@@ -325,7 +283,7 @@ class _SetupProfileState extends State<SetupProfile> {
                           child: Center(
                               child: Text(
                             'Finish',
-                            style: TextStyle(color: Colors.black, fontSize: 18),
+                            style: TextStyle(color: Colors.white, fontSize: 18),
                           )),
                         ))
                       : Center(
@@ -381,7 +339,6 @@ class _SetupProfileState extends State<SetupProfile> {
 
   changeText(String text) {
     setState(() {});
-    print(phoneList);
   }
 
   changeUserName(String text) {

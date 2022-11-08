@@ -318,12 +318,17 @@ void handleTimeout() {  // callback function
             SizedBox(
               height: height*0.15,
             ),
-            Center(
+            Container(
+              width: width*0.8,
+              height: height*0.08,
+             
+              child: Center(
               child: Text(
                 widget.category == 'age'?'Who is Older?':widget.category == 'height'
                 ?'Who is taller?':widget.category == 'jersey'?'Who has higher Jersey Number?':'Who has more goals?',
                  style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 25, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
               ),
+            ),
             ),
             SizedBox(
               height: height*0.08,
@@ -344,7 +349,7 @@ void handleTimeout() {  // callback function
               backgroundColor: Colors.transparent,
               value: timeLeft == divider?1:(timeLeft/(divider-1)).toDouble(),
               // value: _slideController.value,
-              valueColor: AlwaysStoppedAnimation(Color(0xff00ffff)),
+              valueColor: AlwaysStoppedAnimation(Color(0xffffffff)),
             ),
            ),
              SizedBox(

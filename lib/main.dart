@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:instagram_clone/models/lobby.dart';
 import 'package:instagram_clone/models/user.dart';
 import 'package:instagram_clone/new_spinner.dart';
 import 'package:instagram_clone/pages/football_menu.dart';
@@ -23,7 +24,7 @@ class MyApp extends StatelessWidget {
    
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: "BetMania",
+      title: "Medib",
       theme: ThemeData(
         primarySwatch: Colors.red,
       ),
@@ -40,6 +41,7 @@ class UserVariables extends ChangeNotifier {
   List<String> unlockedListings = [];
   Map<String, Image> cachedImages = {};
   List<String> phoneList = [];
+  Lobby lobby;
   bool trial = false;
 
   void addkeys(int amount) {
@@ -52,6 +54,10 @@ class UserVariables extends ChangeNotifier {
 
    void updatePhones (List<String> phones){
     phoneList = phones;
+  }
+
+  void setLobby (Lobby newLobby){
+    lobby = newLobby;
   }
 
   void setCurrentUser(User _user) {
