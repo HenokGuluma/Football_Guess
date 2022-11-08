@@ -40,22 +40,22 @@ class _LoginScreenState extends State<LoginScreen> {
               padding: const EdgeInsets.only(bottom: 10.0),
               child: Center(
                 child: Container(
-                  height: height * 0.15,
+                  height: height * 0.25,
                   decoration: BoxDecoration(
                       image: DecorationImage(
-                          image: AssetImage('assets/asyiz.jpg'))),
+                          image: AssetImage('assets/asyiz.png'))),
                 ),
               )),
           SizedBox(
             height: height * 0.05,
           ),
           Padding(
-              padding: const EdgeInsets.only(top: 0.0, bottom: 10.0),
+              padding:  EdgeInsets.only(top: 0.0, bottom: 10.0, left: width*0.05, right: width*0.05),
               child: Center(
                   child: Text(
                 "Create your Account to play with others",
                 style: TextStyle(
-                    fontFamily: 'Muli', color: Colors.white, fontSize: 30.0),
+                    fontFamily: 'Muli', color: Colors.white, fontSize: 25.0, fontWeight: FontWeight.w900), textAlign: TextAlign.center,
               ))),
         
            loggingIn
@@ -121,6 +121,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           style: TextStyle(
                               fontFamily: 'Muli',
                               color: Colors.black,
+                              fontWeight: FontWeight.w900,
                               fontSize: 18.0)),
                     )
                   ],
@@ -139,7 +140,28 @@ class _LoginScreenState extends State<LoginScreen> {
                 });
               },
             ),
+
+            
           ),
+          SizedBox(
+            height: height*0.05,
+          ),
+          MaterialButton(
+                onPressed: (){
+                  Navigator.pop(context);
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Color(0xffff2378),
+                    borderRadius: BorderRadius.circular(20)
+                  ),
+                  width: width*0.3,
+                  height: 40,
+                  child: Center(
+                    child: Text('Go Back', style: TextStyle(color: Colors.white, fontSize:18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                  ),
+                ),
+              ),
         ]));
   }
 

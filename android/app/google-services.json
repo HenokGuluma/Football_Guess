@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "684932941572-mjtam1tnrmsopgs4m9u3r4v4dirs2cah.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.letsBet.eth",
+            "certificate_hash": "639aad5c2a72a7a56ada9b9f2a0eddb7dbe362e3"
+          }
+        },
+        {
           "client_id": "684932941572-4miuuacb21qp794jdbfg8599ol3oi3ee.apps.googleusercontent.com",
           "client_type": 3
         }
