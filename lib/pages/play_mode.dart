@@ -11,6 +11,7 @@ import 'package:flutter_countdown_timer/countdown.dart';
 import 'package:instagram_clone/pages/football_menu.dart';
 import 'package:instagram_clone/pages/footballers.dart';
 import 'package:instagram_clone/pages/lobby_menu.dart';
+import 'package:instagram_clone/pages/login_screen.dart';
 import 'package:instagram_clone/pages/setup_profile.dart';
 
 class PlayMode extends StatefulWidget {
@@ -129,13 +130,21 @@ void handleTimeout() {  // callback function
     return first>second;
    }
 
+   void finishNavigation(){
+     Navigator.push(context, MaterialPageRoute( 
+          builder: (BuildContext context) {
+                          return LobbyMenu();
+                        },
+                        ));
+   }
+
    Widget menuOption(var width, var height, int index, List<String> images){
     return GestureDetector(
       onTap: (){
         Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           // return LobbyMenu();
-                          return  SetupProfile();
+                          return  LoginScreen(finishStage: finishNavigation,);
                         },
                         ));
       },

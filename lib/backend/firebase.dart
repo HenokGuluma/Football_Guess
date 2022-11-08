@@ -74,6 +74,27 @@ class FirebaseProvider {
         });
   }
 
+   Future<User> retrieveUserDetails(auth.User user) async {
+    DocumentSnapshot _documentSnapshot =
+        await _firestore.collection("users").doc(user.uid).get();
+    return User.fromMap(_documentSnapshot.data());
+  }
+
+    Future<bool> authenticateUser(auth.User user) async {
+    final QuerySnapshot result = await _firestore
+        .collection("users")
+        .where("email", isEqualTo: user.email)
+        .get();
+
+    final List<DocumentSnapshot> docs = result.docs;
+
+    if (docs.length == 0) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
     Future<String> fetchUidbyEmail(String email) async {
     final QuerySnapshot result = await _firestore
         .collection("users")

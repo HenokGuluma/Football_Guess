@@ -10,6 +10,7 @@ import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:instagram_clone/backend/firebase.dart';
+import 'package:instagram_clone/pages/lobby_menu.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:instagram_clone/models/user.dart';
@@ -19,8 +20,9 @@ class SetupProfile extends StatefulWidget {
   final String userId;
   final String emailAddress;
   final String name;
+  Function finishNavigation;
 
-  SetupProfile({this.userId, this.emailAddress, this.name});
+  SetupProfile({this.userId, this.emailAddress, this.name, this.finishNavigation});
 
   @override
   _SetupProfileState createState() => _SetupProfileState();
@@ -85,7 +87,7 @@ class _SetupProfileState extends State<SetupProfile> {
         centerTitle: true,
         title: Text(
           'Setup Profile',
-          style: TextStyle(fontFamily: 'Muli', color: Colors.white),
+          style: TextStyle(fontFamily: 'Muli', color: Colors.white, fontSize: 20, fontWeight: FontWeight.w900),
         ),
       ),
       body: ListView(
@@ -263,7 +265,7 @@ class _SetupProfileState extends State<SetupProfile> {
                             child: Text(
                               'Finishing Up ...',
                               style:
-                                  TextStyle(color: Colors.white, fontSize: 18),
+                                  TextStyle(color: Colors.white, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900),
                             ),
                           )))
                   : _nameController.text.isEmpty ||
@@ -283,7 +285,7 @@ class _SetupProfileState extends State<SetupProfile> {
                           child: Center(
                               child: Text(
                             'Finish',
-                            style: TextStyle(color: Colors.white, fontSize: 18),
+                            style: TextStyle(color: Colors.white, fontSize: 18, fontFamily:'Muli', fontWeight: FontWeight.w900),
                           )),
                         ))
                       : Center(
@@ -320,7 +322,8 @@ class _SetupProfileState extends State<SetupProfile> {
                                           _emailController.text,
                                           _phoneController.text)
                                       .then((value) {
-                                    Navigator.pop(context);
+                                   Navigator.pop(context);
+                                   widget.finishNavigation();
                                   });
                                 });
                               });
