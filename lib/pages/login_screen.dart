@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter/material.dart';
 import 'package:instagram_clone/backend/firebase.dart';
+import 'package:instagram_clone/main.dart';
 import 'package:instagram_clone/pages/lobby_menu.dart';
 import 'package:instagram_clone/pages/setup_profile.dart';
 import 'package:progress_indicators/progress_indicators.dart';
@@ -9,8 +10,9 @@ class LoginScreen extends StatefulWidget {
 
   String nextStage;
   Function finishStage;
+  UserVariables variables;
 
-  LoginScreen({this.nextStage, this.finishStage});
+  LoginScreen({this.nextStage, this.finishStage, this.variables});
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
@@ -32,7 +34,13 @@ class _LoginScreenState extends State<LoginScreen> {
           centerTitle: true,
           elevation: 1.0,
         ),
-        body: ListView(children: <Widget>[
+        body: Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('assets/general_background.png')
+            )
+          ),
+          child: ListView(children: <Widget>[
           SizedBox(
             height: height * 0.1,
           ),
@@ -43,7 +51,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   height: height * 0.25,
                   decoration: BoxDecoration(
                       image: DecorationImage(
-                          image: AssetImage('assets/asyiz.png'))),
+                          image: AssetImage('assets/asyiz-removed.png'))),
                 ),
               )),
           SizedBox(
@@ -162,7 +170,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               ),
-        ]));
+        ]),
+        ));
   }
 
   void authenticateUser(auth.User user) {
@@ -178,7 +187,8 @@ class _LoginScreenState extends State<LoginScreen> {
               userId: user.uid,
               emailAddress: user.email,
               name: user.displayName,
-
+              finishNavigation: widget.finishStage,
+              variables: widget.variables,
             );
           }));
         });

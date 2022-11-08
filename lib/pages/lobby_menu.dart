@@ -9,12 +9,17 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_countdown_timer/flutter_countdown_timer.dart';
 import 'package:flutter_spinning_wheel/src/utils.dart';
 import 'package:flutter_countdown_timer/countdown.dart';
+import 'package:instagram_clone/main.dart';
+import 'package:instagram_clone/models/lobby.dart';
+import 'package:instagram_clone/pages/add_lobby.dart';
 import 'package:instagram_clone/pages/football_menu.dart';
 import 'package:instagram_clone/pages/footballers.dart';
 
 class LobbyMenu extends StatefulWidget {
  
+ UserVariables variables;
 
+ LobbyMenu({this.variables});
   @override
   _LobbyMenuState createState() => _LobbyMenuState();
 }
@@ -224,7 +229,12 @@ void handleTimeout() {  // callback function
             ),
              GestureDetector(
             onTap: (){
-              Navigator.pop(context);
+               Navigator.push(context, MaterialPageRoute( 
+          builder: (BuildContext context) {
+                          // return LobbyMenu();
+                          return  AddLobby(variables: widget.variables,);
+                        },
+                        ));
             },
             child: Container(
               decoration: BoxDecoration(

@@ -92,6 +92,9 @@ flutter:
     - assets/Christiano-Ronaldo.png
     - assets/Lionel-Messi.png
     - assets/asyiz.png
+    - assets/asyiz-removed.png
+    - assets/asyiz-transparent.png
+    - assets/general_background.png
     - assets/Sadio-Mane.png
     - assets/Mohammed-Salah.png
     - assets/Karim-Benzema.png

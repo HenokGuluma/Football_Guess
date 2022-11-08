@@ -8,11 +8,13 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_countdown_timer/flutter_countdown_timer.dart';
 import 'package:flutter_spinning_wheel/src/utils.dart';
 import 'package:flutter_countdown_timer/countdown.dart';
+import 'package:instagram_clone/main.dart';
 import 'package:instagram_clone/pages/football_menu.dart';
 import 'package:instagram_clone/pages/footballers.dart';
 import 'package:instagram_clone/pages/lobby_menu.dart';
 import 'package:instagram_clone/pages/login_screen.dart';
 import 'package:instagram_clone/pages/setup_profile.dart';
+import 'package:provider/provider.dart';
 
 class PlayMode extends StatefulWidget {
  
@@ -61,6 +63,7 @@ void handleTimeout() {  // callback function
 
   @override
   Widget build(BuildContext context) {
+    UserVariables variables = Provider.of<UserVariables>(context, listen: false);
      var width = MediaQuery.of(context).size.width;
     var height = MediaQuery.of(context).size.height;
  
@@ -109,9 +112,9 @@ void handleTimeout() {  // callback function
             child:  ListView(
   padding: const EdgeInsets.all(5),
   children: <Widget>[
-   menuOption(width, height, 0, modes),
+   menuOption(width, height, 0, modes, variables),
    SizedBox(height: height*0.08,),
-   menuOption(width, height, 1, modes),
+   menuOption(width, height, 1, modes, variables),
   ],
 ),
           )
@@ -138,15 +141,25 @@ void handleTimeout() {  // callback function
                         ));
    }
 
-   Widget menuOption(var width, var height, int index, List<String> images){
+   Widget menuOption(var width, var height, int index, List<String> images, UserVariables variables){
     return GestureDetector(
       onTap: (){
-        Navigator.push(context, MaterialPageRoute( 
+        if(variables.currentUser.uid==null || variables.currentUser.uid.isEmpty){
+          Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           // return LobbyMenu();
-                          return  LoginScreen(finishStage: finishNavigation,);
+                          return  LoginScreen(finishStage: finishNavigation, variables: variables,);
                         },
                         ));
+        }
+        else{
+          Navigator.push(context, MaterialPageRoute( 
+          builder: (BuildContext context) {
+                          // return LobbyMenu();
+                          return LobbyMenu(variables: variables,);
+                        },
+                        ));
+        }
       },
       child: Stack(
         alignment: Alignment.bottomCenter,

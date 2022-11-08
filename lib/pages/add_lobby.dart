@@ -32,9 +32,9 @@ class _AddLobbyState extends State<AddLobby>
  
   AnimationController _animationController;
   AnimationController _bounceController;
-  TextEditingController _nameController;
-  TextEditingController _uidController;
-  TextEditingController _rateController;
+  TextEditingController _nameController = TextEditingController();
+  TextEditingController _uidController= TextEditingController();
+  TextEditingController _rateController = TextEditingController();
   PageController _pageController;
   FirebaseProvider _firebaseProvider = FirebaseProvider();
   Animation _animation;
@@ -151,20 +151,22 @@ void handleTimeout() {  // callback function
               height: height*0.03,
             ),
             Text(
-                'Join a Lobby', style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 30, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
+                'Create a Lobby', style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 30, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
               ),
 
                SizedBox(
               height: height*0.03,
             ),
          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            
             children: <Widget>[
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                padding: const EdgeInsets.symmetric(horizontal: 30.0),
                 child: TextFormField(
-                    style: TextStyle(fontFamily: 'Muli', color: Colors.black),
+                    style: TextStyle(fontFamily: 'Muli', color: Colors.white, fontWeight: FontWeight.w900, fontSize: 20),
                     controller: _nameController,
+                    autofocus: true,
                     decoration: InputDecoration(
                       hintText: 'Lobby Name',
                       hintStyle: TextStyle(
@@ -174,25 +176,27 @@ void handleTimeout() {  // callback function
                       labelText: 'Lobby Name',
                       labelStyle: TextStyle(
                           fontFamily: 'Muli',
-                          color: Colors.black,
+                          color: Colors.white,
                           fontSize: 20.0),
                     ),
                     onChanged: changeText),
               ),
               Padding(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8.0),
-                child: TextFormField(
+                    const EdgeInsets.only(left: 30.0, top: 10),
+                child: TextField(
                   inputFormatters: [
                   FilteringTextInputFormatter.deny(
                       RegExp(r'\s')),
               ],
-                    style: TextStyle(fontFamily: 'Muli', color: Colors.black),
+                    style: TextStyle(fontFamily: 'Muli', color: Colors.white, fontWeight: FontWeight.w900, fontSize: 20),
                     controller: _uidController,
-                    maxLines: 3,
-                    maxLength: 150,
+                    maxLength: 15,
+                    
                     decoration: InputDecoration(
+                      
                         hintText: 'Lobby Identifier',
+                        
                         hintStyle: TextStyle(
                             fontFamily: 'Muli',
                             color: Colors.grey,
@@ -200,40 +204,51 @@ void handleTimeout() {  // callback function
                         labelText: 'Lobby Identifier',
                         labelStyle: TextStyle(
                             fontFamily: 'Muli',
-                            color: Colors.black,
+                            color: Colors.white,
                             fontSize: 20.0)),
                     onChanged: updateText),
               ),
 
               unavailable
               ?Container(
-                 
-                  // width: width*0.4,
-                  height: height*0.03,
+                  decoration: BoxDecoration(
+                    color: Color(0xffff2389),
+                    borderRadius: BorderRadius.circular(15)
+                  ),
+                  width: width*0.4,
+                  height: height*0.05,
                   child: Center(
-                    child: Text('Identifier already exists', style: TextStyle(color: Color(0xffff2389), fontSize: 14, fontFamily: 'Muli')),
+                    child: Text('Identifier unavailable', style: TextStyle(color: Colors.white, fontSize: 16, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
                   ),
                 )
               :available
               ?Container(
-                 
-                  // width: width*0.4,
-                  height: height*0.03,
+                  decoration: BoxDecoration(
+                    color: Color(0xff23ff89),
+                    borderRadius: BorderRadius.circular(15)
+                  ),
+                  width: width*0.4,
+                  height: height*0.05,
                   child: Center(
-                    child: Text('Identifier Available', style: TextStyle(color: Color(0xff23ff89), fontSize: 14, fontFamily: 'Muli')),
+                    child: Text('Identifier Available', style: TextStyle(color: Colors.black, fontSize: 16, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
                   ),
                 )
-              :MaterialButton(
-                onPressed:(){
+              :GestureDetector(
+                onTap:(){
+                  setState(() {
+                    checking = true;
+                  });
                   _firebaseProvider.fetchLobbyById(_uidController.text).then((value) {
                     if(value!=null){
                       setState(() {
                         unavailable = true;
+                        checking = false;
                       });
                     }
                     else{
                       setState(() {
                         available = true;
+                        checking = false;
                       });
                     }
                   });
@@ -244,36 +259,44 @@ void handleTimeout() {  // callback function
                     borderRadius: BorderRadius.circular(15)
                   ),
                   width: width*0.4,
-                  height: height*0.03,
+                  height: height*0.05,
                   child: Center(
-                    child: Text(checking?'Checking...':'Check Availability', style: TextStyle(color: Colors.black, fontSize: 14, fontFamily: 'Muli')),
+                    child: Text(checking?'Checking...':'Check Availability', style: TextStyle(color: Colors.black, fontSize: 16, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
                   ),
                 ),
                  ),
+                 SizedBox(
+            height: height*0.08,
+          ),
              
               Padding(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8.0),
+                    const EdgeInsets.symmetric(horizontal: 30.0, vertical: 8.0),
                 child: TextFormField(
                   keyboardType: TextInputType.number,
-                    style: TextStyle(fontFamily: 'Muli', color: Colors.black),
+                    style: TextStyle(fontFamily: 'Muli', color: Colors.white, fontSize: 30, fontWeight: FontWeight.w900),
                     controller: _rateController,
-                    enabled: false,
+                    enabled: true,
                     decoration: InputDecoration(
+                      
                         hintText: 'Rate (in ETB) (eg. 50)',
                         hintStyle: TextStyle(
                             fontFamily: 'Muli',
                             color: Colors.grey,
                             fontSize: 20.0),
-                        labelText: 'Rate Per Game',
+                        labelText: 'Rate (in ETB)',
                         labelStyle: TextStyle(
                             fontFamily: 'Muli',
-                            color: Colors.black,
+                            color: Colors.white,
                             fontSize: 20.0)),
                     onChanged: changeText),
               ),
               
             ],
+          ),
+
+          SizedBox(
+            height: height*0.05,
           ),
         
          Row(
@@ -295,7 +318,8 @@ void handleTimeout() {  // callback function
               ),
             ),
             ),
-             GestureDetector(
+             available && _nameController.text.isNotEmpty && _rateController.text.isNotEmpty
+             ?GestureDetector(
             onTap: (){
               setState(() {
                 creating = true;
@@ -329,6 +353,17 @@ void handleTimeout() {  // callback function
               ),
             ),
             )
+            :Container(
+              decoration: BoxDecoration(
+                color: Color(0xff777777),
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.35,
+              height: height*0.06,
+              child: Center(
+                child: Text('Confirm Lobby', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            ),
           ],
          )
 

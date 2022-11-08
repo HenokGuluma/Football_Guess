@@ -10,6 +10,7 @@ import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:instagram_clone/backend/firebase.dart';
+import 'package:instagram_clone/main.dart';
 import 'package:instagram_clone/pages/lobby_menu.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -21,8 +22,9 @@ class SetupProfile extends StatefulWidget {
   final String emailAddress;
   final String name;
   Function finishNavigation;
+  UserVariables variables;
 
-  SetupProfile({this.userId, this.emailAddress, this.name, this.finishNavigation});
+  SetupProfile({this.userId, this.emailAddress, this.name, this.finishNavigation, this.variables});
 
   @override
   _SetupProfileState createState() => _SetupProfileState();
@@ -90,7 +92,13 @@ class _SetupProfileState extends State<SetupProfile> {
           style: TextStyle(fontFamily: 'Muli', color: Colors.white, fontSize: 20, fontWeight: FontWeight.w900),
         ),
       ),
-      body: ListView(
+      body: Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/general_background.png')
+          )
+        ),
+        child: ListView(
         children: [
           Column(
             children: <Widget>[
@@ -224,6 +232,7 @@ class _SetupProfileState extends State<SetupProfile> {
                 child: TextFormField(
                     style: TextStyle(fontFamily: 'Muli', color: Colors.white),
                     controller: _phoneController,
+                    keyboardType: TextInputType.number,
                     autofocus: false,
                     decoration: InputDecoration(
                         hintText: 'Phone Number',
@@ -300,7 +309,7 @@ class _SetupProfileState extends State<SetupProfile> {
                                 child: Text(
                               'Finish',
                               style:
-                                  TextStyle(color: Colors.black, fontSize: 18),
+                                  TextStyle(color: Colors.black, fontSize: 18, fontFamily:'Muli', fontWeight: FontWeight.w900 ),
                             )),
                           ),
                           onTap: () {
@@ -322,7 +331,26 @@ class _SetupProfileState extends State<SetupProfile> {
                                           _emailController.text,
                                           _phoneController.text)
                                       .then((value) {
+                                 
                                    Navigator.pop(context);
+                                   User _user = User();
+                                   
+                                   _user = User(
+                                      recentActivity: DateTime.utc(2020).millisecondsSinceEpoch,
+                                      uid: widget.userId,
+                                      email: _emailController.text,
+                                      userName: '',
+                                      hasLobby: false,
+                                      photoUrl: url,
+                                      followers: '0',
+                                      following: '0',
+                                      bio: '',
+                                      posts: 0,
+                                      phone: '',
+                                      trending: 100,
+                                      keys: 0,
+                                      dailyTimer: DateTime.now().millisecondsSinceEpoch);
+                                   widget.variables.setCurrentUser(_user);
                                    widget.finishNavigation();
                                   });
                                 });
@@ -337,6 +365,7 @@ class _SetupProfileState extends State<SetupProfile> {
           ),
         ],
       ),
+      )
     );
   }
 

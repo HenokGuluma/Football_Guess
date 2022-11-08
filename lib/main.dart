@@ -9,6 +9,7 @@ import 'package:instagram_clone/pages/footballers.dart';
 import 'package:instagram_clone/pages/main_page.dart';
 import 'package:instagram_clone/pages/play_mode.dart';
 import 'package:instagram_clone/spinner-wheel.dart';
+import 'package:provider/provider.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,7 +32,13 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.red,
       ),
       home: 
-      PlayMode()
+      MultiProvider(
+      providers: [
+        ChangeNotifierProvider<UserVariables>(
+            create: (context) => UserVariables())
+      ],
+      child: PlayMode(),
+    )
       // MainPage(),
     );
   }
