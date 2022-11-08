@@ -10,6 +10,7 @@ import 'package:flutter_spinning_wheel/src/utils.dart';
 import 'package:flutter_countdown_timer/countdown.dart';
 import 'package:instagram_clone/pages/football_menu.dart';
 import 'package:instagram_clone/pages/footballers.dart';
+import 'package:instagram_clone/pages/lobby.dart';
 
 class PlayMode extends StatefulWidget {
  
@@ -132,7 +133,7 @@ void handleTimeout() {  // callback function
       onTap: (){
         Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
-                          return FootBallMenu();
+                          return LobbyMenu();
                         },
                         ));
       },
