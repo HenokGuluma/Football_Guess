@@ -144,7 +144,15 @@ void handleTimeout() {  // callback function
    Widget menuOption(var width, var height, int index, List<String> images, UserVariables variables){
     return GestureDetector(
       onTap: (){
-        if(variables.currentUser.uid==null || variables.currentUser.uid.isEmpty){
+        if (index == 1){
+            Navigator.push(context, MaterialPageRoute( 
+          builder: (BuildContext context) {
+                          // return LobbyMenu();
+                          return  LobbyMenu(variables: variables,);
+                        },
+                        ));
+        }
+        else if(variables.currentUser.uid==null || variables.currentUser.uid.isEmpty){
           Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           // return LobbyMenu();
