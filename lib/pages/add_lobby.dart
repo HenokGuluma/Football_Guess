@@ -135,7 +135,7 @@ void handleTimeout() {  // callback function
             height: height,
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: AssetImage('assets/stadium.png'),
+                image: AssetImage('assets/lobby.png'),
                 fit: BoxFit.cover
               )
             ),

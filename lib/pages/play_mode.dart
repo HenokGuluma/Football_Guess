@@ -8,12 +8,16 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_countdown_timer/flutter_countdown_timer.dart';
 import 'package:flutter_spinning_wheel/src/utils.dart';
 import 'package:flutter_countdown_timer/countdown.dart';
+import 'package:instagram_clone/backend/firebase.dart';
 import 'package:instagram_clone/main.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
+import 'package:instagram_clone/models/user.dart';
 import 'package:instagram_clone/pages/football_menu.dart';
 import 'package:instagram_clone/pages/footballers.dart';
 import 'package:instagram_clone/pages/lobby_menu.dart';
 import 'package:instagram_clone/pages/login_screen.dart';
 import 'package:instagram_clone/pages/setup_profile.dart';
+import 'package:progress_indicators/progress_indicators.dart';
 import 'package:provider/provider.dart';
 
 class PlayMode extends StatefulWidget {
@@ -26,7 +30,8 @@ class PlayMode extends StatefulWidget {
 class _PlayModeState extends State<PlayMode>
     with TickerProviderStateMixin {
   List<String> modes = ['assets/group.jpg', 'assets/solo.jpg'];
-  List<String> options = ['Crew-Mania', 'Solo-Games'];
+  List<String> options = ['Squad-Mode', 'Solo-Mode'];
+  FirebaseProvider _firebaseProvider = FirebaseProvider();
   AnimationController _animationController;
   AnimationController _slideController;
   PageController _pageController;
@@ -42,12 +47,16 @@ class _PlayModeState extends State<PlayMode>
   bool defeated = false;
   bool wrongClick = false;
   int gamePlayDuration = 0;
+  User currentUser = User();
+  bool loading = true;
   
   
   @override
   void initState() {
     super.initState();
-    
+    getCurrentUser().then((value) {
+      loading = false;
+    });
   }
 
   
@@ -59,11 +68,22 @@ void handleTimeout() {  // callback function
     defeated = true;
   });
 }
+
+    Future<void> getCurrentUser() async {
+     auth.User thisUser = await _firebaseProvider.getCurrentUser();
+    User user = await _firebaseProvider.fetchUserDetailsById(thisUser.uid);
+    setState(() {
+      currentUser = user;
+    });
+  }
    
 
   @override
   Widget build(BuildContext context) {
     UserVariables variables = Provider.of<UserVariables>(context, listen: false);
+    if(currentUser.uid!=null){
+      variables.setCurrentUser(currentUser);
+    }
      var width = MediaQuery.of(context).size.width;
     var height = MediaQuery.of(context).size.height;
  
@@ -76,12 +96,28 @@ void handleTimeout() {  // callback function
             height: height,
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: AssetImage('assets/stadium.png'),
+                image: AssetImage('assets/game_play.png'),
                 fit: BoxFit.cover
               )
             ),
           ),
-          Container(
+          loading
+          ?Container(
+            width: width,
+            height: height,
+            child: Column(
+              children: [
+                Center(
+            child: Text(
+                'Preparing Game', style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 35, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
+              ),
+          ),
+          JumpingDotsProgressIndicator(color: Color(0xff00ffff), fontSize: 70,)
+
+              ],
+            )
+          )
+          :Container(
         width: width,
         height: height,
         child: Column(
@@ -148,11 +184,12 @@ void handleTimeout() {  // callback function
             Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           // return LobbyMenu();
-                          return  LobbyMenu(variables: variables,);
+                          return FootBallMenu();
                         },
                         ));
         }
         else if(variables.currentUser.uid==null || variables.currentUser.uid.isEmpty){
+          print(variables.keys); print (' is the keys');
           Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           // return LobbyMenu();

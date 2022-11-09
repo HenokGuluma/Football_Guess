@@ -4,6 +4,7 @@ import 'dart:math';
 import 'dart:typed_data';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flushbar/flushbar.dart';
+import 'package:flutter/services.dart';
 
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image/image.dart' as Im;
@@ -48,11 +49,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
   StorageReference _storageReference;
+  bool available = false;
+  bool unavailable = false;
+  bool userNameShort = true;
+  bool checking = false;
 
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(text: 'Name');
+    _nameController = TextEditingController(text: 'UserName');
     _nameController.text = widget.variables.currentUser.userName;
     _bioController.text = widget.variables.currentUser.bio;
     _emailController.text = widget.variables.currentUser.email;
@@ -75,8 +80,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    var width = MediaQuery.of(context).size.width;
+    var height = MediaQuery.of(context).size.height;
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.black,
       appBar: AppBar(
         brightness: Brightness.dark,
         backgroundColor: new Color(0xff1a1a1a),
@@ -108,6 +115,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     child: Icon(Icons.done, color: Color(0xff00ffff)),
                   ),
                   onPressed: () {
+                    if(_nameController.text!=widget.name && available){
+                      _firebaseProvider.editUserName(_nameController.text, widget.name, currentUser.uid);
+                    }
+                    if(_phoneController.text!=widget.phone && available){
+                      _firebaseProvider.editPhone(_phoneController.text, widget.phone, currentUser.uid);
+                    }
                     _firebaseProvider
                         .updateDetails(
                             currentuser.uid,
@@ -188,7 +201,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   child: Text('Change Photo',
                       style: TextStyle(
                           fontFamily: 'Muli',
-                          color: Colors.black,
+                          color: Colors.white,
                           fontSize: 20.0,
                           fontWeight: FontWeight.w900)),
                 ),
@@ -218,28 +231,109 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 15.0),
                 child: TextFormField(
-                    style: TextStyle(fontFamily: 'Muli', color: Colors.black),
+                    style: TextStyle(fontFamily: 'Muli', color: Colors.white),
                     controller: _nameController,
+                     inputFormatters: [
+                  FilteringTextInputFormatter.deny(
+                      RegExp(r'\s')),
+              ],
+              maxLength: 20,
                     decoration: InputDecoration(
-                      hintText: 'Name',
+                      hintText: 'UserName',
                       hintStyle: TextStyle(
                           fontFamily: 'Muli',
                           color: Colors.grey,
                           fontSize: 16.0),
-                      labelText: 'Name',
+                      labelText: 'UserName',
                       labelStyle: TextStyle(
                           fontFamily: 'Muli',
-                          color: Colors.black,
+                          color: Colors.white,
                           fontWeight: FontWeight.w900,
                           fontSize: 16.0),
                     ),
-                    onChanged: updateText),
+                    onChanged: changeText),
               ),
+
+             /*  SizedBox(
+                height: height*0.02,
+              ), */
+
+               Center(
+                child:  unavailable
+              ?Container(
+                  decoration: BoxDecoration(
+                    color: Color(0xffff2389),
+                    borderRadius: BorderRadius.circular(15)
+                  ),
+                  width: width*0.4,
+                  height: height*0.05,
+                  child: Center(
+                    child: Text('Identifier unavailable', style: TextStyle(color: Colors.white, fontSize: 16, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                  ),
+                )
+                :userNameShort
+                ?Container(
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: BorderRadius.circular(15)
+                  ),
+                  width: width*0.6,
+                  height: height*0.05,
+                  child: Center(
+                    child: Text('Enter at least 7 characters', style: TextStyle(color: Color(0xffff2389), fontSize: 14, fontFamily: 'Muli', fontWeight: FontWeight.w600)),
+                  ),
+                )
+              :available
+              ?Container(
+                  decoration: BoxDecoration(
+                    color: Color(0xff23ff89),
+                    borderRadius: BorderRadius.circular(15)
+                  ),
+                  width: width*0.4,
+                  height: height*0.05,
+                  child: Center(
+                    child: Text('Identifier Available', style: TextStyle(color: Colors.black, fontSize: 16, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                  ),
+                )
+              :GestureDetector(
+                onTap:(){
+                  setState(() {
+                    checking = true;
+                  });
+                  _firebaseProvider.fetchLobbyById(_nameController.text).then((value) {
+                    if(value!=null){
+                      setState(() {
+                        unavailable = true;
+                        checking = false;
+                      });
+                    }
+                    else{
+                      setState(() {
+                        available = true;
+                        checking = false;
+                      });
+                    }
+                  });
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: checking?Color(0xff777777):Colors.white,
+                    borderRadius: BorderRadius.circular(15)
+                  ),
+                  width: width*0.4,
+                  height: height*0.05,
+                  child: Center(
+                    child: Text(checking?'Checking...':'Check Availability', style: TextStyle(color: Colors.black, fontSize: 16, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                  ),
+                ),
+                 ),
+               ),
+               
               Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8.0),
                 child: TextFormField(
-                    style: TextStyle(fontFamily: 'Muli', color: Colors.black),
+                    style: TextStyle(fontFamily: 'Muli', color: Colors.white),
                     controller: _bioController,
                     maxLines: 3,
                     maxLength: 150,
@@ -252,13 +346,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         labelText: 'Bio',
                         labelStyle: TextStyle(
                             fontFamily: 'Muli',
-                            color: Colors.black,
+                            color: Colors.white,
                             fontWeight: FontWeight.w900,
                             fontSize: 16.0)),
                     onChanged: updateText),
               ),
               Divider(
-                color: Colors.black,
+                color: Colors.white,
                 thickness: 0.5,
               ),
               Padding(
@@ -267,7 +361,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   'Private Information',
                   style: TextStyle(
                       fontFamily: 'Muli',
-                      color: Colors.black,
+                      color: Colors.white,
                       fontSize: 18.0,
                       fontWeight: FontWeight.bold),
                 ),
@@ -276,7 +370,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8.0),
                 child: TextFormField(
-                  style: TextStyle(fontFamily: 'Muli', color: Colors.black),
+                  style: TextStyle(fontFamily: 'Muli', color: Colors.white),
                   controller: _emailController,
                   enabled: false,
                   decoration: InputDecoration(
@@ -288,7 +382,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       labelText: 'Email address',
                       labelStyle: TextStyle(
                           fontFamily: 'Muli',
-                          color: Colors.black,
+                          color: Colors.white,
                           fontWeight: FontWeight.w900,
                           fontSize: 16.0)),
                 ),
@@ -297,7 +391,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8.0),
                 child: TextFormField(
-                    style: TextStyle(fontFamily: 'Muli', color: Colors.black),
+                    style: TextStyle(fontFamily: 'Muli', color: Colors.white),
                     controller: _phoneController,
                     autofocus: false,
                     decoration: InputDecoration(
@@ -309,7 +403,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         labelText: 'Phone Number',
                         labelStyle: TextStyle(
                             fontFamily: 'Muli',
-                            color: Colors.black,
+                            color: Colors.white,
                             fontWeight: FontWeight.w900,
                             fontSize: 16.0)),
                     onChanged: updateText),
@@ -336,6 +430,25 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   updateText(String text) {
     setState(() {});
+  }
+
+  changeText(String text){
+    setState(() {
+      unavailable = false;
+      available = false;
+      checking = false;
+    });
+
+    if(text.length>=7){
+      setState(() {
+        userNameShort = false;
+      });
+    }
+    else{
+       setState(() {
+        userNameShort = true;
+      });
+    }
   }
 
   void showFloatingFlushbar(BuildContext context) {

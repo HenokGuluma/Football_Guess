@@ -32,7 +32,6 @@ class InstaProfileScreen extends StatefulWidget {
 class _InstaProfileScreenState extends State<InstaProfileScreen>
     with AutomaticKeepAliveClientMixin {
   var _firebaseProvider = FirebaseProvider();
-  User _user;
   bool _isLiked = false;
   List<DocumentSnapshot> list;
   bool loading = true;
@@ -71,15 +70,14 @@ class _InstaProfileScreenState extends State<InstaProfileScreen>
     auth.User currentUser = await _firebaseProvider.getCurrentUser();
     User user = await _firebaseProvider.retrieveUserDetails(currentUser);
     setState(() {
-      _user = user;
+      widget.variables.currentUser = user;
       variables.currentUser = user;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    var boltTimer = Provider.of<UserVariables>(context, listen: true);
-    _user = boltTimer.currentUser;
+   
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
     return Scaffold(
@@ -90,16 +88,16 @@ class _InstaProfileScreenState extends State<InstaProfileScreen>
         toolbarHeight: 50,
         // elevation: 1,
         centerTitle: true,
-        title: Text('Profile',
+        title: Text(widget.variables.currentUser!=null?widget.variables.currentUser.userName:'Profile',
             style: TextStyle(
                 fontFamily: 'Muli',
                 color: Colors.white,
                 fontSize: 20,
-                fontWeight: FontWeight.w400)),
+                fontWeight: FontWeight.w900)),
       ),
       body: RefreshIndicator(
           onRefresh: () {
-            retrieveUserDetails(boltTimer);
+            retrieveUserDetails(widget.variables);
             return Future.delayed(Duration(seconds: 2));
           },
           backgroundColor: Colors.black,
@@ -121,12 +119,12 @@ class _InstaProfileScreenState extends State<InstaProfileScreen>
                             //thumbnail:NetworkImage(list[index].data()['postOwnerPhotoUrl']),
                             thumbnail: AssetImage('assets/grey.png'),
                             // size: 1.29MB
-                            image: boltTimer.currentUser!=null
-                            ?CachedNetworkImageProvider(boltTimer.currentUser.photoUrl)
-                            :_user != null
-                                ? CachedNetworkImageProvider(_user.photoUrl)
+                            image: widget.variables.currentUser!=null
+                            ?CachedNetworkImageProvider(widget.variables.currentUser.photoUrl)
+                            :widget.variables.currentUser != null
+                                ? CachedNetworkImageProvider(widget.variables.currentUser.photoUrl)
                                 : AssetImage('assets/grey.png'),
-                            //image: NetworkImage(_user.photoUrl),
+                            //image: NetworkImage(widget.variables.currentUser.photoUrl),
                             fit: BoxFit.cover,
                             width: 130,
                             height: 130,
@@ -159,12 +157,12 @@ class _InstaProfileScreenState extends State<InstaProfileScreen>
                       'Bio: ',
                       style: TextStyle(
                         fontFamily: 'Muli',
-                        color: Colors.black,
+                        color: Colors.white,
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    _user == null
+                    widget.variables.currentUser == null
                         ? Container(
                             width: width * 0.8,
                             child: Text(
@@ -179,12 +177,12 @@ class _InstaProfileScreenState extends State<InstaProfileScreen>
                         : Container(
                             width: width * 0.8,
                             child: Text(
-                                boltTimer.currentUser.bio.isNotEmpty
-                                    ? boltTimer.currentUser.bio
+                                widget.variables.currentUser.bio.isNotEmpty
+                                    ? widget.variables.currentUser.bio
                                     : 'Add your bio by clicking on Edit Profile.',
                                 style: TextStyle(
                                   fontFamily: 'Muli',
-                                  color: boltTimer.currentUser.bio.isNotEmpty
+                                  color: widget.variables.currentUser.bio.isNotEmpty
                                       ? Colors.black
                                       : Colors.grey,
                                   fontSize: 18,
@@ -207,13 +205,13 @@ class _InstaProfileScreenState extends State<InstaProfileScreen>
                             updateState: (){
                               setState(() {});
                             },
-                              variables: boltTimer,
-                              currentUser: _user,
-                              photoUrl: _user.photoUrl,
-                              email: _user.email,
-                              bio: _user.bio,
-                              name: _user.userName,
-                              phone: _user.phone))));
+                              variables: widget.variables,
+                              currentUser: widget.variables.currentUser,
+                              photoUrl: widget.variables.currentUser.photoUrl,
+                              email: widget.variables.currentUser.email,
+                              bio: widget.variables.currentUser.bio,
+                              name: widget.variables.currentUser.userName,
+                              phone: widget.variables.currentUser.phone))));
                 },
               ),
              GestureDetector(
@@ -222,7 +220,7 @@ class _InstaProfileScreenState extends State<InstaProfileScreen>
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: ((context) => BuyKeys(variables: boltTimer))));
+                      builder: ((context) => BuyKeys(variables: widget.variables))));
             },
           ),
 
@@ -280,7 +278,7 @@ class _InstaProfileScreenState extends State<InstaProfileScreen>
                                   logging_out = true;
                                 });
                                   _firebaseProvider.signOut().then((v) {
-                                    boltTimer.reset();
+                                    widget.variables.reset();
                                     _navigator.pushReplacement(
                                         MaterialPageRoute(builder: (context) {
                                       return MyApp();

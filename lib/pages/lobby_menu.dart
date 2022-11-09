@@ -3,6 +3,7 @@ import 'dart:math';
 import 'dart:ui';
 import 'package:async/async.dart';
 import 'package:animated_check/animated_check.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -14,6 +15,7 @@ import 'package:instagram_clone/models/lobby.dart';
 import 'package:instagram_clone/pages/add_lobby.dart';
 import 'package:instagram_clone/pages/football_menu.dart';
 import 'package:instagram_clone/pages/footballers.dart';
+import 'package:instagram_clone/pages/insta_profile_screen.dart';
 
 class LobbyMenu extends StatefulWidget {
  
@@ -156,7 +158,7 @@ void handleTimeout() {  // callback function
             height: height,
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: AssetImage('assets/stadium.png'),
+                image: AssetImage('assets/lobby.png'),
                 fit: BoxFit.cover
               )
             ),
@@ -169,11 +171,47 @@ void handleTimeout() {  // callback function
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
              SizedBox(
-              height: height*0.03,
+              height: height*0.01,
             ),
-            Text(
+            Stack(
+              children: [
+                Align(
+              alignment: Alignment.topRight,
+              child: Padding(
+                padding: EdgeInsets.only(top: 10),
+                child: IconButton(
+                onPressed: (){
+                    Navigator.push(context, MaterialPageRoute( 
+          builder: (BuildContext context) {
+                          // return LobbyMenu();
+                          return InstaProfileScreen(variables: widget.variables,);
+                        },
+                        ));
+                },
+                icon: Container(
+                  
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    image: DecorationImage(
+                      image: CachedNetworkImageProvider(widget.variables.currentUser.photoUrl),
+                      fit: BoxFit.cover
+                    )
+                  ),
+                  width: height*0.05,
+                  height: height*0.05,
+                ),
+              )),
+            ),
+           Padding(
+            padding: EdgeInsets.only(top: height*0.05),
+            child:  Center(
+              child: Text(
                 'Join a Lobby', style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 30, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
               ),
+            )
+           )
+              ],
+            ),
 
                SizedBox(
               height: height*0.03,

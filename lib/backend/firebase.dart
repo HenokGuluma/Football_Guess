@@ -138,6 +138,22 @@ class FirebaseProvider {
     return null;
   }
 
+Future<User> fetchUserDetailsById(String uid) async {
+    DocumentSnapshot documentSnapshot =
+        await _firestore.collection("users").doc(uid).get();
+    return User.fromMap(documentSnapshot.data());
+  }
+
+
+
+  Future<DocumentSnapshot> fetchUserNameById(String id) async{
+    DocumentSnapshot snapshot = await _firestore.collection("userNames").doc(id).get();
+     if (snapshot.data() != null) {
+      return snapshot;
+    }
+    return null;
+  }
+
   Future<void> addLobbyById(String id, Lobby lobby, String creatorId) async{
     _firestore.collection('users').doc(creatorId).collection('lobby').doc(id).set(lobby.toMap(lobby));
     _firestore.collection('users').doc(creatorId).update({'hasLobby': true});
@@ -146,6 +162,20 @@ class FirebaseProvider {
 
     void addPhone(String phone, String userId) async{
     await _firestore.collection('phones').doc(phone).set({'phone': phone, 'userId': userId});
+  }
+
+   Future<void> editPhone(String phone, String previousPhone, String userId) async{
+    await _firestore.collection('phones').doc(previousPhone).delete();
+    await _firestore.collection('phones').doc(phone).set({'phone': phone, 'userId': userId});
+  }
+
+  Future<void> editUserName(String userName, String previousUserName, String userId) async{
+    await _firestore.collection('userNames').doc(previousUserName).delete();
+    await _firestore.collection('userNames').doc(userName).set({'userName': userName, 'userId': userId});
+  }
+
+  void addUserName(String userName, String userId) async{
+    await _firestore.collection('userNames').doc(userName).set({'userName': userName, 'userId': userId});
   }
 
   Future<void> updatePhoto(String photoUrl, String uid) async {
@@ -157,7 +187,7 @@ class FirebaseProvider {
   Future<void> updateDetails(
       String uid, String name, String bio, String email, String phone) async {
     Map<String, dynamic> map = Map();
-    map['displayName'] = name;
+    map['userName'] = name;
     map['bio'] = bio;
     map['email'] = email;
     map['phone'] = phone;

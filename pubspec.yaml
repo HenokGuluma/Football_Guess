@@ -94,6 +94,8 @@ flutter:
     - assets/asyiz.png
     - assets/asyiz-removed.png
     - assets/asyiz-transparent.png
+    - assets/game_play.png
+    - assets/lobby.png
     - assets/general_background.png
     - assets/Sadio-Mane.png
     - assets/Mohammed-Salah.png

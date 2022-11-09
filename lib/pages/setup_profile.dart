@@ -4,6 +4,7 @@ import 'dart:math';
 import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flushbar/flushbar.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image/image.dart' as Im;
 import 'package:firebase_auth/firebase_auth.dart' as auth;
@@ -49,6 +50,9 @@ class _SetupProfileState extends State<SetupProfile> {
   List<String> phoneList = [];
   bool phoneExists = false;
   bool userNameExists = false;
+  bool available = false;
+  bool checking = false;
+  bool unavailable = false;
 
   @override
   void initState() {
@@ -154,15 +158,19 @@ class _SetupProfileState extends State<SetupProfile> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 15.0),
                 child: TextFormField(
+                  inputFormatters: [
+                  FilteringTextInputFormatter.deny(
+                      RegExp(r'\s')),
+              ],
                     style: TextStyle(fontFamily: 'Muli', color: Colors.white),
                     controller: _nameController,
                     decoration: InputDecoration(
-                      hintText: 'Name',
+                      hintText: 'UserName',
                       hintStyle: TextStyle(
                           fontFamily: 'Muli',
                           color: Colors.grey,
                           fontSize: 16.0),
-                      labelText: 'Name',
+                      labelText: 'UserName',
                       labelStyle: TextStyle(
                           fontFamily: 'Muli',
                           color: Colors.white,
@@ -170,6 +178,66 @@ class _SetupProfileState extends State<SetupProfile> {
                     ),
                     onChanged: changeText),
               ),
+
+                unavailable
+              ?Container(
+                  decoration: BoxDecoration(
+                    color: Color(0xffff2389),
+                    borderRadius: BorderRadius.circular(15)
+                  ),
+                  width: size.width*0.4,
+                  height: size.height*0.05,
+                  child: Center(
+                    child: Text('Identifier unavailable', style: TextStyle(color: Colors.white, fontSize: 16, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                  ),
+                )
+              :available
+              ?Container(
+                  decoration: BoxDecoration(
+                    color: Color(0xff23ff89),
+                    borderRadius: BorderRadius.circular(15)
+                  ),
+                  width: size.width*0.4,
+                  height: size.height*0.05,
+                  child: Center(
+                    child: Text('Identifier Available', style: TextStyle(color: Colors.black, fontSize: 16, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                  ),
+                )
+              :GestureDetector(
+                onTap:(){
+                  setState(() {
+                    checking = true;
+                  });
+                  _firebaseProvider.fetchLobbyById(_nameController.text).then((value) {
+                    if(value!=null){
+                      setState(() {
+                        unavailable = true;
+                        checking = false;
+                      });
+                    }
+                    else{
+                      setState(() {
+                        available = true;
+                        checking = false;
+                      });
+                    }
+                  });
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: checking?Color(0xff777777):Colors.white,
+                    borderRadius: BorderRadius.circular(15)
+                  ),
+                  width: size.width*0.4,
+                  height: size.height*0.05,
+                  child: Center(
+                    child: Text(checking?'Checking...':'Check Availability', style: TextStyle(color: Colors.black, fontSize: 16, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                  ),
+                ),
+                 ),
+                 SizedBox(
+            height: size.height*0.08,
+          ),
               Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8.0),
@@ -323,6 +391,7 @@ class _SetupProfileState extends State<SetupProfile> {
                                     .updatePhoto(url, widget.userId)
                                     .then((v) {
                                       _firebaseProvider.addPhone(_phoneController.text, widget.userId);
+                                      _firebaseProvider.addUserName(_nameController.text, widget.userId);
                                   _firebaseProvider
                                       .updateDetails(
                                           widget.userId,
@@ -339,7 +408,7 @@ class _SetupProfileState extends State<SetupProfile> {
                                       recentActivity: DateTime.utc(2020).millisecondsSinceEpoch,
                                       uid: widget.userId,
                                       email: _emailController.text,
-                                      userName: '',
+                                      userName: _nameController.text,
                                       hasLobby: false,
                                       photoUrl: url,
                                       followers: '0',

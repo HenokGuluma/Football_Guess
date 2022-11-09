@@ -180,6 +180,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (value) {
         print("VALUE : $value");
         print("INSIDE IF");
+        print(widget.variables.keys);
         _firebaseProvider.addDataToDb(user).then((value) {
           Navigator.pushReplacement(context,
               MaterialPageRoute(builder: (context) {
@@ -194,9 +195,10 @@ class _LoginScreenState extends State<LoginScreen> {
         });
       } else {
         print("INSIDE ELSE");
+        print(widget.variables.keys);
         Navigator.pushReplacement(context,
             MaterialPageRoute(builder: (context) {
-              return SetupProfile(finishNavigation: widget.finishStage,);
+              return LobbyMenu(variables: widget.variables,);
         }));
       }
     });
