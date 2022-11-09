@@ -2,17 +2,30 @@ import 'dart:async';
 import 'dart:ui';
 import 'package:async/async.dart';
 import 'package:animated_check/animated_check.dart';
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_countdown_timer/flutter_countdown_timer.dart';
 import 'package:flutter_spinning_wheel/src/utils.dart';
 import 'package:flutter_countdown_timer/countdown.dart';
+import 'package:instagram_clone/backend/firebase.dart';
+import 'package:instagram_clone/main.dart';
+import 'package:instagram_clone/models/lobby.dart';
+import 'package:instagram_clone/models/user.dart';
 import 'package:instagram_clone/pages/footballers.dart';
 
 class FootBallMenu extends StatefulWidget {
  
+  bool creating;
+  String uid;
+  String name;
+  String rate;
+  User thisUser;
+  UserVariables variables;
 
+
+  FootBallMenu({this.creating, this.uid, this.name, this.rate, this.thisUser, this.variables});
   @override
   _FootBallMenuState createState() => _FootBallMenuState();
 }
@@ -28,8 +41,11 @@ class _FootBallMenuState extends State<FootBallMenu>
     ['assets/Alexis-Sanchez.png', 'assets/Paul-Pogba.png']
   ];
 
-  List<String> categories = ['Number', 'Goals', 'Age', 'Height'];
+  FirebaseProvider _firebaseProvider = FirebaseProvider();
+
+  List<String> categories = ['Jersey No.', 'Goals', 'Age', 'Height'];
   List<String> categoryId = ['jersey', 'goals', 'age', 'height'];
+  int selectedIndex;
 
   List<String> menuImages = ['assets/football2.jpg', 'assets/football3.jpg','assets/football4.jpg',  'assets/football1.png'];
 
@@ -73,6 +89,7 @@ class _FootBallMenuState extends State<FootBallMenu>
   bool defeated = false;
   bool wrongClick = false;
   int gamePlayDuration = 0;
+  bool creating = false;
   
   
   @override
@@ -155,7 +172,10 @@ void handleTimeout() {  // callback function
           ), 
 
           SizedBox(height: height*0.02,),
-          GestureDetector(
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+                 GestureDetector(
             onTap: (){
               Navigator.pop(context);
             },
@@ -167,10 +187,87 @@ void handleTimeout() {  // callback function
               width: width*0.3,
               height: height*0.06,
               child: Center(
-                child: Text('Go Back', style: TextStyle(color: Colors.black, fontSize: 20, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                child: Text('Go Back', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            ),
+            ),
+            widget.creating
+            ? selectedIndex==null
+            ?Container(
+              decoration: BoxDecoration(
+                color: Color(0xff777777),
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.35,
+              height: height*0.06,
+              child: Center(
+                child: Text('Confirm Lobby', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            )
+            :creating
+            ?Container(
+              decoration: BoxDecoration(
+                color: Color(0xff777777),
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.45,
+              height: height*0.06,
+              child: Center(
+                child: Text('Confirming Lobby', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            )
+            :GestureDetector(
+            onTap: (){
+             print('dammmmn');
+              setState(() {
+                creating = true;
+              });
+              Lobby lobby = Lobby(
+                uid: widget.uid,
+                name: widget.name,
+                rate: double.parse(widget.rate),
+                players: [widget.variables.currentUser.uid],
+                gameType: 0,
+                gameCategory: selectedIndex,
+                creationDate: DateTime.now().millisecondsSinceEpoch,
+                creatorId: widget.variables.currentUser.uid,
+                creatorName: widget.variables.currentUser.userName,
+              );
+              print(widget.variables.currentUser.uid); print(' is the user');
+              _firebaseProvider.addLobbyById(widget.uid, lobby, widget.thisUser).then((value) {
+                widget.variables.setLobby(lobby);
+                
+                
+                Flushbar(
+                  title: 'Created a Lobby',
+                  backgroundColor: Color(0xff00ffff),
+                  titleText: Text('Successfully created the lobby', style: TextStyle(color: Colors.black, fontSize: 16, fontFamily: 'Muli')),
+                );
+
+                 Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                  builder: ((context) => MyApp())),
+                              (Route<dynamic> route) => false,
+                            );
+              });
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Color(0xff23ff89),
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.35,
+              height: height*0.06,
+              child: Center(
+                child: Text('Confirm Lobby', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
               ),
             ),
             )
+            :Center()
+            ],
+          ),
+       
 
           ],
         )
@@ -189,11 +286,18 @@ void handleTimeout() {  // callback function
    Widget menuOption(var width, var height, int index, List<String> images){
     return GestureDetector(
       onTap: (){
-        Navigator.push(context, MaterialPageRoute( 
+        if(widget.creating){
+          setState(() {
+            selectedIndex = index;
+          });
+        }
+        else{
+          Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           return Footballers(category: categoryId[index],);
                         },
                         ));
+        }
       },
       child: Stack(
         alignment: Alignment.bottomCenter,
@@ -232,6 +336,19 @@ void handleTimeout() {  // callback function
           child: Text(categories[index], style: TextStyle(color: Colors.black, fontSize: 22, fontFamily: 'Muli', fontWeight: FontWeight.w900),)
         ),
       ),
+      selectedIndex == index
+      ?Container(
+        width: width*0.4,
+        height: width*0.6,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(15),
+         
+        ),
+        child: Center(
+          child: Icon(Icons.check, size: 40, color: Color(0xff23ff89),)
+          ),
+      )
+      :Center(),
         ],
       )
     );

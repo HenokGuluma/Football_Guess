@@ -144,6 +144,11 @@ Future<User> fetchUserDetailsById(String uid) async {
     return User.fromMap(documentSnapshot.data());
   }
 
+  Future<Lobby> getLobbyById(String lobbyId) async{
+    DocumentSnapshot snapshot = await _firestore.collection('lobbies').doc(lobbyId).get();
+    return Lobby.fromMap(snapshot.data());
+  }
+
 
 
   Future<DocumentSnapshot> fetchUserNameById(String id) async{
@@ -154,10 +159,17 @@ Future<User> fetchUserDetailsById(String uid) async {
     return null;
   }
 
-  Future<void> addLobbyById(String id, Lobby lobby, String creatorId) async{
-    _firestore.collection('users').doc(creatorId).collection('lobby').doc(id).set(lobby.toMap(lobby));
-    _firestore.collection('users').doc(creatorId).update({'hasLobby': true});
-    return _firestore.collection("lobbies").doc(id).set(lobby.toMap(lobby));
+  Future<void> addLobbyById(String id, Lobby lobby, User creatorId) async{
+    print(creatorId); print('stage1');
+    Map<String, dynamic> setMap = lobby.toMap(lobby);
+    print(setMap);
+    await _firestore.collection('users').doc(creatorId.uid).collection('lobby').doc(id).set(setMap);
+    print(creatorId); print('stage2');
+    await _firestore.collection('users').doc(creatorId.uid).update({'hasLobby': true});
+    print(creatorId); print('stage3');
+    
+    setMap['creator'] = creatorId.toMap(creatorId);
+    return _firestore.collection("lobbies").doc(id).set(setMap);
   }
 
     void addPhone(String phone, String userId) async{

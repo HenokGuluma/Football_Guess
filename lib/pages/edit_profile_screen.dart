@@ -106,6 +106,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   _phoneController.text == widget.variables.currentUser.phone)
                   || (widget.variables.phoneList.contains(_phoneController.text) && widget.variables.currentUser.phone != _phoneController.text)
                   || _phoneController.text.length!=10
+                  || !available
               ? Padding(
                   padding: const EdgeInsets.only(right: 12.0),
                   child: Icon(Icons.done, color: Color(0xff444444)))
@@ -116,10 +117,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   ),
                   onPressed: () {
                     if(_nameController.text!=widget.name && available){
-                      _firebaseProvider.editUserName(_nameController.text, widget.name, currentUser.uid);
+                      _firebaseProvider.editUserName(_nameController.text, widget.name, widget.currentUser.uid);
                     }
                     if(_phoneController.text!=widget.phone && available){
-                      _firebaseProvider.editPhone(_phoneController.text, widget.phone, currentUser.uid);
+                      _firebaseProvider.editPhone(_phoneController.text, widget.phone, widget.currentUser.uid);
                     }
                     _firebaseProvider
                         .updateDetails(
@@ -483,7 +484,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       borderRadius: 0,
       //flushbarPosition: FlushbarPosition.,
       backgroundGradient: LinearGradient(
-        colors: [Colors.black, Colors.black],
+        colors: [Color(0xff00ffff), Color(0xff00ffff)],
         stops: [0.6, 1],
       ),
       duration: Duration(seconds: 2),
@@ -492,7 +493,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       messageText: Center(
           child: Text(
         'You have successfully updated your profile.',
-        style: TextStyle(fontFamily: 'Muli', color: Color(0xff00ffff)),
+        style: TextStyle(fontFamily: 'Muli', color: Colors.black),
       )),
     )..show(context);
   }

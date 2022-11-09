@@ -54,6 +54,8 @@ class _AddLobbyState extends State<AddLobby>
   bool available = false;
   bool checking = false;
   bool unavailable = false;
+  bool userNameLongEnough = false;
+  bool userNameShort = false;
   
   
   @override
@@ -118,6 +120,18 @@ void handleTimeout() {  // callback function
       unavailable = false;
       available = false;
     });
+    if(text.length>=7){
+      setState(() {
+        userNameShort = false;
+        userNameLongEnough = true;
+      });
+    }
+    else if (text.length>0 && text.length<7){
+       setState(() {
+        userNameShort = true;
+        userNameLongEnough = false;
+      });
+    }
   }
    
 
@@ -210,8 +224,31 @@ void handleTimeout() {  // callback function
                             fontSize: 20.0)),
                     onChanged: updateText),
               ),
-
-              unavailable
+               userNameShort
+                ?Container(
+                  decoration: BoxDecoration(
+                    color: Colors.transparent,
+                    borderRadius: BorderRadius.circular(15)
+                  ),
+                  width: width*0.6,
+                  height: height*0.05,
+                  child: Center(
+                    child: Text('Enter at least 7 characters', style: TextStyle(color: Color(0xffff2389), fontSize: 14, fontFamily: 'Muli', fontWeight: FontWeight.w600)),
+                  ),
+                )
+               :checking||!userNameLongEnough
+              ?Container(
+                  decoration: BoxDecoration(
+                    color: Color(0xff777777),
+                    borderRadius: BorderRadius.circular(15)
+                  ),
+                  width: width*0.4,
+                  height: height*0.05,
+                  child: Center(
+                    child: Text(checking?'Checking...':'Check Availability', style: TextStyle(color: Colors.black, fontSize: 16, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                  ),
+                )
+                :unavailable
               ?Container(
                   decoration: BoxDecoration(
                     color: Color(0xffff2389),
@@ -223,6 +260,7 @@ void handleTimeout() {  // callback function
                     child: Text('Identifier unavailable', style: TextStyle(color: Colors.white, fontSize: 16, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
                   ),
                 )
+               
               :available
               ?Container(
                   decoration: BoxDecoration(
@@ -323,25 +361,19 @@ void handleTimeout() {  // callback function
              available && _nameController.text.isNotEmpty && _rateController.text.isNotEmpty
              ?GestureDetector(
             onTap: (){
-              setState(() {
-                creating = true;
-              });
-              Lobby lobby = Lobby(
-                uid: _uidController.text,
-                name: _nameController.text,
-                rate: double.parse(_rateController.text),
-                players: [widget.variables.currentUser]
-              );
-              _firebaseProvider.addLobbyById('id', lobby, widget.variables.currentUser.uid).then((value) {
-                widget.variables.setLobby(lobby);
-                Navigator.pop(context);
-                
-                Flushbar(
-                  title: 'Created a Lobby',
-                  backgroundColor: Color(0xff00ffff),
-                  titleText: Text('Successfully created the lobby', style: TextStyle(color: Colors.black, fontSize: 16, fontFamily: 'Muli')),
-                );
-              });
+               Navigator.push(context, MaterialPageRoute( 
+          builder: (BuildContext context) {
+                          // return SelectLobby();
+                          return FootBallMenu(
+                            creating: true,
+                            uid: _uidController.text,
+                            name: _nameController.text,
+                            rate: _rateController.text,
+                            thisUser: widget.variables.currentUser,
+                            variables: widget.variables,
+                          );
+                        },
+                        ));
             },
             child: Container(
               decoration: BoxDecoration(
@@ -351,7 +383,7 @@ void handleTimeout() {  // callback function
               width: width*0.35,
               height: height*0.06,
               child: Center(
-                child: Text(creating?'Creating Lobby...':'Confirm Lobby', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                child: Text(creating?'Creating Lobby...':'Choose Game', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
               ),
             ),
             )
@@ -363,7 +395,7 @@ void handleTimeout() {  // callback function
               width: width*0.35,
               height: height*0.06,
               child: Center(
-                child: Text('Confirm Lobby', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                child: Text('Choose Game', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
               ),
             ),
           ],

@@ -96,6 +96,8 @@ flutter:
     - assets/asyiz-removed.png
     - assets/asyiz-transparent.png
     - assets/game_play.png
+    - assets/search.svg
+    - assets/grey.png
     - assets/lobby.png
     - assets/profile_pic1.png
     - assets/profile_pic2.png

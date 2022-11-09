@@ -60,18 +60,18 @@ class _PlayModeState extends State<PlayMode>
   @override
   void initState() {
     super.initState();
-   if(widget.loggedIn){
      getCurrentUser().then((value) {
       setState(() {
         loading = false;
       });
     });
-   }
+  /*  }
    else{
     setState(() {
       loading = false;
     });
-   }
+    print('nope');
+   } */
   }
 
   
@@ -85,9 +85,16 @@ void handleTimeout() {  // callback function
 }
 
     Future<void> getCurrentUser() async {
-     auth.User thisUser = await _firebaseProvider.getCurrentUser();
-     if(thisUser!=null){
-      User user = await _firebaseProvider.fetchUserDetailsById(thisUser.uid);
+      print(widget.loggedIn); print (' is logged in');
+      print(widget.email); print('Emmmmail');
+    //  auth.User thisUser = await _firebaseProvider.getCurrentUser();
+   await Future.delayed(Duration(seconds: 2));
+    User user = await _firebaseProvider.fetchUserDetailsById(widget.uid);
+    setState(() {
+      currentUser = user;
+    });
+     if(widget.loggedIn){
+      User user = await _firebaseProvider.fetchUserDetailsById(widget.uid);
     setState(() {
       currentUser = user;
     });
@@ -103,7 +110,11 @@ void handleTimeout() {  // callback function
   Widget build(BuildContext context) {
     UserVariables variables = Provider.of<UserVariables>(context, listen: false);
     if(currentUser.uid!=null){
+      print('kaballllllam');
       variables.setCurrentUser(currentUser);
+    }
+    else{
+      print(' oh noooo');
     }
      var width = MediaQuery.of(context).size.width;
     var height = MediaQuery.of(context).size.height;
@@ -210,12 +221,13 @@ void handleTimeout() {  // callback function
             Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           // return LobbyMenu();
-                          return FootBallMenu();
+                          return FootBallMenu(creating: false,);
                         },
                         ));
         }
-        else if(widget.email==null){
+        else if(!widget.loggedIn || widget.email==null ){
           print(variables.keys); print (' is the keys');
+          print(widget.loggedIn); print (' is loggedddd in');
           Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           // return LobbyMenu();
@@ -236,6 +248,9 @@ void handleTimeout() {  // callback function
                         ));
         }
         else{
+          print(widget.loggedIn); print (' is loggedddd in');
+          print(widget.email);
+          print(variables.currentUser.uid);
           Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           // return LobbyMenu();

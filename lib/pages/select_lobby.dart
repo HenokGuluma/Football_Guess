@@ -170,11 +170,11 @@ void handleTimeout() {  // callback function
         width: width,
         height: height,
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
              SizedBox(
-              height: height*0.01,
+              height: height*0.05,
             ),
             Stack(
               children: [
@@ -196,7 +196,10 @@ void handleTimeout() {  // callback function
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     image: DecorationImage(
-                      image: CachedNetworkImageProvider(widget.variables.currentUser.photoUrl!=null?widget.variables.currentUser.photoUrl:''),
+                      image: widget.variables.currentUser.photoUrl!=null
+                      ?CachedNetworkImageProvider(widget.variables.currentUser.photoUrl)
+                      :AssetImage('assets/grey.png')
+                      ,
                       fit: BoxFit.cover
                     )
                   ),
@@ -206,7 +209,7 @@ void handleTimeout() {  // callback function
               )),
             ),
            Padding(
-            padding: EdgeInsets.only(top: height*0.05),
+            padding: EdgeInsets.only(top: height*0.15),
             child:  Center(
               child: Text(
                 'Select a Lobby', style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 30, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
@@ -258,7 +261,7 @@ void handleTimeout() {  // callback function
                               cursorWidth: 0.5,
                               onChanged: searchQuery,
                               decoration: InputDecoration(
-                                  hintText: 'Search by location',
+                                  hintText: 'Search by lobby Id',
                                   // contentPadding: EdgeInsets.only(bottom: 20),
                                   focusedBorder: InputBorder.none,
                                   enabledBorder: InputBorder.none,
@@ -317,7 +320,7 @@ void handleTimeout() {  // callback function
             },
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Color(0xff00ffff),
                 borderRadius: BorderRadius.circular(20)
               ),
               width: width*0.35,
@@ -326,6 +329,9 @@ void handleTimeout() {  // callback function
                 child: Text('Search Lobby', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
               ),
             ),
+            ),
+            Container(
+              height: height*0.3,
             ),
          
          Row(
@@ -369,7 +375,33 @@ void handleTimeout() {  // callback function
             ),
             )
           ],
-         )
+         ),
+
+         SizedBox(
+          height: height*0.05,
+         ),
+
+         GestureDetector(
+            onTap: (){
+               Navigator.push(context, MaterialPageRoute( 
+          builder: (BuildContext context) {
+                          // return SelectLobby();
+                          return  AddLobby(variables: widget.variables,);
+                        },
+                        ));
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Color(0xff23ff89),
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.35,
+              height: height*0.06,
+              child: Center(
+                child: Text('Create a Lobby', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            ),
+            )
 
           ],
         )
@@ -414,7 +446,7 @@ void handleTimeout() {  // callback function
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 image: DecorationImage(
-                  image: AssetImage('assets/asyiz.png'),
+                  image: AssetImage('assets/grey.png'),
                   fit: BoxFit.cover
                 ),
                  boxShadow: [BoxShadow(

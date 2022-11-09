@@ -9,8 +9,10 @@ class Lobby {
   int creationDate;
   String creatorName;
   String creatorId;
+  int gameType;
+  int gameCategory;
 
-   Lobby({this.uid, this.name, this.rate, this.players});
+   Lobby({this.uid, this.name, this.rate, this.creationDate, this.players, this.gameCategory, this.gameType, this.creatorId, this.creatorName});
 
     Map toMap(Lobby lobby) {
     var data = Map<String, dynamic>();
@@ -21,6 +23,8 @@ class Lobby {
     data['creationDate'] = lobby.creationDate;
     data['creatorName'] = lobby.creatorName;
     data['creatorId'] = lobby.creatorId;
+    data['gameType'] = lobby.gameType;
+    data['gameCategory'] = lobby.gameCategory;
     return data;
   }
 
@@ -32,6 +36,8 @@ class Lobby {
     this.creationDate = mapData['creationDate'];
     this.creatorId = mapData['creatorId'];
     this.creatorName = mapData['creatorName'];
+    this.gameCategory = mapData['gameCategory'];
+    this.gameType = mapData['gameType'];
   }
 
   Lobby.fromDoc(DocumentSnapshot doc){
@@ -42,6 +48,8 @@ class Lobby {
       this.creationDate = doc['creationDate'];
       this.creatorId = doc['creatorId'];
       this.creatorName = doc['creatorName'];
+      this.gameCategory = doc['gameCategory'];
+      this.gameType = doc['gameType'];
   }
 }
 
