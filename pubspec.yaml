@@ -87,6 +87,7 @@ flutter:
     - lib/static/backgrounds/
     - lib/static/cards/
     - assets/google_icon.jpg
+    - assets/profile_background.png
     - assets/Alexis-Sanchez.png
     - assets/Paul-Pogba.png
     - assets/Christiano-Ronaldo.png
@@ -96,6 +97,10 @@ flutter:
     - assets/asyiz-transparent.png
     - assets/game_play.png
     - assets/lobby.png
+    - assets/profile_pic1.png
+    - assets/profile_pic2.png
+    - assets/profile_pic3.png
+    - assets/profile_pic4.png
     - assets/general_background.png
     - assets/Sadio-Mane.png
     - assets/Mohammed-Salah.png

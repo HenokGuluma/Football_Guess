@@ -143,19 +143,21 @@ void handleTimeout() {  // callback function
           Container(
         width: width,
         height: height,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
+        child: ListView(
+         /*  mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center, */
           children: [
              SizedBox(
-              height: height*0.03,
+              height: height*0.1,
             ),
-            Text(
+            Center(
+              child: Text(
                 'Create a Lobby', style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 30, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
               ),
+            ),
 
                SizedBox(
-              height: height*0.03,
+              height: height*0.08,
             ),
          Column(
             crossAxisAlignment: CrossAxisAlignment.center,

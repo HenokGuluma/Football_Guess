@@ -51,7 +51,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   StorageReference _storageReference;
   bool available = false;
   bool unavailable = false;
-  bool userNameShort = true;
+  bool userNameShort = false;
   bool checking = false;
 
   @override
@@ -86,7 +86,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       backgroundColor: Colors.black,
       appBar: AppBar(
         brightness: Brightness.dark,
-        backgroundColor: new Color(0xff1a1a1a),
+        backgroundColor:  Colors.black,
         toolbarHeight: 40.0,
         elevation: 1,
         title: Text(
@@ -148,7 +148,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 )
         ],
       ),
-      body: ListView(
+      body: Stack(
+        children: [
+          Container(
+            height: height -40,
+            decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/profile_background.png')
+          )
+        ),
+        child: ListView(
         children: <Widget>[
           Column(
             children: <Widget>[
@@ -259,7 +268,20 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               ), */
 
                Center(
-                child:  unavailable
+                child:  
+                 checking||(_nameController.text == widget.name)
+              ?Container(
+                  decoration: BoxDecoration(
+                    color: Color(0xff777777),
+                    borderRadius: BorderRadius.circular(15)
+                  ),
+                  width: width*0.4,
+                  height: height*0.05,
+                  child: Center(
+                    child: Text(checking?'Checking...':'Check Availability', style: TextStyle(color: Colors.black, fontSize: 16, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                  ),
+                )
+                :unavailable
               ?Container(
                   decoration: BoxDecoration(
                     color: Color(0xffff2389),
@@ -425,7 +447,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           )
         ],
       ),
-    );
+    
+          ),
+          
+        ],
+      ));
   }
 
   updateText(String text) {

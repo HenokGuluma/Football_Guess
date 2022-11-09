@@ -193,7 +193,7 @@ void handleTimeout() {  // callback function
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     image: DecorationImage(
-                      image: CachedNetworkImageProvider(widget.variables.currentUser.photoUrl),
+                      image: CachedNetworkImageProvider(widget.variables.currentUser.photoUrl!=null?widget.variables.currentUser.photoUrl:''),
                       fit: BoxFit.cover
                     )
                   ),
@@ -331,8 +331,8 @@ void handleTimeout() {  // callback function
                 ),
                  boxShadow: [BoxShadow(
             color: Color(0xff00ffff),
-            blurRadius: pow(_animation.value, 3)/400,
-            spreadRadius: pow(_animation.value, 3)/400
+            blurRadius: pow(_animation.value, 5)/200000,
+            spreadRadius: pow(_animation.value, 5)/200000
           )],
               ),
             ),

@@ -174,11 +174,18 @@ Future<User> fetchUserDetailsById(String uid) async {
     await _firestore.collection('userNames').doc(userName).set({'userName': userName, 'userId': userId});
   }
 
+  Future<void> editLobbyName(String userName, String previousUserName) async{
+    await _firestore.collection('lobbies').doc(previousUserName).delete();
+    await _firestore.collection('lobbies').doc(userName).set({'lobbyId': userName});
+  }
+
   void addUserName(String userName, String userId) async{
+    print('adding userName');
     await _firestore.collection('userNames').doc(userName).set({'userName': userName, 'userId': userId});
   }
 
   Future<void> updatePhoto(String photoUrl, String uid) async {
+    print('updating photo');
     Map<String, dynamic> map = Map();
     map['photoUrl'] = photoUrl;
     return _firestore.collection("users").doc(uid).update(map);

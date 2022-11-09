@@ -32,6 +32,14 @@ class _FootballersState extends State<Footballers>
     ['assets/Alexis-Sanchez.png', 'assets/Paul-Pogba.png']
   ];
 
+  List<String> profilePics = ['assets/profile_pic1.png', 'assets/profile_pic2.png',
+    'assets/profile_pic3.png', 'assets/profile_pic4.png'
+  ];
+
+   List<String> profileNames = ['ashley123', 'joe_rogan',
+    'willSmith', 'ruthaBG89'
+  ];
+
   List<List<Map<String, dynamic>>> footballers = 
   [
     [
@@ -316,8 +324,20 @@ void handleTimeout() {  // callback function
         ):Column(
           children: [
             SizedBox(
-              height: height*0.15,
+              height: height*0.03,
             ),
+            Container(
+              height: height*0.1,
+              child: ListView.builder(
+                itemBuilder: (BuildContext context, int index) { 
+                    return profileCircle(width, height, index);
+                    //return CircularProgressIndicator();
+                  },
+                scrollDirection: Axis.horizontal,
+                itemCount: profileNames.length,
+                ),
+            ),
+            SizedBox(height: height*0.03,),
             Container(
               width: width*0.8,
               height: height*0.08,
@@ -331,7 +351,7 @@ void handleTimeout() {  // callback function
             ),
             ),
             SizedBox(
-              height: height*0.08,
+              height: height*0.03,
             ),
             /* Center(
               child: Text(
@@ -353,7 +373,7 @@ void handleTimeout() {  // callback function
             ),
            ),
              SizedBox(
-              height: height*0.05,
+              height: height*0.02,
             ),
 
             Container(
@@ -437,6 +457,31 @@ void handleTimeout() {  // callback function
 
    bool compare(var first, var second){
     return first>second;
+   }
+
+   Widget profileCircle(var width, var height, int index){
+    return Container(
+      child: Column(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              image: DecorationImage(
+                image: AssetImage(profilePics[index])
+              )
+            ),
+            width: width*0.08,
+      height: width*0.08,
+          ),
+          SizedBox(height: height*0.02,),
+          Center(
+            child: Text('@'+profileNames[index], style: TextStyle(
+              color: Colors.white, fontFamily:'Muli', fontSize: 18, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic
+            )),
+          )
+        ],
+      ),
+    );
    }
 
 

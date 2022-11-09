@@ -72,7 +72,7 @@ class BuyKeysState extends State<BuyKeys> {
           toolbarHeight: 50,
           backgroundColor: Colors.black,
           title: Text(
-            'Buy Keys',
+            'Buy Coins',
             style: TextStyle(
                 fontFamily: 'Muli',
                 color: Colors.white,
@@ -223,8 +223,8 @@ class BuyKeysState extends State<BuyKeys> {
                   ),
                   Text(
                     amount != 1
-                        ? amount.toString() + ' keys'
-                        : amount.toString() + ' key',
+                        ? amount.toString() + ' coins'
+                        : amount.toString() + ' coin',
                     style: TextStyle(
                         fontFamily: 'Muli',
                         color: Color(0xff00ffff),

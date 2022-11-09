@@ -53,17 +53,18 @@ class _SetupProfileState extends State<SetupProfile> {
   bool available = false;
   bool checking = false;
   bool unavailable = false;
+  bool userNameShort = false;
+  bool userNameLongEnough = false;
 
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(text: 'Name');
+    _nameController = TextEditingController();
     if (widget.emailAddress != null) {
       _emailController.text = widget.emailAddress;
+      print('aaaaaaaaaaaaaaaaaah');
     }
-    if (widget.name != null) {
-      _nameController.text = widget.name;
-    }
+   
 
   }
 
@@ -99,7 +100,7 @@ class _SetupProfileState extends State<SetupProfile> {
       body: Container(
         decoration: BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('assets/general_background.png')
+            image: AssetImage('assets/profile_background.png')
           )
         ),
         child: ListView(
@@ -176,10 +177,25 @@ class _SetupProfileState extends State<SetupProfile> {
                           color: Colors.white,
                           fontSize: 16.0),
                     ),
-                    onChanged: changeText),
+                    onChanged: updateText),
               ),
 
-                unavailable
+              SizedBox(
+                height: size.height*0.02,
+              ),
+              checking||!userNameLongEnough
+              ?Container(
+                  decoration: BoxDecoration(
+                    color: Color(0xff777777),
+                    borderRadius: BorderRadius.circular(15)
+                  ),
+                  width: size.width*0.4,
+                  height: size.height*0.05,
+                  child: Center(
+                    child: Text(checking?'Checking...':'Check Availability', style: TextStyle(color: Colors.black, fontSize: 16, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                  ),
+                )
+                :unavailable
               ?Container(
                   decoration: BoxDecoration(
                     color: Color(0xffff2389),
@@ -188,7 +204,19 @@ class _SetupProfileState extends State<SetupProfile> {
                   width: size.width*0.4,
                   height: size.height*0.05,
                   child: Center(
-                    child: Text('Identifier unavailable', style: TextStyle(color: Colors.white, fontSize: 16, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                    child: Text('UserName unavailable', style: TextStyle(color: Colors.white, fontSize: 16, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                  ),
+                )
+                :userNameShort
+                ?Container(
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: BorderRadius.circular(15)
+                  ),
+                  width: size.width*0.6,
+                  height: size.height*0.05,
+                  child: Center(
+                    child: Text('Enter at least 7 characters', style: TextStyle(color: Color(0xffff2389), fontSize: 14, fontFamily: 'Muli', fontWeight: FontWeight.w600)),
                   ),
                 )
               :available
@@ -200,7 +228,7 @@ class _SetupProfileState extends State<SetupProfile> {
                   width: size.width*0.4,
                   height: size.height*0.05,
                   child: Center(
-                    child: Text('Identifier Available', style: TextStyle(color: Colors.black, fontSize: 16, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                    child: Text('UserName Available', style: TextStyle(color: Colors.black, fontSize: 16, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
                   ),
                 )
               :GestureDetector(
@@ -235,16 +263,14 @@ class _SetupProfileState extends State<SetupProfile> {
                   ),
                 ),
                  ),
-                 SizedBox(
-            height: size.height*0.08,
-          ),
+               
               Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8.0),
                 child: TextFormField(
                     style: TextStyle(fontFamily: 'Muli', color: Colors.white),
                     controller: _bioController,
-                    maxLines: 3,
+                    maxLines: 2,
                     maxLength: 150,
                     decoration: InputDecoration(
                         hintText: 'Bio',
@@ -262,6 +288,9 @@ class _SetupProfileState extends State<SetupProfile> {
               Divider(
                 color: Colors.white,
                 thickness: 0.5,
+              ),
+              SizedBox(
+                height: size.height*0.05,
               ),
               Padding(
                 padding: const EdgeInsets.only(left: 15.0),
@@ -350,6 +379,7 @@ class _SetupProfileState extends State<SetupProfile> {
                           _phoneController.text.isEmpty ||
                           imageFile == null||phoneList.contains(_phoneController.text)
                           ||_phoneController.text.length!=10
+                          ||!available
                       ? Center(
                           child: Container(
                           width: 150,
@@ -387,6 +417,7 @@ class _SetupProfileState extends State<SetupProfile> {
                             compressImage().then((compressedImage) {
                               uploadImagesToStorage(compressedImage)
                                   .then((url) {
+                                    print(' the user id is'); print (widget.userId);
                                 _firebaseProvider
                                     .updatePhoto(url, widget.userId)
                                     .then((v) {
@@ -413,14 +444,14 @@ class _SetupProfileState extends State<SetupProfile> {
                                       photoUrl: url,
                                       followers: '0',
                                       following: '0',
-                                      bio: '',
+                                      bio: _bioController.text,
                                       posts: 0,
-                                      phone: '',
+                                      phone: _phoneController.text,
                                       trending: 100,
                                       keys: 0,
                                       dailyTimer: DateTime.now().millisecondsSinceEpoch);
                                    widget.variables.setCurrentUser(_user);
-                                   widget.finishNavigation();
+                                   widget.finishNavigation(widget.variables);
                                   });
                                 });
                               });
@@ -440,6 +471,27 @@ class _SetupProfileState extends State<SetupProfile> {
 
   changeText(String text) {
     setState(() {});
+  }
+
+    updateText(String text){
+    setState(() {
+      unavailable = false;
+      available = false;
+      checking = false;
+    });
+
+    if(text.length>=7){
+      setState(() {
+        userNameShort = false;
+        userNameLongEnough = true;
+      });
+    }
+    else if (text.length>0 && text.length<7){
+       setState(() {
+        userNameShort = true;
+        userNameLongEnough = false;
+      });
+    }
   }
 
   changeUserName(String text) {

@@ -88,12 +88,14 @@ class _InstaProfileScreenState extends State<InstaProfileScreen>
         toolbarHeight: 50,
         // elevation: 1,
         centerTitle: true,
-        title: Text(widget.variables.currentUser!=null?widget.variables.currentUser.userName:'Profile',
+        title: Text(widget.variables.currentUser.userName!=null?widget.variables.currentUser.userName.isEmpty?'Profile':'@'+widget.variables.currentUser.userName:'Profile',
             style: TextStyle(
                 fontFamily: 'Muli',
                 color: Colors.white,
                 fontSize: 20,
-                fontWeight: FontWeight.w900)),
+                fontWeight: FontWeight.w900,
+                fontStyle: FontStyle.italic
+                )),
       ),
       body: RefreshIndicator(
           onRefresh: () {
@@ -102,7 +104,13 @@ class _InstaProfileScreenState extends State<InstaProfileScreen>
           },
           backgroundColor: Colors.black,
           color: Color(0xff00ffff),
-          child: ListView(
+          child: Container(
+             decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/profile_background.png')
+          )
+        ),
+            child: ListView(
             cacheExtent: 500000000,
             children: <Widget>[
               Padding(
@@ -120,9 +128,7 @@ class _InstaProfileScreenState extends State<InstaProfileScreen>
                             thumbnail: AssetImage('assets/grey.png'),
                             // size: 1.29MB
                             image: widget.variables.currentUser!=null
-                            ?CachedNetworkImageProvider(widget.variables.currentUser.photoUrl)
-                            :widget.variables.currentUser != null
-                                ? CachedNetworkImageProvider(widget.variables.currentUser.photoUrl)
+                            ?CachedNetworkImageProvider(widget.variables.currentUser.photoUrl!=null?widget.variables.currentUser.photoUrl:'')
                                 : AssetImage('assets/grey.png'),
                             //image: NetworkImage(widget.variables.currentUser.photoUrl),
                             fit: BoxFit.cover,
@@ -138,7 +144,7 @@ class _InstaProfileScreenState extends State<InstaProfileScreen>
                   )),
               Center(
                 child: Text(
-                    widget.variables.currentUser != null ? widget.variables.currentUser.userName : 'Your Name',
+                    widget.variables.currentUser.userName != null ? widget.variables.currentUser.userName : 'Your Name',
                     style: TextStyle(
                         fontFamily: 'Muli',
                         color: Colors.black,
@@ -159,7 +165,7 @@ class _InstaProfileScreenState extends State<InstaProfileScreen>
                         fontFamily: 'Muli',
                         color: Colors.white,
                         fontSize: 20,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w900,
                       ),
                     ),
                     widget.variables.currentUser == null
@@ -183,10 +189,10 @@ class _InstaProfileScreenState extends State<InstaProfileScreen>
                                 style: TextStyle(
                                   fontFamily: 'Muli',
                                   color: widget.variables.currentUser.bio.isNotEmpty
-                                      ? Colors.black
+                                      ? Colors.white
                                       : Colors.grey,
                                   fontSize: 18,
-                                  fontWeight: FontWeight.w400,
+                                  fontWeight: FontWeight.w900,
                                 ),
                                 textAlign: TextAlign.start))
                   ],
@@ -215,7 +221,7 @@ class _InstaProfileScreenState extends State<InstaProfileScreen>
                 },
               ),
              GestureDetector(
-            child: ProfileButtons('Buy Keys', width, height),
+            child: ProfileButtons('Buy Coins', width, height),
             onTap: () {
               Navigator.push(
                   context,
@@ -397,7 +403,8 @@ class _InstaProfileScreenState extends State<InstaProfileScreen>
               SizedBox(height: 30,)
             ],
           )),
-    );
+    
+          ));
   }
 
   Widget ProfileButtons(String text, var width, var height) {
@@ -424,7 +431,7 @@ class _InstaProfileScreenState extends State<InstaProfileScreen>
                     child: Text(text,
                         style: TextStyle(
                             fontFamily: 'Muli',
-                            color: Color(0xff666666),
+                            color: Colors.white,
                             fontSize: 18,
                             fontWeight: FontWeight.w900)),
                   ),
@@ -432,7 +439,8 @@ class _InstaProfileScreenState extends State<InstaProfileScreen>
                       padding: EdgeInsets.only(right: 20),
                       child: Icon(
                         Icons.arrow_right_outlined,
-                        color: Colors.black,
+                        color: Color(0xff00ffff),
+                        size: 30,
                       ))
                 ]),
           ],

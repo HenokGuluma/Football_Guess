@@ -22,7 +22,12 @@ import 'package:provider/provider.dart';
 
 class PlayMode extends StatefulWidget {
  
+  bool loggedIn;
+  String email;
+  String uid;
 
+  PlayMode({this.loggedIn, this.email, this.uid});
+  
   @override
   _PlayModeState createState() => _PlayModeState();
 }
@@ -54,9 +59,18 @@ class _PlayModeState extends State<PlayMode>
   @override
   void initState() {
     super.initState();
-    getCurrentUser().then((value) {
+   if(widget.loggedIn){
+     getCurrentUser().then((value) {
+      setState(() {
+        loading = false;
+      });
+    });
+   }
+   else{
+    setState(() {
       loading = false;
     });
+   }
   }
 
   
@@ -71,10 +85,16 @@ void handleTimeout() {  // callback function
 
     Future<void> getCurrentUser() async {
      auth.User thisUser = await _firebaseProvider.getCurrentUser();
-    User user = await _firebaseProvider.fetchUserDetailsById(thisUser.uid);
+     if(thisUser!=null){
+      User user = await _firebaseProvider.fetchUserDetailsById(thisUser.uid);
     setState(() {
       currentUser = user;
     });
+     }
+     else{
+      return;
+     }
+    
   }
    
 
@@ -96,7 +116,7 @@ void handleTimeout() {  // callback function
             height: height,
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: AssetImage('assets/game_play.png'),
+                image: AssetImage('assets/profile_background.png'),
                 fit: BoxFit.cover
               )
             ),
@@ -106,14 +126,19 @@ void handleTimeout() {  // callback function
             width: width,
             height: height,
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Center(
             child: Text(
                 'Preparing Game', style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 35, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
               ),
           ),
-          JumpingDotsProgressIndicator(color: Color(0xff00ffff), fontSize: 70,)
-
+          JumpingDotsProgressIndicator(color: Color(0xff00ffff), fontSize: 70,),
+           Center(
+            child: Text(
+                'Sit back and Relax', style: TextStyle(color: Colors.white, fontFamily: 'Muli', fontSize: 25, fontWeight: FontWeight.w900, fontStyle: FontStyle.normal),
+              ),
+          ),
               ],
             )
           )
@@ -144,7 +169,7 @@ void handleTimeout() {  // callback function
             ) */
           Container(
             width: width,
-            height: height*0.7,
+            height: height*0.6,
             child:  ListView(
   padding: const EdgeInsets.all(5),
   children: <Widget>[
@@ -169,10 +194,10 @@ void handleTimeout() {  // callback function
     return first>second;
    }
 
-   void finishNavigation(){
+   void finishNavigation(UserVariables variables){
      Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
-                          return LobbyMenu();
+                          return LobbyMenu(variables: variables,);
                         },
                         ));
    }
@@ -188,12 +213,24 @@ void handleTimeout() {  // callback function
                         },
                         ));
         }
-        else if(variables.currentUser.uid==null || variables.currentUser.uid.isEmpty){
+        else if(widget.email==null){
           print(variables.keys); print (' is the keys');
           Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           // return LobbyMenu();
                           return  LoginScreen(finishStage: finishNavigation, variables: variables,);
+                        },
+                        ));
+        }
+         else if(widget.email!=null && variables.currentUser==null){
+          print(variables.keys); print (' is the keys');
+          print(widget.email);
+          Navigator.push(context, MaterialPageRoute( 
+          builder: (BuildContext context) {
+                          // return LobbyMenu();
+                          return  SetupProfile(userId: widget.uid, emailAddress: widget.email,
+                          name: variables.currentUser.userName, finishNavigation: finishNavigation, variables: variables,
+                          );
                         },
                         ));
         }
