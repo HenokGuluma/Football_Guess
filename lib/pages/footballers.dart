@@ -248,7 +248,21 @@ void handleTimeout() {  // callback function
               padding: EdgeInsets.only(top: height*0.05, left: width*0.05),
               child: Center()
               ),
-            SizedBox(height: height*0.15,),
+              SizedBox(
+                height: height*0.02,
+              ),
+             Container(
+              height: height*0.15,
+              child: ListView.builder(
+                itemBuilder: (BuildContext context, int index) { 
+                    return profileCircle(width, height, index);
+                    //return CircularProgressIndicator();
+                  },
+                scrollDirection: Axis.horizontal,
+                itemCount: profileNames.length,
+                ),
+            ),
+            SizedBox(height: height*0.05,),
             Center(
               child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -324,10 +338,10 @@ void handleTimeout() {  // callback function
         ):Column(
           children: [
             SizedBox(
-              height: height*0.03,
+              height: height*0.08,
             ),
             Container(
-              height: height*0.1,
+              height: height*0.15,
               child: ListView.builder(
                 itemBuilder: (BuildContext context, int index) { 
                     return profileCircle(width, height, index);
@@ -337,7 +351,7 @@ void handleTimeout() {  // callback function
                 itemCount: profileNames.length,
                 ),
             ),
-            SizedBox(height: height*0.03,),
+            
             Container(
               width: width*0.8,
               height: height*0.08,
@@ -460,7 +474,9 @@ void handleTimeout() {  // callback function
    }
 
    Widget profileCircle(var width, var height, int index){
-    return Container(
+    return Padding(
+      padding: EdgeInsets.only(left: 10, right: 10),
+      child: Container(
       child: Column(
         children: [
           Container(
@@ -470,19 +486,28 @@ void handleTimeout() {  // callback function
                 image: AssetImage(profilePics[index])
               )
             ),
-            width: width*0.08,
-      height: width*0.08,
+            width: width*0.1,
+      height: width*0.1,
           ),
           SizedBox(height: height*0.02,),
           Center(
             child: Text('@'+profileNames[index], style: TextStyle(
-              color: Colors.white, fontFamily:'Muli', fontSize: 18, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic
+              color: Colors.white, fontFamily:'Muli', fontSize: 15, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic
             )),
+          ),
+          SizedBox(height: height*0.01,),
+          Container(
+            width: width*0.02,
+            height: width*0.02,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Color(0xff23ff89)
+            ),
           )
         ],
       ),
-    );
-   }
+    )
+    );}
 
 
    

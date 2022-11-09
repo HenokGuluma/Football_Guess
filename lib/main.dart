@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
    
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: "Medib",
+      title: "Asyiz",
       theme: ThemeData(
         primarySwatch: Colors.red,
       ),

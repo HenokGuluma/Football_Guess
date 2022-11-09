@@ -16,6 +16,7 @@ import 'package:instagram_clone/pages/football_menu.dart';
 import 'package:instagram_clone/pages/footballers.dart';
 import 'package:instagram_clone/pages/lobby_menu.dart';
 import 'package:instagram_clone/pages/login_screen.dart';
+import 'package:instagram_clone/pages/select_lobby.dart';
 import 'package:instagram_clone/pages/setup_profile.dart';
 import 'package:progress_indicators/progress_indicators.dart';
 import 'package:provider/provider.dart';
@@ -197,7 +198,7 @@ void handleTimeout() {  // callback function
    void finishNavigation(UserVariables variables){
      Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
-                          return LobbyMenu(variables: variables,);
+                          return SelectLobby(variables: variables,);
                         },
                         ));
    }
@@ -238,7 +239,7 @@ void handleTimeout() {  // callback function
           Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           // return LobbyMenu();
-                          return LobbyMenu(variables: variables,);
+                          return SelectLobby(variables: variables,);
                         },
                         ));
         }
