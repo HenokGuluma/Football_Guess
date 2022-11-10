@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:async/async.dart';
 import 'package:animated_check/animated_check.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -11,13 +12,16 @@ import 'package:flutter_countdown_timer/flutter_countdown_timer.dart';
 import 'package:flutter_spinning_wheel/src/utils.dart';
 import 'package:flutter_countdown_timer/countdown.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:instagram_clone/backend/firebase.dart';
 import 'package:instagram_clone/main.dart';
 import 'package:instagram_clone/models/lobby.dart';
 import 'package:instagram_clone/pages/add_lobby.dart';
 import 'package:instagram_clone/pages/football_menu.dart';
 import 'package:instagram_clone/pages/footballers.dart';
 import 'package:instagram_clone/pages/insta_profile_screen.dart';
+import 'package:instagram_clone/pages/lobby_details.dart';
 import 'package:instagram_clone/pages/lobby_menu.dart';
+import 'package:progress_indicators/progress_indicators.dart';
 
 class SelectLobby extends StatefulWidget {
  
@@ -47,6 +51,7 @@ class _SelectLobbyState extends State<SelectLobby>
 
   List<String> categories = ['Number', 'Goals', 'Age', 'Height'];
   List<String> categoryId = ['jersey', 'goals', 'age', 'height'];
+  
 
   List<String> menuImages = ['assets/football2.jpg', 'assets/football3.jpg','assets/football4.jpg',  'assets/football1.png'];
 
@@ -77,7 +82,9 @@ class _SelectLobbyState extends State<SelectLobby>
   ];
   AnimationController _animationController;
   AnimationController _bounceController;
+  Lobby searchedLobby;
   PageController _pageController;
+  FirebaseProvider _firebaseProvider = FirebaseProvider();
   TextEditingController controller = TextEditingController();
   Animation _animation;
   bool animate = false;
@@ -92,6 +99,7 @@ class _SelectLobbyState extends State<SelectLobby>
   bool wrongClick = false;
   int gamePlayDuration = 0;
   double size = 1;
+  bool searching = false;
   
   
   @override
@@ -169,12 +177,12 @@ void handleTimeout() {  // callback function
           Container(
         width: width,
         height: height,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
+        child: ListView(
+          /* mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center, */
           children: [
              SizedBox(
-              height: height*0.05,
+              height: height*0.02,
             ),
             Stack(
               children: [
@@ -184,6 +192,7 @@ void handleTimeout() {  // callback function
                 padding: EdgeInsets.only(top: 10),
                 child: IconButton(
                 onPressed: (){
+                  FocusScope.of(context).unfocus();
                     Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           // return SelectLobby();
@@ -227,8 +236,13 @@ void handleTimeout() {  // callback function
           Center(
                 child: Padding(
                     padding: EdgeInsets.only(top: 5.0),
-                    child: Container(
-                      width: width * 0.8,
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: width*0.08,
+                        ),
+                        Container(
+                      width: width * 0.6,
                       height: height*0.06,
                       decoration: BoxDecoration(
                           color: Color(0xfff1f1f1),
@@ -245,17 +259,19 @@ void handleTimeout() {  // callback function
                           ),
                           Center(
                               child: Container(
-                            width: width * 0.5,
+                            width: width * 0.4,
                             height: 30,
                             padding: EdgeInsets.only(left: 5, top: 0),
                             child: TextField(
                               style: TextStyle(
                                   fontFamily: 'Muli',
                                   color: Colors.black,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w400),
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w900),
                               controller: controller,
                               cursorColor: Colors.black,
+                              autofocus: false,
+                              focusNode: FocusNode(),
                               cursorHeight: 20,
                               maxLength: 20,
                               cursorWidth: 0.5,
@@ -273,66 +289,115 @@ void handleTimeout() {  // callback function
                                       fontFamily: 'Muli',
                                       color: Color(0xff999999),
                                       fontSize: 16,
-                                      fontWeight: FontWeight.w400)),
+                                      fontWeight: FontWeight.w900)),
                             ),
                           )),
-                          controller.text.isNotEmpty
-                              ? GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      controller.text = '';
-                                     
-                                    });
-                                    searchQuery('');
-                                    print('clearing');
-                                  },
-                                  child: Center(
-                                    child: Text(
-                                      'Clear',
-                                      style: TextStyle(
-                                        fontFamily: 'Muli',
-                                        color: Colors.red,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w400,
-                                      ),
-                                    ),
-                                  ))
-                              : Center(
-                                  child: Text(
-                                    'Clear',
-                                    style: TextStyle(
-                                      fontFamily: 'Muli',
-                                      color: Colors.grey,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w400,
-                                    ),
-                                  ),
-                                )
+                       
                         ],
                       ),
-                    ))),
-
-                    SizedBox(height: height*0.05,),
-
-                  GestureDetector(
+                    ),
+                    SizedBox(
+                      width: width*0.02,
+                    ),
+                    GestureDetector(
             onTap: (){
-              
+              setState(() {
+                searching = true;
+              });
+              _firebaseProvider.getLobbyById(controller.text).then((lobby) {
+                setState(() {
+                  searchedLobby = lobby;
+                  searching = false;
+                });
+              });
             },
             child: Container(
               decoration: BoxDecoration(
                 color: Color(0xff00ffff),
                 borderRadius: BorderRadius.circular(20)
               ),
-              width: width*0.35,
-              height: height*0.06,
+              width: width*0.2,
+              height: height*0.05,
               child: Center(
-                child: Text('Search Lobby', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                child: Text('Search', style: TextStyle(color: Colors.black, fontSize: 16, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
               ),
             ),
             ),
-            Container(
-              height: height*0.3,
+                      ],
+                    ))),
+
+                    SizedBox(height: height*0.12,),
+
+                  
+           
+
+         Center(
+          child: 
+          searching
+          ?Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Center(
+            child: Text(
+                'Searching for lobby', style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 35, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
+              ),
+          ),
+          JumpingDotsProgressIndicator(color: Color(0xff00ffff), fontSize: 70,),
+          
+              ],
+            )
+          :searchedLobby==null
+          ?GestureDetector(
+            onTap: (){
+              FocusScope.of(context).unfocus();
+               Navigator.push(context, MaterialPageRoute( 
+          builder: (BuildContext context) {
+                          // return SelectLobby();
+                          return  LobbyMenu(variables: widget.variables,);
+                        },
+                        ));
+            },
+            child:Container(
+            width: width*0.4,
+            height: width*0.4,
+            child: Column(
+              children: [
+                Container(
+                  child: Center(
+                    child: Container(
+                    width: width*0.2,
+                    child: Text('Public Lobbies', style: TextStyle(color: Colors.black, fontSize: width*0.06, fontFamily: 'Muli', fontWeight: FontWeight.w900), textAlign: TextAlign.center),
+                  )),
+              width: width*0.35*(pow(size, 0.5)),
+              height: width*0.35*pow(size, 0.5),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white,
+                /*  boxShadow: [BoxShadow(
+            color: Color(0xff00ffff),
+            blurRadius: pow(_animation.value, 5)/200000,
+            spreadRadius: pow(_animation.value, 5)/200000
+          )], */
+              ),
             ),
+         
+              ],
+            ),
+          ))
+          :searchedLobby.uid ==null
+          ?Container(
+            height: height*0.15,
+            child: Center(
+            child: Text('No lobby with that Id', style: TextStyle(color: Colors.white, fontSize: width*0.06, fontFamily: 'Muli', fontWeight: FontWeight.w900), textAlign: TextAlign.center),
+                  
+          ),
+          )
+          :lobbyItem(width, height, searchedLobby)
+          ),
+
+          SizedBox(
+            height: searchedLobby!=null?height*0.07:height*0.12,
+          ),
          
          Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -353,36 +418,9 @@ void handleTimeout() {  // callback function
               ),
             ),
             ),
-             GestureDetector(
+              GestureDetector(
             onTap: (){
-               Navigator.push(context, MaterialPageRoute( 
-          builder: (BuildContext context) {
-                          // return SelectLobby();
-                          return  LobbyMenu(variables: widget.variables,);
-                        },
-                        ));
-            },
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20)
-              ),
-              width: width*0.35,
-              height: height*0.06,
-              child: Center(
-                child: Text('Public Lobbies', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
-              ),
-            ),
-            )
-          ],
-         ),
-
-         SizedBox(
-          height: height*0.05,
-         ),
-
-         GestureDetector(
-            onTap: (){
+              FocusScope.of(context).unfocus();
                Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           // return SelectLobby();
@@ -404,6 +442,14 @@ void handleTimeout() {  // callback function
             )
 
           ],
+         ),
+
+         SizedBox(
+          height: height*0.05,
+         ),
+
+        
+          ],
         )
         
       ),
@@ -419,25 +465,26 @@ void handleTimeout() {  // callback function
     });
    }
 
-  Widget lobbyItem(var width, var height, int index){
+  Widget lobbyItem(var width, var height, Lobby snapshot){
     return Padding(
-      padding: EdgeInsets.only(top: height*0.03, bottom: height*0.03),
+      padding: EdgeInsets.only(top: 0, bottom: 0),
       child: GestureDetector(
       onTap: (){
+        FocusScope.of(context).unfocus();
          Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
-                          return FootBallMenu();
+                          return LobbyDetails(variables: widget.variables, lobby: snapshot);
                         },
                         ));
       },
       child: Container(
-        width: width*0.3,
-        height: height*0.25,
+        width: width*0.5,
+        height: height*0.3,
         child: Column(
           children: [
             SizedBox(
-              width: width*0.3,
-              height: width*0.3,
+              width: width*0.28,
+              height: width*0.28,
               child: Column(
                 children: [
                   Container(
@@ -446,7 +493,7 @@ void handleTimeout() {  // callback function
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 image: DecorationImage(
-                  image: AssetImage('assets/grey.png'),
+                  image: AssetImage('assets/bankeru_blue.png'),
                   fit: BoxFit.cover
                 ),
                  boxShadow: [BoxShadow(
@@ -465,7 +512,7 @@ void handleTimeout() {  // callback function
             Container(
               width: width*0.45,
               child: Center(
-                child: Text(lobbies[index]['name'] , style: TextStyle(fontFamily: 'Muli', color: Color(0xffff4399), fontSize: 20, fontWeight: FontWeight.w900), overflow: TextOverflow.ellipsis,),
+                child: Text(snapshot.name , style: TextStyle(fontFamily: 'Muli', color: Color(0xffff4399), fontSize: 20, fontWeight: FontWeight.w900), overflow: TextOverflow.ellipsis,),
               ),
             ),
             SizedBox(
@@ -474,7 +521,7 @@ void handleTimeout() {  // callback function
             Container(
               width: width*0.45,
               child: Center(
-                child: Text(lobbies[index]['lobbyId']+ '(' + lobbies[index]['price'].toString() + ' ETB)', style: TextStyle(fontFamily: 'Muli', color: Colors.white, fontSize: 16, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic), overflow: TextOverflow.ellipsis,),
+                child: Text(snapshot.uid+ '(' + snapshot.rate.toString() + ' ETB)', style: TextStyle(fontFamily: 'Muli', color: Colors.white, fontSize: 16, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic), overflow: TextOverflow.ellipsis,),
               ),
             )
           ],

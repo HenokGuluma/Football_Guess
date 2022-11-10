@@ -147,13 +147,13 @@ class _InstaProfileScreenState extends State<InstaProfileScreen>
                     widget.variables.currentUser.userName != null ? widget.variables.currentUser.userName : 'Your Name',
                     style: TextStyle(
                         fontFamily: 'Muli',
-                        color: Colors.black,
+                        color: Colors.white,
                         fontWeight: FontWeight.w900,
                         fontSize: 25.0)),
               ),
               Padding(
                 padding: EdgeInsets.only(
-                    top: height * 0.03,
+                    top: height * 0.06,
                     left: width * 0.03,
                     right: width * 0.03),
                 child: Row(

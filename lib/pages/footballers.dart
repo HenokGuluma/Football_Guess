@@ -221,7 +221,9 @@ void handleTimeout() {  // callback function
      var width = MediaQuery.of(context).size.width;
     var height = MediaQuery.of(context).size.height;
  
-    return Scaffold(
+    return WillPopScope(
+    onWillPop: () async => false,
+    child: Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
         children: [
@@ -360,7 +362,7 @@ void handleTimeout() {  // callback function
               child: Text(
                 widget.category == 'age'?'Who is Older?':widget.category == 'height'
                 ?'Who is taller?':widget.category == 'jersey'?'Who has higher Jersey Number?':'Who has more goals?',
-                 style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 25, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
+                 style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: widget.category == 'jersey'?22:25, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
               ),
             ),
             ),
@@ -465,7 +467,7 @@ void handleTimeout() {  // callback function
       ),
     
         ],
-      ));
+      )));
    
    }
 

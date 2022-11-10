@@ -146,6 +146,9 @@ Future<User> fetchUserDetailsById(String uid) async {
 
   Future<Lobby> getLobbyById(String lobbyId) async{
     DocumentSnapshot snapshot = await _firestore.collection('lobbies').doc(lobbyId).get();
+    if(snapshot.data()==null){
+      return Lobby();
+    }
     return Lobby.fromMap(snapshot.data());
   }
 
@@ -158,6 +161,7 @@ Future<User> fetchUserDetailsById(String uid) async {
     }
     return null;
   }
+  
 
   Future<void> addLobbyById(String id, Lobby lobby, User creatorId) async{
     print(creatorId); print('stage1');

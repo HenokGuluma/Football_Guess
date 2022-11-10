@@ -361,6 +361,7 @@ void handleTimeout() {  // callback function
              available && _nameController.text.isNotEmpty && _rateController.text.isNotEmpty
              ?GestureDetector(
             onTap: (){
+              FocusScope.of(context).unfocus();
                Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           // return SelectLobby();
