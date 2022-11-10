@@ -10,6 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_countdown_timer/flutter_countdown_timer.dart';
 import 'package:flutter_spinning_wheel/src/utils.dart';
 import 'package:flutter_countdown_timer/countdown.dart';
+import 'package:instagram_clone/backend/firebase.dart';
 import 'package:instagram_clone/main.dart';
 import 'package:instagram_clone/models/lobby.dart';
 import 'package:instagram_clone/pages/add_lobby.dart';
@@ -78,6 +79,7 @@ class _LobbyDetailsState extends State<LobbyDetails>
   AnimationController _bounceController;
   PageController _pageController;
   Animation _animation;
+  FirebaseProvider _firebaseProvider = FirebaseProvider();
   bool animate = false;
   bool correctPicked = false;
   int currentPage = 0;
@@ -90,6 +92,7 @@ class _LobbyDetailsState extends State<LobbyDetails>
   bool wrongClick = false;
   int gamePlayDuration = 0;
   double size = 1;
+  bool joining = false;
   
   
   @override
@@ -169,7 +172,7 @@ void handleTimeout() {  // callback function
         height: height,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
              SizedBox(
               height: height*0.01,
@@ -178,11 +181,11 @@ void handleTimeout() {  // callback function
               children: [
                 
            Padding(
-            padding: EdgeInsets.only(top: height*0.05),
-            child:  Center(
+            padding: EdgeInsets.only(top: height*0.02, left: width*0.08),
+            child: Center(
               child: Text(
                 widget.lobby.name, style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 30, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
-              ),
+              )
             )
            )
               ],
@@ -193,36 +196,31 @@ void handleTimeout() {  // callback function
             ),
            
           Padding(
-            padding: EdgeInsets.only(top: height*0.05),
-            child:  Center(
-              child: Text(
-                'Lobby Id: '+ widget.lobby.uid, style: TextStyle(color: Colors.white, fontFamily: 'Muli', fontSize: 15, fontWeight: FontWeight.w900, fontStyle: FontStyle.normal),
+            padding: EdgeInsets.only(top: height*0.05, left: width*0.08),
+            child: Text(
+                'Lobby Id: '+ widget.lobby.uid, style: TextStyle(color: Color(0xff23ff89), fontFamily: 'Muli', fontSize: 25, fontWeight: FontWeight.w900, fontStyle: FontStyle.normal),
               ),
+           ),
+             SizedBox(
+              height: height*0.03,
+            ),
+
+               Padding(
+            padding: EdgeInsets.only(top: height*0.02, left: width*0.08),
+            child:  Text(
+                'Creator: ' + widget.lobby.creator['userName'], style: TextStyle(color: Colors.white, fontFamily: 'Muli', fontSize: 20, fontWeight: FontWeight.w900, fontStyle: FontStyle.normal),
+             
             )
            ),
              SizedBox(
               height: height*0.03,
             ),
 
-             Padding(
-            padding: EdgeInsets.only(top: height*0.05),
-            child:  Center(
-              child: Text(
-                'Lobby Id: '+ widget.lobby.uid, style: TextStyle(color: Colors.white, fontFamily: 'Muli', fontSize: 15, fontWeight: FontWeight.w900, fontStyle: FontStyle.normal),
-              ),
-            )
-           ),
-
-           SizedBox(
-              height: height*0.03,
-            ),
-
             Padding(
-            padding: EdgeInsets.only(top: height*0.05),
-            child:  Center(
-              child: Text(
-                'Rate: '+ widget.lobby.rate.toString(), style: TextStyle(color: Colors.white, fontFamily: 'Muli', fontSize: 15, fontWeight: FontWeight.w900, fontStyle: FontStyle.normal),
-              ),
+            padding: EdgeInsets.only(top: height*0.05, left: width*0.08),
+            child:  Text(
+                'Rate: '+ widget.lobby.rate.toString() + ' ETB', style: TextStyle(color: Colors.white, fontFamily: 'Muli', fontSize: 20, fontWeight: FontWeight.w900, fontStyle: FontStyle.normal),
+             
             )
            ),
 
@@ -234,15 +232,18 @@ void handleTimeout() {  // callback function
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                  Padding(
-            padding: EdgeInsets.only(top: height*0.05),
+            padding: EdgeInsets.only(top: height*0.05, left: width*0.08),
             child:  Center(
               child: Text(
-                'Rate: '+ widget.lobby.rate.toString(), style: TextStyle(color: Colors.white, fontFamily: 'Muli', fontSize: 15, fontWeight: FontWeight.w900, fontStyle: FontStyle.normal),
+                'Game Chosen: ', style: TextStyle(color: Colors.white, fontFamily: 'Muli', fontSize: 20, fontWeight: FontWeight.w900, fontStyle: FontStyle.normal),
               ),
             )
            ),
            menuOption(width, height, widget.lobby.gameCategory, menuImages)
               ],
+            ),
+            SizedBox(
+              height: height*0.05,
             ),
             Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -263,14 +264,24 @@ void handleTimeout() {  // callback function
               ),
             ),
             ),
-             GestureDetector(
+             !joining
+             ?GestureDetector(
             onTap: (){
-               Navigator.push(context, MaterialPageRoute( 
+              print(widget.lobby.gameCategory); print(' is the category');
+              setState(() {
+                joining = true;
+              });
+              _firebaseProvider.addUserToLobby(widget.variables.currentUser.uid, widget.lobby.uid).then((value) {
+                setState(() {
+                  joining = false;
+                });
+                 Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           // return LobbyDetails();
-                          return Footballers(category: categories[widget.lobby.gameCategory],);
+                          return Footballers(category: categoryId[widget.lobby.gameCategory], lobbyId: widget.lobby.uid, solo: false, creatorId: widget.lobby.creatorId, variables: widget.variables);
                         },
                         ));
+              });
             },
             child: Container(
               decoration: BoxDecoration(
@@ -284,6 +295,17 @@ void handleTimeout() {  // callback function
               ),
             ),
             )
+            :Container(
+              decoration: BoxDecoration(
+                color: Color(0xff777777),
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.35,
+              height: height*0.06,
+              child: Center(
+                child: Text('Joining...', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            ),
           ],
          )
 
@@ -305,7 +327,7 @@ void handleTimeout() {  // callback function
         children: [
           Container(
         width: width*0.4,
-        height: width*0.8,
+        height: width*0.6,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(15),
           image: DecorationImage(

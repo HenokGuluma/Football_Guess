@@ -183,6 +183,7 @@ void handleTimeout() {  // callback function
                     style: TextStyle(fontFamily: 'Muli', color: Colors.white, fontWeight: FontWeight.w900, fontSize: 20),
                     controller: _nameController,
                     autofocus: true,
+                    maxLength: 20,
                     decoration: InputDecoration(
                       hintText: 'Lobby Name',
                       hintStyle: TextStyle(
@@ -317,6 +318,7 @@ void handleTimeout() {  // callback function
                     style: TextStyle(fontFamily: 'Muli', color: Colors.white, fontSize: 30, fontWeight: FontWeight.w900),
                     controller: _rateController,
                     enabled: true,
+                    maxLength: 5,
                     decoration: InputDecoration(
                       
                         hintText: 'Rate (in ETB) (eg. 50)',

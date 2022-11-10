@@ -294,7 +294,7 @@ void handleTimeout() {  // callback function
         else{
           Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
-                          return Footballers(category: categoryId[index],);
+                          return Footballers(category: categoryId[index], solo: true,);
                         },
                         ));
         }

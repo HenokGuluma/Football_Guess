@@ -176,6 +176,41 @@ Future<User> fetchUserDetailsById(String uid) async {
     return _firestore.collection("lobbies").doc(id).set(setMap);
   }
 
+  Future<void> addUserToLobby (String userId, String lobbyId) async{
+    DocumentSnapshot snap = await _firestore.collection('lobbies').doc(lobbyId).get();
+    List<dynamic> playerList = snap.data()['players'];
+    if(!playerList.contains(userId)){
+      playerList.add(userId);
+    }
+    Map<String, dynamic> updateMap = {'players': playerList};
+    await _firestore.collection('lobbies').doc(lobbyId).update(updateMap);
+  }
+
+  Future<void> submitUserScore(String userId, String lobbyId, int score) async{
+    await _firestore.collection('lobbies').doc(lobbyId).collection('playerScores').doc(userId).set({'userId': userId, 'score': score });
+  }
+
+
+   Future<void> removeUserFromLobby (String userId, String lobbyId) async{
+    DocumentSnapshot snap = await _firestore.collection('lobbies').doc(lobbyId).get();
+    List<dynamic> playerList = snap.data()['players'];
+    if(playerList.contains(userId)){
+      playerList.remove(userId);
+    }
+    Map<String, dynamic> updateMap = {'players': playerList};
+    await _firestore.collection('lobbies').doc(lobbyId).update(updateMap);
+  }
+
+  Future<void> startLobbyGame (String userId, String lobbyId) async{
+    Map<String, dynamic> updateMap = {'active': true};
+    await _firestore.collection('lobbies').doc(lobbyId).update(updateMap);
+  }
+
+  Future<void> stopLobbyGame (String userId, String lobbyId) async{
+    Map<String, dynamic> updateMap = {'active': false};
+    await _firestore.collection('lobbies').doc(lobbyId).update(updateMap);
+  }
+
     void addPhone(String phone, String userId) async{
     await _firestore.collection('phones').doc(phone).set({'phone': phone, 'userId': userId});
   }

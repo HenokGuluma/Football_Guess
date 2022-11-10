@@ -8,6 +8,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_countdown_timer/flutter_countdown_timer.dart';
 import 'package:flutter_spinning_wheel/src/utils.dart';
 import 'package:flutter_countdown_timer/countdown.dart';
@@ -276,7 +277,12 @@ void handleTimeout() {  // callback function
                               maxLength: 20,
                               cursorWidth: 0.5,
                               onChanged: searchQuery,
+                               inputFormatters: [
+                  FilteringTextInputFormatter.deny(
+                      RegExp(r'\s')),
+              ],
                               decoration: InputDecoration(
+                                
                                   hintText: 'Search by lobby Id',
                                   // contentPadding: EdgeInsets.only(bottom: 20),
                                   focusedBorder: InputBorder.none,
@@ -299,7 +305,8 @@ void handleTimeout() {  // callback function
                     SizedBox(
                       width: width*0.02,
                     ),
-                    GestureDetector(
+                    controller.text.length>0
+                    ?GestureDetector(
             onTap: (){
               setState(() {
                 searching = true;
@@ -322,6 +329,17 @@ void handleTimeout() {  // callback function
                 child: Text('Search', style: TextStyle(color: Colors.black, fontSize: 16, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
               ),
             ),
+            )
+            :Container(
+              decoration: BoxDecoration(
+                color: Color(0xff777777),
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.2,
+              height: height*0.05,
+              child: Center(
+                child: Text('Search', style: TextStyle(color: Colors.black, fontSize: 16, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
             ),
                       ],
                     ))),
