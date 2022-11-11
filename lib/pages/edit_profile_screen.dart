@@ -106,7 +106,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   _phoneController.text == widget.variables.currentUser.phone)
                   || (widget.variables.phoneList.contains(_phoneController.text) && widget.variables.currentUser.phone != _phoneController.text)
                   || _phoneController.text.length!=10
-                  || !available
+                  ||(_nameController.text!= widget.variables.currentUser.userName && !available)
               ? Padding(
                   padding: const EdgeInsets.only(right: 12.0),
                   child: Icon(Icons.done, color: Color(0xff444444)))

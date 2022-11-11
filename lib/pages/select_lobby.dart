@@ -219,7 +219,7 @@ void handleTimeout() {  // callback function
               )),
             ),
            Padding(
-            padding: EdgeInsets.only(top: height*0.15),
+            padding: EdgeInsets.only(top: height*0.1),
             child:  Center(
               child: Text(
                 'Select a Lobby', style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 30, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
@@ -391,11 +391,11 @@ void handleTimeout() {  // callback function
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: Colors.white,
-                /*  boxShadow: [BoxShadow(
-            color: Color(0xff00ffff),
+                 boxShadow: [BoxShadow(
+            color: Colors.white,
             blurRadius: pow(_animation.value, 5)/200000,
             spreadRadius: pow(_animation.value, 5)/200000
-          )], */
+          )],
               ),
             ),
          
@@ -404,7 +404,7 @@ void handleTimeout() {  // callback function
           ))
           :searchedLobby.uid ==null
           ?Container(
-            height: height*0.15,
+            height: height*0.25,
             child: Center(
             child: Text('No lobby with that Id', style: TextStyle(color: Colors.white, fontSize: width*0.06, fontFamily: 'Muli', fontWeight: FontWeight.w900), textAlign: TextAlign.center),
                   
@@ -530,7 +530,7 @@ void handleTimeout() {  // callback function
             Container(
               width: width*0.45,
               child: Center(
-                child: Text(snapshot.name , style: TextStyle(fontFamily: 'Muli', color: Color(0xffff4399), fontSize: 20, fontWeight: FontWeight.w900), overflow: TextOverflow.ellipsis,),
+                child: Text(snapshot.name.toUpperCase() , style: TextStyle(fontFamily: 'Muli', color: Color(0xffff4399), fontSize: 20, fontWeight: FontWeight.w900), overflow: TextOverflow.ellipsis,),
               ),
             ),
             SizedBox(

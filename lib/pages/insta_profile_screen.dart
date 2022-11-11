@@ -246,10 +246,11 @@ class _InstaProfileScreenState extends State<InstaProfileScreen>
                         context: context,
                         builder: ((context) {
                           return new AlertDialog(
+                            backgroundColor: Color(0xff240044),
                             title: new Text(
                               'Logging out',
                               style: TextStyle(
-                                  color: Colors.black,
+                                  color: Colors.white,
                                   fontFamily: 'Muli',
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold),
@@ -257,7 +258,7 @@ class _InstaProfileScreenState extends State<InstaProfileScreen>
                             content: new Text(
                               'Are you sure you want to log out?',
                               style: TextStyle(
-                                  color: Colors.black,
+                                  color: Colors.white,
                                   fontFamily: 'Muli',
                                   fontSize: 16,
                                   fontWeight: FontWeight.normal),
@@ -270,7 +271,7 @@ class _InstaProfileScreenState extends State<InstaProfileScreen>
                                 child: new Text(
                                   'No',
                                   style: TextStyle(
-                                      color: Colors.black,
+                                      color: Color(0xffff2389),
                                       fontSize: 16,
                                       fontFamily: 'Muli',
                                       fontWeight: FontWeight.w900),
@@ -296,7 +297,7 @@ class _InstaProfileScreenState extends State<InstaProfileScreen>
                                 child: new Text(
                                   'Yes',
                                   style: TextStyle(
-                                      color: Colors.black,
+                                      color: Color(0xff23ff89),
                                       fontSize: 16,
                                       fontFamily: 'Muli',
                                       fontWeight: FontWeight.w900),

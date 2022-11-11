@@ -45,7 +45,7 @@ class _LobbyDetailsState extends State<LobbyDetails>
   {'name':'Garri-Jema', 'lobbyId': '@garriJema', 'price': 25},
  {'name':'Planet-Doom', 'lobbyId': '@planetDoom', 'price': 100}];
 
-  List<String> categories = ['Number', 'Goals', 'Age', 'Height'];
+  List<String> categories = ['Jersey.No', 'Goals', 'Age', 'Height'];
   List<String> categoryId = ['jersey', 'goals', 'age', 'height'];
 
   List<String> menuImages = ['assets/football2.jpg', 'assets/football3.jpg','assets/football4.jpg',  'assets/football1.png'];
@@ -184,7 +184,7 @@ void handleTimeout() {  // callback function
             padding: EdgeInsets.only(top: height*0.02, left: width*0.08),
             child: Center(
               child: Text(
-                widget.lobby.name, style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 30, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
+                widget.lobby.name.toUpperCase(), style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 30, fontWeight: FontWeight.w900, fontStyle: FontStyle.normal),
               )
             )
            )
@@ -202,7 +202,7 @@ void handleTimeout() {  // callback function
               ),
            ),
              SizedBox(
-              height: height*0.03,
+              height: height*0.01,
             ),
 
                Padding(
@@ -213,11 +213,11 @@ void handleTimeout() {  // callback function
             )
            ),
              SizedBox(
-              height: height*0.03,
+              height: height*0.01,
             ),
 
             Padding(
-            padding: EdgeInsets.only(top: height*0.05, left: width*0.08),
+            padding: EdgeInsets.only(top: height*0.02, left: width*0.08),
             child:  Text(
                 'Rate: '+ widget.lobby.rate.toString() + ' ETB', style: TextStyle(color: Colors.white, fontFamily: 'Muli', fontSize: 20, fontWeight: FontWeight.w900, fontStyle: FontStyle.normal),
              
@@ -225,7 +225,7 @@ void handleTimeout() {  // callback function
            ),
 
             SizedBox(
-              height: height*0.03,
+              height: height*0.01,
             ),
 
             Row(
@@ -271,14 +271,14 @@ void handleTimeout() {  // callback function
               setState(() {
                 joining = true;
               });
-              _firebaseProvider.addUserToLobby(widget.variables.currentUser.uid, widget.lobby.uid).then((value) {
+              _firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobby.uid).then((value) {
                 setState(() {
                   joining = false;
                 });
                  Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           // return LobbyDetails();
-                          return Footballers(category: categoryId[widget.lobby.gameCategory], lobbyId: widget.lobby.uid, solo: false, creatorId: widget.lobby.creatorId, variables: widget.variables);
+                          return Footballers(category: categoryId[widget.lobby.gameCategory], lobbyId: widget.lobby.uid, solo: false, creatorId: widget.lobby.creatorId, variables: widget.variables, categoryNo: widget.lobby.gameCategory,);
                         },
                         ));
               });
