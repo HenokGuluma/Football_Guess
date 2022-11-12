@@ -364,7 +364,7 @@ void handleTimeout() {  // callback function
           
               ],
             )
-          :searchedLobby==null
+          :searchedLobby==null || controller.text.length ==0
           ?GestureDetector(
             onTap: (){
               FocusScope.of(context).unfocus();
@@ -384,15 +384,15 @@ void handleTimeout() {  // callback function
                   child: Center(
                     child: Container(
                     width: width*0.2,
-                    child: Text('Public Lobbies', style: TextStyle(color: Colors.black, fontSize: width*0.06, fontFamily: 'Muli', fontWeight: FontWeight.w900), textAlign: TextAlign.center),
+                    child: Text('Public Lobbies', style: TextStyle(color: Color(0xff00ffff), fontSize: width*0.06, fontFamily: 'Muli', fontWeight: FontWeight.w900), textAlign: TextAlign.center),
                   )),
               width: width*0.35*(pow(size, 0.5)),
               height: width*0.35*pow(size, 0.5),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.white,
+                color: Colors.black,
                  boxShadow: [BoxShadow(
-            color: Colors.white,
+            color: Color(0xff00ffff),
             blurRadius: pow(_animation.value, 5)/200000,
             spreadRadius: pow(_animation.value, 5)/200000
           )],

@@ -194,7 +194,8 @@ _bounceController.addListener(() {
     setState(() {
       retrievingWinner = true;
     });
-    _firebaseProvider.getLobbyWinner(widget.lobbyId).then((lobbyWinner) {
+   Future.delayed(Duration(seconds: 3)).then((value) {
+     _firebaseProvider.getLobbyWinner(widget.lobbyId).then((lobbyWinner) {
       if(lobbyWinner!=null){
         setState(() {
           winner = lobbyWinner;
@@ -202,6 +203,7 @@ _bounceController.addListener(() {
         });
       }
     });
+   });
   }
 
   void startCountDown(){
@@ -595,12 +597,13 @@ void handleTimeout() {  // callback function
         ,
             )
             :Center(
-              child: Column(
+              child: widget.variables.currentUser.userName != winner.data()['userName']
+              ?Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
-                'The Winner is: ', style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 25, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
+                'The Winner is: ', style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 25, fontWeight: FontWeight.w900, fontStyle: FontStyle.normal),
               ),
             SizedBox(
               height: height*0.02,
@@ -738,6 +741,150 @@ void handleTimeout() {  // callback function
             ],
            )],
         )
+        :Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+                'Congratulations', style: TextStyle(color: Color(0xff63ff00), fontFamily: 'Muli', fontSize: 50, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
+              ),
+            SizedBox(
+              height: height*0.06,
+            ),
+           Text(
+                'You have won with score ' + (currentPage*10).toString(), style: TextStyle(color: Color(0xffffffff), fontFamily: 'Muli', fontSize: 25, fontWeight: FontWeight.w900, fontStyle: FontStyle.normal),
+              ),
+              SizedBox(
+              height: height*0.1,
+            ),
+              SizedBox(
+              height: height*0.08,
+            ),
+           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+               MaterialButton(
+              onPressed: (){
+                _firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId);
+                setState(() {
+                  timeLeft = 5.5;
+                  // _slideController.value = 5.5;
+                  defeated = false;
+                  resetValue = 6;
+                  winner = null;
+                  gotWinner = false;
+                  gamePlayDuration=0;
+                  divider = 6;
+                  finished = false;
+                  wrongClick = false;
+                  gameStarted = false;
+                  gamePlayTimeLeft = 5;
+                  correctPicked = false;
+                  animate = false;
+                  currentPage = 0;
+                  _animationController.reset();
+                  _slideController.reset();
+                  _slideController.repeat(reverse: false);
+                });
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20)
+                ),
+                width: width*0.45,
+                height: width*0.12,
+                child: Center(
+                  child: Text(
+                'Try Again', style: TextStyle(color: Colors.black, fontFamily: 'Muli', fontSize: 22, fontWeight: FontWeight.w900),
+              ),
+                ),
+              ),
+            ),
+            
+             MaterialButton(
+                onPressed: (){
+                  showDialog(
+                        context: context,
+                        builder: ((context) {
+                          return new AlertDialog(
+                            backgroundColor: Color(0xff240044),
+                            title: new Text(
+                              'Leaving the game',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Muli',
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w900),
+                            ),
+                            content: new Text(
+                              'Are you sure you want to leave the game? All progresses and bets will be lost.',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Muli',
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.normal),
+                            ),
+                            actions: <Widget>[
+                              new TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                  setState(() {
+                                    paused = false;
+                                  });
+                                }, // Closes the dialog
+                                child: new Text(
+                                  'No',
+                                  style: TextStyle(
+                                      color: Color(0xffff2389),
+                                      fontSize: 16,
+                                      fontFamily: 'Muli',
+                                      fontWeight: FontWeight.w900),
+                                ),
+                              ),
+                              new TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                 _bounceController.reset();
+                  _animationController.reset();
+                  setState(() {
+                    disposed = true;
+                  });
+                  // handleTimeout();
+                  _navigator.pop(context);
+                                },
+                                child: new Text(
+                                  'Yes',
+                                  style: TextStyle(
+                                      color: Color(0xff23ff89),
+                                      fontSize: 16,
+                                      fontFamily: 'Muli',
+                                      fontWeight: FontWeight.w900),
+                                ),
+                              ),
+                            ],
+                          );
+                        }));
+
+
+                  // dispose();
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Color(0xffff2378),
+                    borderRadius: BorderRadius.circular(20)
+                  ),
+                  width: width*0.3,
+                  height: 40,
+                  child: Center(
+                    child: Text('Leave', style: TextStyle(color: Colors.white, fontSize:18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                  ),
+                ),
+              ),
+          
+            ],
+           )],
+        )
         ,
             )
           
@@ -745,7 +892,7 @@ void handleTimeout() {  // callback function
         ):Column(
           children: [
             SizedBox(
-              height: height*0.08,
+              height: height*0.1,
             ),
             Container(
               height: height*0.15,
@@ -762,18 +909,14 @@ void handleTimeout() {  // callback function
             ?Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                Container(
-              width: width*0.8,
-              height: height*0.08,
-             
-              child: Center(
+                Center(
               child: Text(
                 widget.category == 'age'?'Who is Older?':widget.category == 'height'
                 ?'Who is taller?':widget.category == 'jersey'?'Who has higher Jersey Number?':'Who has more goals?',
                  style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: widget.category == 'jersey'?22:25, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
               ),
             ),
-            ),
+              
             SizedBox(
               height: height*0.03,
             ),
@@ -1863,6 +2006,9 @@ void handleTimeout() {  // callback function
               ],
             ):Container(
               height: height*0.15,),
+              SizedBox(
+                height: height*0.08,
+              ),
             gameStarted
             ?Column(
               children: [
@@ -2141,7 +2287,7 @@ void handleTimeout() {  // callback function
                   child: Center(
                     child: Container(
                     width: width*0.5,
-                    child: Text('@'+winner['userName'], style: TextStyle(color: Color(0xff63ff00), fontSize: width*0.09, fontFamily: 'Muli', fontWeight: FontWeight.w900), textAlign: TextAlign.center),
+                    child: Text('@'+winner['userName'], style: TextStyle(color: Color(0xff63ff00), fontSize: width*0.09, fontFamily: 'Muli', fontWeight: FontWeight.w900, fontStyle: FontStyle.italic), textAlign: TextAlign.center),
                   )),
               width: width*0.55,
               height: height*0.1,

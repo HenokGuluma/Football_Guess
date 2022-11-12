@@ -12,7 +12,7 @@ import 'package:instagram_clone/backend/firebase.dart';
 
 import 'package:instagram_clone/main.dart';
 import 'package:instagram_clone/models/user.dart';
-import 'package:instagram_clone/pages/buy_keys.dart';
+import 'package:instagram_clone/pages/buy_coins.dart';
 import 'package:instagram_clone/pages/edit_profile_screen.dart';
 import 'package:progress_indicators/progress_indicators.dart';
 import 'package:progressive_image/progressive_image.dart';
@@ -221,12 +221,12 @@ class _InstaProfileScreenState extends State<InstaProfileScreen>
                 },
               ),
              GestureDetector(
-            child: ProfileButtons('Buy Coins', width, height),
+            child: ProfileButtons('Coin Wallet', width, height),
             onTap: () {
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: ((context) => BuyKeys(variables: widget.variables))));
+                      builder: ((context) => BuyCoins(variables: widget.variables))));
             },
           ),
 

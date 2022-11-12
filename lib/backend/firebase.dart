@@ -32,7 +32,7 @@ class FirebaseProvider {
         posts: 0,
         phone: '',
         trending: 100,
-        keys: 0,
+        coins: 0,
         dailyTimer: DateTime.now().millisecondsSinceEpoch);
 
     //  Map<String, String> mapdata = Map<String, dynamic>();
