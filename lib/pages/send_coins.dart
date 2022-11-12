@@ -41,7 +41,7 @@ class SendCoinsState extends State<SendCoins> {
   TextEditingController controller = TextEditingController();
   TextEditingController userController = TextEditingController();
   bool searching  = false;
-  User searchedUser;
+  User searchedUser = User();
 
   @override
   void initState() {
@@ -130,7 +130,7 @@ class SendCoinsState extends State<SendCoins> {
           child: ListView(
               
               children: [
-          SizedBox(height: height * 0.2),
+          SizedBox(height: height * 0.12),
           Container(
               width: width*0.5,
               height: height*0.05,
@@ -153,11 +153,11 @@ class SendCoinsState extends State<SendCoins> {
                                 textAlign: TextAlign.center,
                               style: TextStyle(
                                   fontFamily: 'Muli',
-                                  color: Colors.black,
+                                  color: Colors.white,
                                   fontSize: 16,
                                   fontWeight: FontWeight.w900),
                               controller: controller,
-                              cursorColor: Colors.black,
+                              cursorColor: Colors.white,
                               autofocus: false,
                               focusNode: FocusNode(),
                               cursorHeight: 20,
@@ -167,12 +167,15 @@ class SendCoinsState extends State<SendCoins> {
                                inputFormatters: [
                   FilteringTextInputFormatter.deny(
                       RegExp(r'\s')),
+
               ],
+              keyboardType: TextInputType.number,
                               decoration: InputDecoration(
                                 
                                   hintText: 'Amount of coins',
                                   // contentPadding: EdgeInsets.only(bottom: 20),
                                   focusedBorder: InputBorder.none,
+                                  
                                   enabledBorder: InputBorder.none,
                                   errorBorder: InputBorder.none,
                                   disabledBorder: InputBorder.none,
@@ -186,9 +189,7 @@ class SendCoinsState extends State<SendCoins> {
                             ),
                           
                             ))),
-                          SizedBox(
-                            height: height*0.1,
-                          ),
+                         
                             SizedBox(
               height: height*0.03,
             ),
@@ -243,7 +244,7 @@ class SendCoinsState extends State<SendCoins> {
               ],
                               decoration: InputDecoration(
                                 
-                                  hintText: 'Search by lobby Id',
+                                  hintText: 'Search by userId',
                                   // contentPadding: EdgeInsets.only(bottom: 20),
                                   focusedBorder: InputBorder.none,
                                   enabledBorder: InputBorder.none,
@@ -265,7 +266,7 @@ class SendCoinsState extends State<SendCoins> {
                     SizedBox(
                       width: width*0.02,
                     ),
-                    controller.text.length>0 && !searching
+                    userController.text.length>0 && !searching
                     ?GestureDetector(
             onTap: (){
               setState(() {
@@ -316,10 +317,40 @@ class SendCoinsState extends State<SendCoins> {
                       ],
                     ))),
 
-             
+             SizedBox(
+              height: height*0.06
+             ),
+             searchedUser == null
+             ?Container(
+              height: height*0.3,
+             )
+             :searchedUser.uid ==null
+          ?Container(
+            height: height*0.25,
+            child: Center(
+            child: Text('No user with that Id', style: TextStyle(color: Colors.white, fontSize: width*0.06, fontFamily: 'Muli', fontWeight: FontWeight.w900), textAlign: TextAlign.center),
+                  
+          ),
+          ):userItem(width, height, searchedUser),
                           Container(
                             constraints: BoxConstraints(maxWidth: width*0.3),
-                            child: MaterialButton(
+                            child: searchedUser.uid==null || controller.text.isEmpty
+                            ?MaterialButton(
+            onPressed: (){
+             
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Color(0xff888888),
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.3,
+              height: height*0.07,
+              child: Center(
+                child: Text('Transfer', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            ))
+                             :MaterialButton(
             onPressed: (){
              
             },
@@ -341,6 +372,56 @@ class SendCoinsState extends State<SendCoins> {
         
           )));
   }
+
+    Widget userItem(var width, var height, User user){
+    return Padding(
+      padding: EdgeInsets.only(top: 0, bottom: 0),
+      child: GestureDetector(
+      onTap: (){
+       
+      },
+      child: Container(
+        width: width*0.5,
+        height: height*0.3,
+        child: Column(
+          children: [
+            SizedBox(
+              width: width*0.28,
+              height: width*0.28,
+              child: Column(
+                children: [
+                  Container(
+              width: width*0.25,
+              height: width*0.25,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                image: DecorationImage(
+                  image: CachedNetworkImageProvider(user.photoUrl),
+                  fit: BoxFit.cover
+                ),
+                 
+              ),
+            ),
+                ],
+              )
+            ),
+            SizedBox(
+              height: height*0.01,
+            ),
+            Container(
+              width: width*0.45,
+              child: Center(
+                child: Text('@'+ user.userName, style: TextStyle(fontFamily: 'Muli', color: Color(0xffff4399), fontSize: 20, fontWeight: FontWeight.w900), overflow: TextOverflow.ellipsis,),
+              ),
+            ),
+           
+          ],
+        ),
+      ),
+    )
+    );
+    }
+
 
      Widget menuOption(var width, var height, int index, List<String> images, UserVariables variables){
     return GestureDetector(

@@ -152,12 +152,28 @@ Future<User> fetchUserDetailsById(String uid) async {
     return Lobby.fromMap(snapshot.data());
   }
 
+  Future<void> sendCoins(String senderId, String receiverId, int coins) async{
+     DocumentSnapshot documentSnapshot =
+        await _firestore.collection("users").doc(senderId).get();
+       int previousCoins = documentSnapshot.data()['coins'];
+       int currentCoins = previousCoins - coins;
+    await _firestore.collection('users').doc(senderId).update({'coins': currentCoins});
+
+    DocumentSnapshot newDocumentSnapshot =
+        await _firestore.collection("users").doc(receiverId).get();
+       int prevCoins = newDocumentSnapshot.data()['coins'];
+       int curCoins = prevCoins - coins;
+    return _firestore.collection('users').doc(receiverId).update({'coins': curCoins});
+  }
+
  Future<User> getUserById(String userId) async{
-    DocumentSnapshot snapshot = await _firestore.collection('users').doc(userId).get();
-    if(snapshot.data()==null){
+    QuerySnapshot snapshot = await _firestore.collection('users').where('userName', isEqualTo: userId).get();
+    if(snapshot.docs.isNotEmpty){
+       if(snapshot.docs[0].data()==null){
       return User();
     }
-    return User.fromMap(snapshot.data());
+    }
+    return User.fromMap(snapshot.docs[0].data());
   }
 
 

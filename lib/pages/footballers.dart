@@ -118,6 +118,7 @@ class _FootballersState extends State<Footballers>
   bool setupPlayers = true;
   dynamic playerInfos;
   dynamic playerInfotemp;
+  bool resetColor = true;
   List<dynamic> playerList = [];
 
  @override
@@ -137,7 +138,7 @@ class _FootballersState extends State<Footballers>
     _navigator = Navigator.of(context);
     _pageController = PageController(initialPage: currentPage, viewportFraction: 1);
     _animationController = AnimationController(vsync: this, duration: Duration(milliseconds: 500));
-    _colorController = AnimationController(duration: Duration(seconds: (resetValue-1).toInt()), vsync: this);
+    _colorController = AnimationController(duration: Duration(seconds: 13), vsync: this);
      _slideController = AnimationController(
       /// [AnimationController]s can be created with `vsync: this` because of
       /// [TickerProviderStateMixin].
@@ -153,7 +154,6 @@ class _FootballersState extends State<Footballers>
     super.initState();
 
     _colorController.repeat(reverse: false);
-    _colorController.forward();
     
     _animationController.repeat(reverse: true);
     // _animationController.reset();
@@ -163,7 +163,7 @@ class _FootballersState extends State<Footballers>
       });
     });
 
-    colorAnimation = ColorTween(begin: Color(0xff63ff00), end: Color(0xffff2389)).animate(AnimationController(duration: Duration(seconds: 6), vsync: this ))
+    colorAnimation = ColorTween(begin: Color(0xff63ff00), end: Color(0xffff2389)).animate(_colorController)
           ..addListener(() {
             setState(() {
               // The state that has changed here is the animation object’s value.
@@ -180,6 +180,7 @@ class _FootballersState extends State<Footballers>
       lowerBound: 1
 
     );
+     _colorController.forward();
 _bounceController.forward();
 _bounceController.repeat(reverse: true);
 _bounceController.addListener(() {
@@ -204,7 +205,8 @@ _bounceController.addListener(() {
   }
 
   Future<void> getWinner() async{
-    setState(() {
+    if(!widget.solo){
+      setState(() {
       retrievingWinner = true;
     });
    Future.delayed(Duration(seconds: 3)).then((value) {
@@ -217,6 +219,10 @@ _bounceController.addListener(() {
       }
     });
    });
+    }
+    else{
+
+    }
   }
 
   void startCountDown(){
@@ -247,9 +253,6 @@ _bounceController.addListener(() {
       }
 
       
-      /* else if(shouldGetWinner){
-        print('baam');
-      } */
      
     });
   }
@@ -273,11 +276,26 @@ _bounceController.addListener(() {
           // _slideController.value = (timeLeft-1).toDouble();
         });
       }
-      
+
+      else if (resetColor){
+        setState(() {
+           _colorController = AnimationController(duration: Duration(seconds: resetValue.toInt()), vsync: this);
+           colorAnimation = ColorTween(begin: Color(0xff63ff00), end: Color(0xffff2389)).animate(_colorController)
+          ..addListener(() {
+            setState(() {
+              // The state that has changed here is the animation object’s value.
+            });
+          });
+          _colorController.forward();
+          resetColor = false;
+        });
+      }
+
       else{
         
         setState(() {
           gameStarted = true;
+          
         });
       }
      
@@ -2391,6 +2409,14 @@ void handleTimeout() {  // callback function
           setState(() {
             correctPicked = true;
             currentPage = currentPage+1;
+             _colorController = AnimationController(duration: Duration(seconds: resetValue.toInt()), vsync: this);
+           colorAnimation = ColorTween(begin: Color(0xff63ff00), end: Color(0xffff2389)).animate(_colorController)
+          ..addListener(() {
+            setState(() {
+              // The state that has changed here is the animation object’s value.
+            });
+          });
+          _colorController.forward();
             timeLeft = resetValue;
             divider = resetValue;
             _slideController.reset(); 
