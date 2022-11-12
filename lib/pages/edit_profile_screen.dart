@@ -414,6 +414,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8.0),
                 child: TextFormField(
+                  inputFormatters: [
+                  FilteringTextInputFormatter.deny(
+                      RegExp(r'\s')),
+              ],
                     style: TextStyle(fontFamily: 'Muli', color: Colors.white),
                     controller: _phoneController,
                     autofocus: false,

@@ -327,6 +327,10 @@ class _SetupProfileState extends State<SetupProfile> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 15.0, vertical: 4.0),
                 child: TextFormField(
+                  inputFormatters: [
+                  FilteringTextInputFormatter.deny(
+                      RegExp(r'\s')),
+              ],
                     style: TextStyle(fontFamily: 'Muli', color: Colors.white),
                     controller: _phoneController,
                     keyboardType: TextInputType.number,
@@ -448,7 +452,7 @@ class _SetupProfileState extends State<SetupProfile> {
                                       posts: 0,
                                       phone: _phoneController.text,
                                       trending: 100,
-                                      keys: 0,
+                                      coins: 0,
                                       dailyTimer: DateTime.now().millisecondsSinceEpoch);
                                    widget.variables.setCurrentUser(_user);
                                    widget.finishNavigation(widget.variables);

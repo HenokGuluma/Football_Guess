@@ -305,7 +305,7 @@ void handleTimeout() {  // callback function
                     SizedBox(
                       width: width*0.02,
                     ),
-                    controller.text.length>0
+                    controller.text.length>0 && !searching
                     ?GestureDetector(
             onTap: (){
               setState(() {
@@ -335,10 +335,10 @@ void handleTimeout() {  // callback function
                 color: Color(0xff777777),
                 borderRadius: BorderRadius.circular(20)
               ),
-              width: width*0.2,
+              width: width*0.25,
               height: height*0.05,
               child: Center(
-                child: Text('Search', style: TextStyle(color: Colors.black, fontSize: 16, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                child: Text('Searching...', style: TextStyle(color: Colors.black, fontSize: 16, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
               ),
             ),
                       ],
@@ -511,7 +511,9 @@ void handleTimeout() {  // callback function
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 image: DecorationImage(
-                  image: AssetImage('assets/bankeru_blue.png'),
+                  image: snapshot.gameCategory==null?
+                  AssetImage('assets/bankeru_blue.png')
+                  :AssetImage(menuImages[snapshot.gameCategory]),
                   fit: BoxFit.cover
                 ),
                  boxShadow: [BoxShadow(

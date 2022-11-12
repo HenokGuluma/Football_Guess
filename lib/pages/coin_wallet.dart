@@ -4,26 +4,26 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:instagram_clone/backend/firebase.dart';
 import 'package:instagram_clone/main.dart';
+import 'package:instagram_clone/pages/buy_coins.dart';
 import 'package:instagram_clone/pages/football_menu.dart';
 import 'package:instagram_clone/pages/pay_for_coins.dart';
 import 'package:instagram_clone/pages/select_lobby.dart';
 
 
-class BuyCoins extends StatefulWidget {
+class CoinWallet extends StatefulWidget {
   final UserVariables variables;
 
-  BuyCoins({this.variables});
+  CoinWallet({this.variables});
 
   @override
-  BuycoinsState createState() => BuycoinsState();
+  CoinWalletState createState() => CoinWalletState();
 }
 
-class BuycoinsState extends State<BuyCoins> {
+class CoinWalletState extends State<CoinWallet> {
   File _image;
   File imageFile;
   final picker = ImagePicker();
@@ -37,7 +37,6 @@ class BuycoinsState extends State<BuyCoins> {
   List<bool> balls = [true, true, true, true, true];
   List<DocumentSnapshot> keyOrderList = [];
   List<DocumentSnapshot> pendingOrderList = [];
-  TextEditingController controller = TextEditingController();
 
   @override
   void initState() {
@@ -49,12 +48,6 @@ class BuycoinsState extends State<BuyCoins> {
     super.dispose();
     
   }
-
-   void searchQuery(String text){
-    setState(() {
-      
-    });
-   }
 
   @override
   Widget build(BuildContext context) {
@@ -78,7 +71,7 @@ class BuycoinsState extends State<BuyCoins> {
           toolbarHeight: 70,
           backgroundColor: Colors.black,
           title: Text(
-            'Buy Coins',
+            'Coin Wallet',
             style: TextStyle(
                 fontFamily: 'Muli',
                 color: Colors.white,
@@ -127,72 +120,9 @@ class BuycoinsState extends State<BuyCoins> {
               
               children: [
           SizedBox(height: height * 0.05),
-          Container(
-              width: width*0.5,
-              height: height*0.05,
-              child: Center(
-                child: Text('Enter amount of coins', style: TextStyle(color: Color(0xff00ffff), fontSize: 16, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
-              ),
-            ),
-          Center(
-                              child: Container(
-                            width: width * 0.4,
-                            height: 30,
-                            padding: EdgeInsets.only(left: 5, top: 0),
-                            child: TextField(
-                              style: TextStyle(
-                                  fontFamily: 'Muli',
-                                  color: Colors.black,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w900),
-                              controller: controller,
-                              cursorColor: Colors.black,
-                              autofocus: false,
-                              focusNode: FocusNode(),
-                              cursorHeight: 20,
-                              maxLength: 20,
-                              cursorWidth: 0.5,
-                              onChanged: searchQuery,
-                               inputFormatters: [
-                  FilteringTextInputFormatter.deny(
-                      RegExp(r'\s')),
-              ],
-                              decoration: InputDecoration(
-                                
-                                  hintText: 'Amount of coins',
-                                  // contentPadding: EdgeInsets.only(bottom: 20),
-                                  focusedBorder: InputBorder.none,
-                                  enabledBorder: InputBorder.none,
-                                  errorBorder: InputBorder.none,
-                                  disabledBorder: InputBorder.none,
-                                  counterText: '',
-                                  border: InputBorder.none,
-                                  hintStyle: TextStyle(
-                                      fontFamily: 'Muli',
-                                      color: Color(0xff999999),
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w900)),
-                            ),
-                          )),
-                          SizedBox(
-                            height: height*0.08,
-                          ),
-                          GestureDetector(
-            onTap: (){
-             
-            },
-            child: Container(
-              decoration: BoxDecoration(
-                color: Color(0xff00ffff),
-                borderRadius: BorderRadius.circular(20)
-              ),
-              width: width*0.5,
-              height: height*0.05,
-              child: Center(
-                child: Text('Proceed to Payment', style: TextStyle(color: Colors.black, fontSize: 16, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
-              ),
-            ),
-            )
+            menuOption(width, height, 0, modes, widget.variables),
+   SizedBox(height: height*0.08,),
+   menuOption(width, height, 1, modes, widget.variables),
 
         ]),
         
@@ -206,7 +136,7 @@ class BuycoinsState extends State<BuyCoins> {
             Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           // return LobbyMenu();
-                          return FootBallMenu(creating: false,);
+                          return BuyCoins(variables: variables,);
                         },
                         ));
         }
@@ -214,7 +144,7 @@ class BuycoinsState extends State<BuyCoins> {
           Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           // return LobbyMenu();
-                          return SelectLobby(variables: variables,);
+                          return BuyCoins(variables: variables,);
                         },
                         ));
         }

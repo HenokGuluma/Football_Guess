@@ -13,6 +13,7 @@ import 'package:instagram_clone/backend/firebase.dart';
 import 'package:instagram_clone/main.dart';
 import 'package:instagram_clone/models/user.dart';
 import 'package:instagram_clone/pages/buy_coins.dart';
+import 'package:instagram_clone/pages/coin_wallet.dart';
 import 'package:instagram_clone/pages/edit_profile_screen.dart';
 import 'package:progress_indicators/progress_indicators.dart';
 import 'package:progressive_image/progressive_image.dart';
@@ -226,7 +227,7 @@ class _InstaProfileScreenState extends State<InstaProfileScreen>
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: ((context) => BuyCoins(variables: widget.variables))));
+                      builder: ((context) => CoinWallet(variables: widget.variables))));
             },
           ),
 
