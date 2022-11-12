@@ -51,7 +51,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   height: height * 0.25,
                   decoration: BoxDecoration(
                       image: DecorationImage(
-                          image: AssetImage('assets/asyiz-removed.png'))),
+                          image: AssetImage('assets/banker-removed.png'))),
                 ),
               )),
           SizedBox(
@@ -61,7 +61,7 @@ class _LoginScreenState extends State<LoginScreen> {
               padding:  EdgeInsets.only(top: 0.0, bottom: 10.0, left: width*0.05, right: width*0.05),
               child: Center(
                   child: Text(
-                "Create your Account to play with others",
+                "Login in order to play with others",
                 style: TextStyle(
                     fontFamily: 'Muli', color: Colors.white, fontSize: 25.0, fontWeight: FontWeight.w900), textAlign: TextAlign.center,
               ))),

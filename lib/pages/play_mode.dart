@@ -60,11 +60,18 @@ class _PlayModeState extends State<PlayMode>
   @override
   void initState() {
     super.initState();
-     getCurrentUser().then((value) {
+   if(widget.loggedIn){
+      getCurrentUser().then((value) {
       setState(() {
         loading = false;
       });
     });
+   }
+   else{
+    setState(() {
+      loading = false;
+    });
+   }
   /*  }
    else{
     setState(() {

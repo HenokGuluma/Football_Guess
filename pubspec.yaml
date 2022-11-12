@@ -124,6 +124,7 @@ flutter:
     - assets/coin-background.png
     - assets/buy-coins.png
     - assets/send-coins.png
+    - assets/banker-removed.png
 
 
   fonts:
