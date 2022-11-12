@@ -84,11 +84,13 @@ class _FootballersState extends State<Footballers>
 
   AnimationController _animationController;
   AnimationController _slideController;
+  AnimationController _colorController;
     AnimationController _bounceController;
   FirebaseFirestore _firestore = FirebaseFirestore.instance;
   FirebaseProvider _firebaseProvider = FirebaseProvider();
   PageController _pageController;
   Animation _animation;
+  Animation colorAnimation;
   bool animate = false;
   bool correctPicked = false;
   int currentPage = 0;
@@ -135,6 +137,7 @@ class _FootballersState extends State<Footballers>
     _navigator = Navigator.of(context);
     _pageController = PageController(initialPage: currentPage, viewportFraction: 1);
     _animationController = AnimationController(vsync: this, duration: Duration(milliseconds: 500));
+    _colorController = AnimationController(duration: Duration(seconds: (resetValue-1).toInt()), vsync: this);
      _slideController = AnimationController(
       /// [AnimationController]s can be created with `vsync: this` because of
       /// [TickerProviderStateMixin].
@@ -144,10 +147,13 @@ class _FootballersState extends State<Footballers>
     )..addListener(() {
         setState(() {});
       });
-      // _slideController.reset();
+      // _slideController.reset(); _colorController.reset();
     _slideController.repeat(reverse: false);
 
     super.initState();
+
+    _colorController.repeat(reverse: false);
+    _colorController.forward();
     
     _animationController.repeat(reverse: true);
     // _animationController.reset();
@@ -156,6 +162,13 @@ class _FootballersState extends State<Footballers>
         
       });
     });
+
+    colorAnimation = ColorTween(begin: Color(0xff63ff00), end: Color(0xffff2389)).animate(AnimationController(duration: Duration(seconds: 6), vsync: this ))
+          ..addListener(() {
+            setState(() {
+              // The state that has changed here is the animation object’s value.
+            });
+          });
 
       _bounceController = AnimationController(
 
@@ -224,6 +237,7 @@ _bounceController.addListener(() {
       else if(timeLeft >0){
         setState(() {
           timeLeft = timeLeft-0.1;
+          // _colorController.value = (timeLeft -1).toDouble();
           // _slideController.value = (timeLeft-1).toDouble();
         });
       }
@@ -344,6 +358,8 @@ _bounceController.addListener(() {
         // print(gamePlayDuration.toString() + ' is the duration');
         gamePlayDuration = gamePlayDuration+1;
       }
+
+      // print(timeLeft/resetValue); print (' is the timer');
 
        if(!gotWinner && playerAmount<1){
         print('baaaam');
@@ -783,7 +799,7 @@ void handleTimeout() {  // callback function
                   animate = false;
                   currentPage = 0;
                   _animationController.reset();
-                  _slideController.reset();
+                  _slideController.reset(); 
                   _slideController.repeat(reverse: false);
                 });
               },
@@ -930,7 +946,7 @@ void handleTimeout() {  // callback function
               backgroundColor: Colors.transparent,
               value: timeLeft == divider?1:(timeLeft/(divider-1)).toDouble(),
               // value: _slideController.value,
-              valueColor: AlwaysStoppedAnimation(Color(0xffffffff)),
+              valueColor: AlwaysStoppedAnimation(colorAnimation.value),
             ),
            ),
              SizedBox(
@@ -1129,7 +1145,7 @@ void handleTimeout() {  // callback function
               backgroundColor: Colors.transparent,
               value: timeLeft == divider?1:(timeLeft/(divider-1)).toDouble(),
               // value: _slideController.value,
-              valueColor: AlwaysStoppedAnimation(Color(0xffffffff)),
+              valueColor: AlwaysStoppedAnimation(colorAnimation.value),
             ),
            ),
              SizedBox(
@@ -1800,7 +1816,7 @@ void handleTimeout() {  // callback function
                   animate = false;
                   currentPage = 0;
                   _animationController.reset();
-                  _slideController.reset();
+                  _slideController.reset(); 
                   _slideController.repeat(reverse: false);
                 });
               },
@@ -2037,7 +2053,7 @@ void handleTimeout() {  // callback function
               backgroundColor: Colors.transparent,
               value: timeLeft == divider?1:(timeLeft/(divider-1)).toDouble(),
               // value: _slideController.value,
-              valueColor: AlwaysStoppedAnimation(Color(0xffffffff)),
+              valueColor: AlwaysStoppedAnimation(colorAnimation.value),
             ),
            ),
              SizedBox(
@@ -2141,7 +2157,7 @@ void handleTimeout() {  // callback function
               backgroundColor: Colors.transparent,
               value: timeLeft == divider?1:(timeLeft/(divider-1)).toDouble(),
               // value: _slideController.value,
-              valueColor: AlwaysStoppedAnimation(Color(0xffffffff)),
+              valueColor: AlwaysStoppedAnimation(colorAnimation.value),
             ),
            ),
              SizedBox(
@@ -2377,7 +2393,7 @@ void handleTimeout() {  // callback function
             currentPage = currentPage+1;
             timeLeft = resetValue;
             divider = resetValue;
-            _slideController.reset();
+            _slideController.reset(); 
             _animation = new Tween<double>(begin: 0, end: 1).animate(
         new CurvedAnimation(
             parent: _animationController, curve: Curves.easeInOutCirc));

@@ -12,6 +12,7 @@ import 'package:instagram_clone/pages/buy_coins.dart';
 import 'package:instagram_clone/pages/football_menu.dart';
 import 'package:instagram_clone/pages/pay_for_coins.dart';
 import 'package:instagram_clone/pages/select_lobby.dart';
+import 'package:instagram_clone/pages/send_coins.dart';
 
 
 class CoinWallet extends StatefulWidget {
@@ -136,7 +137,7 @@ class CoinWalletState extends State<CoinWallet> {
             Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           // return LobbyMenu();
-                          return BuyCoins(variables: variables,);
+                          return SendCoins(variables: variables,);
                         },
                         ));
         }

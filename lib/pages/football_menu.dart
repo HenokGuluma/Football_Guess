@@ -172,7 +172,24 @@ void handleTimeout() {  // callback function
           ), 
 
           SizedBox(height: height*0.02,),
-          Row(
+           !widget.creating
+            ?GestureDetector(
+            onTap: (){
+              Navigator.pop(context);
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.3,
+              height: height*0.06,
+              child: Center(
+                child: Text('Go Back', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            ),
+            )
+          :Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
                  GestureDetector(
@@ -191,8 +208,7 @@ void handleTimeout() {  // callback function
               ),
             ),
             ),
-            widget.creating
-            ? selectedIndex==null
+            selectedIndex==null
             ?Container(
               decoration: BoxDecoration(
                 color: Color(0xff777777),
@@ -264,7 +280,7 @@ void handleTimeout() {  // callback function
               ),
             ),
             )
-            :Center()
+            
             ],
           ),
        

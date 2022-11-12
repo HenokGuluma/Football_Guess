@@ -330,6 +330,18 @@ void handleTimeout() {  // callback function
               ),
             ),
             )
+            : !searching
+            ?Container(
+              decoration: BoxDecoration(
+                color: Color(0xff777777),
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.2,
+              height: height*0.05,
+              child: Center(
+                child: Text('Search', style: TextStyle(color: Colors.black, fontSize: 16, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            )
             :Container(
               decoration: BoxDecoration(
                 color: Color(0xff777777),

@@ -208,7 +208,7 @@ void handleTimeout() {  // callback function
                Padding(
             padding: EdgeInsets.only(top: height*0.02, left: width*0.08),
             child:  Text(
-                'Creator: ' + widget.lobby.creator['userName'], style: TextStyle(color: Colors.white, fontFamily: 'Muli', fontSize: 20, fontWeight: FontWeight.w900, fontStyle: FontStyle.normal),
+                'Creator: @' + widget.lobby.creator['userName'], style: TextStyle(color: Colors.white, fontFamily: 'Muli', fontSize: 20, fontWeight: FontWeight.w900, fontStyle: FontStyle.normal),
              
             )
            ),

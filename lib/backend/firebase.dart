@@ -152,6 +152,14 @@ Future<User> fetchUserDetailsById(String uid) async {
     return Lobby.fromMap(snapshot.data());
   }
 
+ Future<User> getUserById(String userId) async{
+    DocumentSnapshot snapshot = await _firestore.collection('users').doc(userId).get();
+    if(snapshot.data()==null){
+      return User();
+    }
+    return User.fromMap(snapshot.data());
+  }
+
 
 
   Future<DocumentSnapshot> fetchUserNameById(String id) async{

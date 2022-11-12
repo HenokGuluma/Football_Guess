@@ -126,20 +126,27 @@ class BuycoinsState extends State<BuyCoins> {
           child: ListView(
               
               children: [
-          SizedBox(height: height * 0.05),
+          SizedBox(height: height * 0.2),
           Container(
               width: width*0.5,
               height: height*0.05,
               child: Center(
-                child: Text('Enter amount of coins', style: TextStyle(color: Color(0xff00ffff), fontSize: 16, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                child: Text('Enter amount of coins', style: TextStyle(color: Color(0xff00ffff), fontSize: 25, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
               ),
             ),
+            SizedBox(height: height * 0.04),
           Center(
                               child: Container(
-                            width: width * 0.4,
-                            height: 30,
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.white),
+                                  borderRadius: BorderRadius.circular(20)
+                                ),
+                            width: width * 0.5,
+                            height: 40,
                             padding: EdgeInsets.only(left: 5, top: 0),
-                            child: TextField(
+                            child: Center(
+                              child: TextField(
+                                textAlign: TextAlign.center,
                               style: TextStyle(
                                   fontFamily: 'Muli',
                                   color: Colors.black,
@@ -170,15 +177,18 @@ class BuycoinsState extends State<BuyCoins> {
                                   hintStyle: TextStyle(
                                       fontFamily: 'Muli',
                                       color: Color(0xff999999),
-                                      fontSize: 16,
+                                      fontSize: 18,
                                       fontWeight: FontWeight.w900)),
                             ),
-                          )),
+                          
+                            ))),
                           SizedBox(
-                            height: height*0.08,
+                            height: height*0.1,
                           ),
-                          GestureDetector(
-            onTap: (){
+                          Container(
+                            constraints: BoxConstraints(maxWidth: width*0.5),
+                            child: MaterialButton(
+            onPressed: (){
              
             },
             child: Container(
@@ -187,12 +197,13 @@ class BuycoinsState extends State<BuyCoins> {
                 borderRadius: BorderRadius.circular(20)
               ),
               width: width*0.5,
-              height: height*0.05,
+              height: height*0.07,
               child: Center(
-                child: Text('Proceed to Payment', style: TextStyle(color: Colors.black, fontSize: 16, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                child: Text('Proceed to Payment', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
               ),
             ),
-            )
+            ),
+                          )
 
         ]),
         
