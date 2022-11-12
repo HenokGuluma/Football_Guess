@@ -19,7 +19,7 @@
     <application
         android:name="io.flutter.app.FlutterApplication"
         android:label="Bankeru"
-        android:icon="@mipmap/bankeru_blue"
+        android:icon="@mipmap/bankeru-logo"
         android:requestLegacyExternalStorage="true">
         <!--<activity android:name=".MainActivity"
             android:parentActivityName=".MainActivity"></activity>-->
