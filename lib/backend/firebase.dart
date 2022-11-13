@@ -139,9 +139,15 @@ class FirebaseProvider {
   }
 
 Future<User> fetchUserDetailsById(String uid) async {
-    DocumentSnapshot documentSnapshot =
+  if(uid!=null){
+     DocumentSnapshot documentSnapshot =
         await _firestore.collection("users").doc(uid).get();
-    return User.fromMap(documentSnapshot.data());
+        if(documentSnapshot.data().isNotEmpty){
+          return User.fromMap(documentSnapshot.data());
+        }
+  }
+   return User();
+    
   }
 
   Future<Lobby> getLobbyById(String lobbyId) async{
@@ -211,7 +217,7 @@ Future<User> fetchUserDetailsById(String uid) async {
       playerList.add(user.uid);
       playerInfo[user.uid] = user.toMap(user);
     }
-    Map<String, dynamic> updateMap = {'players': playerList};
+    Map<String, dynamic> updateMap = {'players': playerList, 'playerInfo': playerInfo};
     await _firestore.collection('lobbies').doc(lobbyId).update(updateMap);
   }
 
@@ -220,7 +226,7 @@ Future<User> fetchUserDetailsById(String uid) async {
   }
 
   Future<DocumentSnapshot> getLobbyWinner(String lobbyId) async{
-    QuerySnapshot snapshot = await _firestore.collection('lobbies').doc(lobbyId).collection('playerScores').orderBy('score').limit(1).get();
+    QuerySnapshot snapshot = await _firestore.collection('lobbies').doc(lobbyId).collection('playerScores').orderBy('score', descending: true).limit(1).get();
     return snapshot.docs[0];
   }
 

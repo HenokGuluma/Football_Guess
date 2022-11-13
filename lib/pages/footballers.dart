@@ -209,7 +209,7 @@ _bounceController.addListener(() {
       setState(() {
       retrievingWinner = true;
     });
-   Future.delayed(Duration(seconds: 3)).then((value) {
+   Future.delayed(Duration(seconds: 10)).then((value) {
      _firebaseProvider.getLobbyWinner(widget.lobbyId).then((lobbyWinner) {
       if(lobbyWinner!=null){
         setState(() {
@@ -529,17 +529,12 @@ void handleTimeout() {  // callback function
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
-                'Nice Effort', style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 45, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
+                'Game Over', style: TextStyle(color: Color(0xffffffff), fontFamily: 'Muli', fontSize: 45, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
               ),
             SizedBox(
               height: height*0.1,
             ),
-            Text(
-                'Your final Score is: ' + (currentPage*10).toString(), style: TextStyle(color: Colors.white, fontFamily: 'Muli', fontSize: 25, fontWeight: FontWeight.w900),
-              ),
-              SizedBox(
-              height: height*0.1,
-            ),
+            
              Center(
             child: Text(
                 'Calculating Results', style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 35, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
@@ -589,6 +584,7 @@ void handleTimeout() {  // callback function
                               ),
                               new TextButton(
                                 onPressed: () {
+                                  _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
                                   Navigator.pop(context);
                                  _bounceController.reset();
                   _animationController.reset();
@@ -631,7 +627,9 @@ void handleTimeout() {  // callback function
         ,
             )
             :Center(
-              child: widget.variables.currentUser.userName != winner.data()['userName']
+              child: winner!=null
+            ?
+              widget.variables.currentUser.userName != winner.data()['userName']
               ?Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -642,11 +640,8 @@ void handleTimeout() {  // callback function
             SizedBox(
               height: height*0.02,
             ),
-            winner!=null
-            ?winnerWidget(width, height, winner)
-            :Text(
-                'The score is a tie.', style: TextStyle(color: Color(0xffffffff), fontFamily: 'Muli', fontSize: 28, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
-              ),
+            winnerWidget(width, height, winner),
+           
               SizedBox(
               height: height*0.1,
             ),
@@ -657,10 +652,19 @@ void handleTimeout() {  // callback function
               onPressed: (){
                 _firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId);
                 setState(() {
+                    _colorController = AnimationController(duration: Duration(seconds: resetValue.toInt()), vsync: this);
+           colorAnimation = ColorTween(begin: Color(0xff63ff00), end: Color(0xffff2389)).animate(_colorController)
+          ..addListener(() {
+            setState(() {
+              // The state that has changed here is the animation object’s value.
+            });
+          });
+          _colorController.forward();
                   timeLeft = 5.5;
                   // _slideController.value = 5.5;
                   defeated = false;
                   resetValue = 6;
+                  resetColor = true;
                   winner = null;
                   gotWinner = false;
                   gamePlayDuration=0;
@@ -734,6 +738,7 @@ void handleTimeout() {  // callback function
                               ),
                               new TextButton(
                                 onPressed: () {
+                                  _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
                                   Navigator.pop(context);
                                  _bounceController.reset();
                   _animationController.reset();
@@ -799,11 +804,20 @@ void handleTimeout() {  // callback function
             children: [
                MaterialButton(
               onPressed: (){
+                  _colorController = AnimationController(duration: Duration(seconds: resetValue.toInt()), vsync: this);
+           colorAnimation = ColorTween(begin: Color(0xff63ff00), end: Color(0xffff2389)).animate(_colorController)
+          ..addListener(() {
+            setState(() {
+              // The state that has changed here is the animation object’s value.
+            });
+          });
+          _colorController.forward();
                 _firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId);
                 setState(() {
                   timeLeft = 5.5;
                   // _slideController.value = 5.5;
                   defeated = false;
+                  resetColor = true;
                   resetValue = 6;
                   winner = null;
                   gotWinner = false;
@@ -878,6 +892,7 @@ void handleTimeout() {  // callback function
                               ),
                               new TextButton(
                                 onPressed: () {
+                                  _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
                                   Navigator.pop(context);
                                  _bounceController.reset();
                   _animationController.reset();
@@ -918,6 +933,115 @@ void handleTimeout() {  // callback function
           
             ],
            )],
+        ): gotWinner
+        ?Text(
+                'The score is a tie.', style: TextStyle(color: Color(0xffffffff), fontFamily: 'Muli', fontSize: 28, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
+              )
+        :Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+             Text(
+                'Nice Effort', style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 45, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
+              ),
+            SizedBox(
+              height: height*0.1,
+            ),
+            Text(
+                'Your final Score is: ' + (currentPage*10).toString(), style: TextStyle(color: Colors.white, fontFamily: 'Muli', fontSize: 25, fontWeight: FontWeight.w900),
+              ),
+               SizedBox(
+              height: height*0.1,
+            ),
+               Center(
+            child: Text(
+                'Waiting for others to finish', style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 30, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic), textAlign: TextAlign.center,
+              ),
+          ),
+          JumpingDotsProgressIndicator(color: Color(0xff00ffff), fontSize: 70,),
+          
+             MaterialButton(
+                onPressed: (){
+                  showDialog(
+                        context: context,
+                        builder: ((context) {
+                          return new AlertDialog(
+                            backgroundColor: Color(0xff240044),
+                            title: new Text(
+                              'Leaving the game',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Muli',
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w900),
+                            ),
+                            content: new Text(
+                              'Are you sure you want to leave the game? All progresses and bets will be lost.',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Muli',
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.normal),
+                            ),
+                            actions: <Widget>[
+                              new TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                  setState(() {
+                                    paused = false;
+                                  });
+                                }, // Closes the dialog
+                                child: new Text(
+                                  'No',
+                                  style: TextStyle(
+                                      color: Color(0xffff2389),
+                                      fontSize: 16,
+                                      fontFamily: 'Muli',
+                                      fontWeight: FontWeight.w900),
+                                ),
+                              ),
+                              new TextButton(
+                                onPressed: () {
+                                  _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
+                                  Navigator.pop(context);
+                                 _bounceController.reset();
+                  _animationController.reset();
+                  setState(() {
+                    disposed = true;
+                  });
+                  // handleTimeout();
+                  _navigator.pop(context);
+                                },
+                                child: new Text(
+                                  'Yes',
+                                  style: TextStyle(
+                                      color: Color(0xff23ff89),
+                                      fontSize: 16,
+                                      fontFamily: 'Muli',
+                                      fontWeight: FontWeight.w900),
+                                ),
+                              ),
+                            ],
+                          );
+                        }));
+
+
+                  // dispose();
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Color(0xffff2378),
+                    borderRadius: BorderRadius.circular(20)
+                  ),
+                  width: width*0.3,
+                  height: 40,
+                  child: Center(
+                    child: Text('Leave', style: TextStyle(color: Colors.white, fontSize:18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                  ),
+                ),
+              ),
+            ],
+          ),
         )
         ,
             )
@@ -1092,6 +1216,7 @@ void handleTimeout() {  // callback function
                               ),
                               new TextButton(
                                 onPressed: () {
+                                  _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
                                   Navigator.pop(context);
                                  _bounceController.reset();
                   _animationController.reset();
@@ -1291,6 +1416,7 @@ void handleTimeout() {  // callback function
                               ),
                               new TextButton(
                                 onPressed: () {
+                                  _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
                                   Navigator.pop(context);
                                  _bounceController.reset();
                   _animationController.reset();
@@ -1472,6 +1598,7 @@ void handleTimeout() {  // callback function
                               ),
                               new TextButton(
                                 onPressed: () {
+                                  _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
                                   Navigator.pop(context);
                                  _bounceController.reset();
                   _animationController.reset();
@@ -1569,6 +1696,7 @@ void handleTimeout() {  // callback function
                               ),
                               new TextButton(
                                 onPressed: () {
+                                  _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
                                   Navigator.pop(context);
                                  _bounceController.reset();
                   _animationController.reset();
@@ -1757,6 +1885,7 @@ void handleTimeout() {  // callback function
                               ),
                               new TextButton(
                                 onPressed: () {
+                                  _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
                                   Navigator.pop(context);
                                  _bounceController.reset();
                   _animationController.reset();
@@ -1822,6 +1951,14 @@ void handleTimeout() {  // callback function
                   _firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId);
                 }
                 setState(() {
+                    _colorController = AnimationController(duration: Duration(seconds: resetValue.toInt()), vsync: this);
+           colorAnimation = ColorTween(begin: Color(0xff63ff00), end: Color(0xffff2389)).animate(_colorController)
+          ..addListener(() {
+            setState(() {
+              // The state that has changed here is the animation object’s value.
+            });
+          });
+          _colorController.forward();
                   timeLeft = 5.5;
                   // _slideController.value = 5.5;
                   defeated = false;
@@ -1830,6 +1967,7 @@ void handleTimeout() {  // callback function
                   divider = 6;
                   finished = false;
                   wrongClick = false;
+                  resetColor = true;
                   correctPicked = false;
                   animate = false;
                   currentPage = 0;
@@ -1895,6 +2033,7 @@ void handleTimeout() {  // callback function
                               ),
                               new TextButton(
                                 onPressed: () {
+                                  _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
                                   Navigator.pop(context);
                                  _bounceController.reset();
                   _animationController.reset();
@@ -1999,6 +2138,7 @@ void handleTimeout() {  // callback function
                               ),
                               new TextButton(
                                 onPressed: () {
+                                  _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
                                   Navigator.pop(context);
                                  _bounceController.reset();
                   _animationController.reset();
@@ -2357,7 +2497,8 @@ void handleTimeout() {  // callback function
               image: DecorationImage(
                 image: data['photoUrl']==null
                 ?AssetImage('assets/grey.png')
-                :CachedNetworkImageProvider(data['photoUrl'])
+                :CachedNetworkImageProvider(data['photoUrl']),
+                fit: BoxFit.cover,
               )
             ),
             width: width*0.1,

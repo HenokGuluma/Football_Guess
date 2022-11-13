@@ -125,6 +125,10 @@ flutter:
     - assets/buy-coins.png
     - assets/send-coins.png
     - assets/banker-removed.png
+    - assets/banker.png
+    - assets/blackjack_backgroud.png
+    - assets/blackjack_option.png
+    - assets/rapidBall.png
 
 
   fonts:

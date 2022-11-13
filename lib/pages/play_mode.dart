@@ -34,7 +34,7 @@ class PlayMode extends StatefulWidget {
 }
 
 class _PlayModeState extends State<PlayMode>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   List<String> modes = ['assets/group.jpg', 'assets/solo.jpg'];
   List<String> options = ['Squad-Mode', 'Solo-Mode'];
   FirebaseProvider _firebaseProvider = FirebaseProvider();
@@ -42,6 +42,7 @@ class _PlayModeState extends State<PlayMode>
   AnimationController _slideController;
   PageController _pageController;
   Animation _animation;
+  bool loggedIn;
   bool animate = false;
   bool correctPicked = false;
   int currentPage = 0;
@@ -56,22 +57,20 @@ class _PlayModeState extends State<PlayMode>
   User currentUser = User();
   bool loading = true;
   
+
+  @override
+  bool get wantKeepAlive => true;
   
   @override
   void initState() {
     super.initState();
-   if(widget.loggedIn){
-      getCurrentUser().then((value) {
+     loggedIn = widget.loggedIn;
+     getCurrentUser().then((value) {
       setState(() {
         loading = false;
       });
     });
-   }
-   else{
-    setState(() {
-      loading = false;
-    });
-   }
+   
   /*  }
    else{
     setState(() {
@@ -214,6 +213,9 @@ void handleTimeout() {  // callback function
    }
 
    void finishNavigation(UserVariables variables){
+    setState(() {
+      loggedIn = true;
+    });
      Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           return SelectLobby(variables: variables,);
@@ -232,8 +234,8 @@ void handleTimeout() {  // callback function
                         },
                         ));
         }
-        else if(!widget.loggedIn || widget.email==null ){
-          print(variables.keys); print (' is the keys');
+        else if(!loggedIn && variables.currentUser.uid==null ){
+          print(variables.currentUser.uid); print (' is the uid');
           print(widget.loggedIn); print (' is loggedddd in');
           Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
