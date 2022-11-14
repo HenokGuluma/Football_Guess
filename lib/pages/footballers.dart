@@ -120,26 +120,7 @@ class _FootballersState extends State<Footballers>
   dynamic playerInfotemp;
   bool resetColor = true;
   List<dynamic> playerList = [];
-  Timer _timer;
-  int _start = 3;
-
-void startTimer() {
-  const oneSec = const Duration(milliseconds: 10);
-  _timer = new Timer.periodic(
-    oneSec,
-    (Timer timer) {
-      if (_start == 0) {
-        setState(() {
-          timer.cancel();
-        });
-      } else {
-        setState(() {
-          _start--;
-        });
-      }
-    },
-  );
-}
+  
 
  @override
   void dispose() {

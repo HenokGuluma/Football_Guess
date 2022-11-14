@@ -160,7 +160,7 @@ void handleTimeout() {  // callback function
   primary: false,
   padding: const EdgeInsets.all(5),
   crossAxisSpacing: 0,
-  mainAxisSpacing: 20,
+  mainAxisSpacing: height*0.03,
   crossAxisCount: 2,
   children: <Widget>[
    menuOption(width, height, 0, menuImages),

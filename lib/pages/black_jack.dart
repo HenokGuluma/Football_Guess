@@ -143,16 +143,29 @@ class _BlackJackState extends State<BlackJack>
   List<Widget> drawnCards = [];
   Timer _timer;
   int _start = 3;
+  bool randomizing = false;
+  bool showRandomizing = true;
+   List<int> cards = [];
+   List<Map<String, dynamic>> cardValues = [];
 
-void startTimer() {
+void startTimer(var width, var height) {
   const oneSec = const Duration(milliseconds: 10);
   _timer = new Timer.periodic(
     oneSec,
     (Timer timer) {
       if (_start == 0) {
-        setState(() {
-          timer.cancel();
-        });
+        timer.cancel();
+        cards.add(value);
+        cardValues.add({'value': value, 'type': type});
+          setState(() {
+            showRandomizing = false;
+          });
+          Future.delayed(Duration(milliseconds: 500)).then((value) {
+            setState(() {
+            randomizing = false;
+            showRandomizing = true;
+          });
+          });
       } else {
         print(_start);
         setState(() {
@@ -171,7 +184,7 @@ void startTimer() {
     _animationController.dispose();
     _slideController.dispose();
     _bounceController.dispose();
-    startTimer();
+    // startTimer();
     _timer.cancel();
    
     super.dispose();
@@ -274,12 +287,17 @@ _bounceController.addListener(() {
     }
   }
 
-  void randomize(){
+ void randomize(var width, var height){
+    print('daaum');
     setState(() {
-      _start = 50;
+      timeLeft = 300;
+      randomizing = true;
+      showRandomizing = true;
+      
     });
-  startTimer();
+    startTimer(width, height);
   }
+
 
   void startCountDown(){
     Timer.periodic(Duration(milliseconds: 100), (timer) { 
@@ -520,41 +538,41 @@ void handleTimeout() {  // callback function
             ),
           ),
           Center(
-            child: Container(
-              width: width,
-              height: height,
-              child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
+            
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Container(
-                  height: height*0.15,
+                 SizedBox(
+                  height: height*0.02,
                 ),
-                // cardBack(value, color, type, width, height),
-                card(value, color, type, width, height),
-                Container(
-                  height: height*0.1,
-                ),
-                MaterialButton(
-                  onPressed:(){
-                    randomize();
-                  },
+                Center(
                   child: Container(
-                    width: width*0.5,
-                    height: width*0.1,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      color: Color(0xff00ffff)
-                    ),
-                    child: Center(
-                      child: Text('Randomize', style: TextStyle(color: Colors.black, fontFamily: 'Muli', fontWeight: FontWeight.w900, fontSize: 18),),
-                    ),
-                  ),
-                  ),
-                  SizedBox(
-                    height: height*0.05,
-                  ),
-                   GestureDetector(
+                    height: height*0.3,
+                    child: (showRandomizing?randomizing?card(width, height, {'value': value, 'type': type}, 0):cardBack(width, height):Center()),
+                  )
+                ),
+                SizedBox(
+                  height: height*0.05,
+                ),
+                Container(
+              width: width,
+              height: height*0.3,
+              child: Stack(
+            alignment: Alignment.center,
+              // scrollDirection: Axis.horizontal,
+              children: 
+                cardValues.map((item) {
+                                      return card(width, height, item, cardValues.indexOf(item));
+                                    }).toList()
+              
+        
+          ),
+            ), 
+             SizedBox(
+            height: height*0.05,
+          ),
+             GestureDetector(
             onTap: (){
               Navigator.pop(context);
             },
@@ -569,12 +587,12 @@ void handleTimeout() {  // callback function
                 child: Text('Go Back', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
               ),
             ),
-            ),
-              ],
-            ),
-          
-            ))
-        ],
+            )
+            
+            ])
+          ), 
+         
+          ],
       ));
    }
 
@@ -644,7 +662,7 @@ void handleTimeout() {  // callback function
                 fit: BoxFit.cover
               )
             ),
-            child: card(value, color, type, width, height),
+            child: card( width, height, {}, 0),
           ),
           Container()
         ],
@@ -658,20 +676,20 @@ void handleTimeout() {  // callback function
    Widget symbolLetter(String value, Color color, int type, var width, var height){
     print(typeMap[type]);
     return Container(
-      width: width*0.15,
-      height: width*0.15,
+      width: width*0.1,
+      height: width*0.1,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(value, style: TextStyle(color: color, fontFamily: 'Muli', fontWeight: FontWeight.w900, fontSize: width*0.07),),
-          SvgPicture.asset(typeMap[type],  color: color, width: width*0.05, height: width*0.05,)
+          Text(value, style: TextStyle(color: color, fontFamily: 'Muli', fontWeight: FontWeight.w900, fontSize: width*0.05),),
+          SvgPicture.asset(typeMap[type],  color: color, width: width*0.03, height: width*0.03,)
         ],
       ),
     );
    }
 
-   Widget cardBack(int value, int color, int type, var width, var height){
+   Widget cardBack(var width, var height){
     String cardValue = '';
     Map<int, String> map;
     if (value <1 || value >9){
@@ -684,9 +702,13 @@ void handleTimeout() {  // callback function
 
     print(typeMap[type]); print('babbby');
 
-    return Container(
-      width: width*0.5,
-      height: width*0.8,
+    return GestureDetector(
+         onTap: (){
+        randomize(width, height);
+      },
+      child: Container(
+      width: width*0.35,
+      height: height*0.3,
       decoration: BoxDecoration(
                
                 color: Colors.black,
@@ -742,8 +764,8 @@ void handleTimeout() {  // callback function
          ),
           Center(
             child: Container(
-                width: width*0.3,
-                height: width*0.3,
+                width: width*0.2,
+                height: width*0.2,
                 decoration: BoxDecoration(
                   image: DecorationImage(
                     image: AssetImage('assets/banker-removed.png'),
@@ -788,12 +810,16 @@ void handleTimeout() {  // callback function
           )
         ]
       ),
-    );
-   }
+    )
+  ,
+    ); }
 
 
-   Widget card(int value, int color, int type, var width, var height){
+   Widget card(var width, var height, Map<String, dynamic> item, int index){
     String cardValue = '';
+    var value = item['value'];
+    var color = Colors.black;
+    var type = item['type'];
     Map<int, String> map;
     if (value <1 || value >9){
       cardValue = cardMap[value];
@@ -806,8 +832,8 @@ void handleTimeout() {  // callback function
     print(typeMap[type]); print('babbby');
 
     return Container(
-      width: width*0.5,
-      height: width*0.8,
+      width: width*0.35,
+      height: height*0.3,
       decoration: BoxDecoration(
                
                 color: Colors.black,
@@ -834,7 +860,7 @@ void handleTimeout() {  // callback function
             alignment: Alignment.topLeft,
             child: symbolLetter(cardValue, Colors.black, type, width, height),
           ),
-          SvgPicture.asset(typeMap[type], color: Colors.black, width: width*0.25, height: width*0.25,),
+          SvgPicture.asset(typeMap[type], color: Colors.black, width: width*0.2, height: width*0.2,),
           Align(
              alignment: Alignment.bottomRight,
              child: Transform(
