@@ -71,10 +71,10 @@ class _BoardViewState extends State<BoardView> {
           width: size.width*1.2,
           decoration: BoxDecoration(
              border: Border.all(color: Colors.white),
-             /*  gradient: LinearGradient(
+              gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [luck.color, luck.color.withOpacity(0)]) */),
+                  colors: [luck.color.withOpacity(0.5), luck.color.withOpacity(0)])),
         ),
       ),
     );
@@ -83,7 +83,7 @@ class _BoardViewState extends State<BoardView> {
   Widget displayName(String name, var width){
     return Container(
       width: width*0.2,
-      child: Text(name, style: TextStyle(color: Colors.black, fontFamily: 'Muli', fontSize: 16, fontWeight: FontWeight.w900),)
+      child: Text(name, style: TextStyle(color: Colors.white, fontFamily: 'Muli', fontSize: 16, fontWeight: FontWeight.w900),)
     );
   }
 

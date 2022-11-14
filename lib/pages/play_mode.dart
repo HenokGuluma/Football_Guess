@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ui';
 import 'package:async/async.dart';
 import 'package:animated_check/animated_check.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -41,6 +42,7 @@ class _PlayModeState extends State<PlayMode>
   AnimationController _animationController;
   AnimationController _slideController;
   PageController _pageController;
+  FirebaseFirestore _firestore = FirebaseFirestore.instance;
   Animation _animation;
   bool animate = false;
   bool correctPicked = false;
@@ -108,7 +110,7 @@ void handleTimeout() {  // callback function
     UserVariables variables = Provider.of<UserVariables>(context, listen: false);
     if(currentUser.uid!=null){
       print('kaballllllam');
-      variables.setCurrentUser(currentUser);
+      // variables.setCurrentUser(currentUser);
     }
     else{
       print(' oh noooo');
@@ -116,7 +118,11 @@ void handleTimeout() {  // callback function
      var width = MediaQuery.of(context).size.width;
     var height = MediaQuery.of(context).size.height;
  
-    return Scaffold(
+    return StreamBuilder<DocumentSnapshot>(
+      stream: _firestore.collection('users').doc(widget.uid).snapshots(),
+      builder: (BuildContext context, AsyncSnapshot snapshot){
+        variables.setCurrentUser(User.fromDoc(snapshot.data));
+        return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
         children: [
@@ -197,6 +203,8 @@ void handleTimeout() {  // callback function
         ],
       ));
    
+      }
+      );
    }
 
    bool compare(int first, int second){

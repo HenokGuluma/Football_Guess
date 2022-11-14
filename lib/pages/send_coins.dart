@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
@@ -40,8 +41,10 @@ class SendCoinsState extends State<SendCoins> {
   List<DocumentSnapshot> pendingOrderList = [];
   TextEditingController controller = TextEditingController();
   TextEditingController userController = TextEditingController();
+  bool searched = false;
   bool searching  = false;
   User searchedUser = User();
+  bool transferring = false;
 
   @override
   void initState() {
@@ -59,6 +62,45 @@ class SendCoinsState extends State<SendCoins> {
       
     });
    }
+
+     void showFloatingFlushbar(BuildContext context) {
+    Flushbar(
+      padding: EdgeInsets.all(10),
+      borderRadius: 0,
+      //flushbarPosition: FlushbarPosition.,
+      backgroundGradient: LinearGradient(
+        colors: [Colors.black, Colors.black],
+        stops: [0.6, 1],
+      ),
+      duration: Duration(seconds: 2),
+      dismissDirection: FlushbarDismissDirection.HORIZONTAL,
+      forwardAnimationCurve: Curves.fastLinearToSlowEaseIn,
+      messageText: Center(
+          child: Text(
+        'You do not have enough coins to do the transfer.',
+        style: TextStyle(fontFamily: 'Muli', color: Color(0xff00ffff)),
+      )),
+    )..show(context);
+  }
+   void showFloatingFlushbar2(BuildContext context) {
+    Flushbar(
+      padding: EdgeInsets.all(10),
+      borderRadius: 0,
+      //flushbarPosition: FlushbarPosition.,
+      backgroundGradient: LinearGradient(
+        colors: [Color(0xff00ffff), Color(0xff00ffff)],
+        stops: [0.6, 1],
+      ),
+      duration: Duration(seconds: 2),
+      dismissDirection: FlushbarDismissDirection.HORIZONTAL,
+      forwardAnimationCurve: Curves.fastLinearToSlowEaseIn,
+      messageText: Center(
+          child: Text(
+        'You have successfully transferred the coins.',
+        style: TextStyle(fontFamily: 'Muli', color: Colors.black),
+      )),
+    )..show(context);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -271,11 +313,13 @@ class SendCoinsState extends State<SendCoins> {
             onTap: (){
               setState(() {
                 searching = true;
+                
               });
               _firebaseProvider.getUserById(userController.text).then((user) {
                 setState(() {
                   searchedUser = user;
                   searching = false;
+                  searched = true;
                 });
               });
             },
@@ -324,20 +368,25 @@ class SendCoinsState extends State<SendCoins> {
              ?Container(
               height: height*0.3,
              )
-             :searchedUser.uid ==null
+             :searchedUser.uid ==null 
+          ?searched
           ?Container(
             height: height*0.25,
             child: Center(
             child: Text('No user with that Id', style: TextStyle(color: Colors.white, fontSize: width*0.06, fontFamily: 'Muli', fontWeight: FontWeight.w900), textAlign: TextAlign.center),
                   
           ),
-          ):userItem(width, height, searchedUser),
+          ):Container(
+            height: height*0.25,
+            child: Center(
+            
+          )):userItem(width, height, searchedUser),
                           Container(
                             constraints: BoxConstraints(maxWidth: width*0.3),
                             child: searchedUser.uid==null || controller.text.isEmpty
                             ?MaterialButton(
             onPressed: (){
-             
+            
             },
             child: Container(
               decoration: BoxDecoration(
@@ -350,9 +399,40 @@ class SendCoinsState extends State<SendCoins> {
                 child: Text('Transfer', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
               ),
             ))
+                             :transferring
+                             ?MaterialButton(onPressed: (){
+
+                             },
+                             child: Container(
+              decoration: BoxDecoration(
+                color: Color(0xff888888),
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.4,
+              height: height*0.07,
+              child: Center(
+                child: Text('Transferring...', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            ),
+                             )
                              :MaterialButton(
             onPressed: (){
-             
+              if(widget.variables.currentUser.coins<int.parse(controller.text.toString())){
+              showFloatingFlushbar(context);
+             }
+             else{
+              setState(() {
+                transferring = true;
+              });
+              print(userController.text);
+              _firebaseProvider.sendCoins(widget.variables.currentUser.uid, searchedUser.uid, int.parse(controller.text.toString())).then((value) {
+                setState(() {
+                  transferring = false;
+                });
+                Navigator.pop(context);
+                showFloatingFlushbar2(context);
+              });
+             }
             },
             child: Container(
               decoration: BoxDecoration(

@@ -36,6 +36,7 @@ class BlackJackState extends State<BlackJack> {
   List<String> options = ['Buy Coins', 'Send coins'];
   Map<int, double> optionsMap = {1: 25, 3: 50, 5: 75, 10: 100};
   List<Widget> cardWidget = [];
+  List<int> cards = [];
   double size = 1;
 
   List<bool> balls = [true, true, true, true, true];
@@ -44,8 +45,9 @@ class BlackJackState extends State<BlackJack> {
   Timer _timer;
   int timeLeft = 300;
   int value;
-  Random rng;
+  Random rng = Random();
   bool randomizing = false;
+  bool showRandomizing = true;
 
   @override
   void initState() {
@@ -63,8 +65,17 @@ class BlackJackState extends State<BlackJack> {
       Duration(milliseconds: 10), (timer) {
         if(timeLeft==0){
           _timer.cancel();
-          cardWidget.add(card(width, height, value));
-          randomizing = false;
+          // cardWidget.add(card(width, height, value));
+          cards.add(value);
+          setState(() {
+            showRandomizing = false;
+          });
+          Future.delayed(Duration(milliseconds: 500)).then((value) {
+            setState(() {
+            randomizing = false;
+            showRandomizing = true;
+          });
+          });
         }
         else{
           setState(() {
@@ -75,11 +86,15 @@ class BlackJackState extends State<BlackJack> {
        });
   }
 
-  void randomize(){
+  void randomize(var width, var height){
+    print('daaum');
     setState(() {
       timeLeft = 300;
       randomizing = true;
+      showRandomizing = true;
+      
     });
+    startTimer(width, height);
   }
 
   @override
@@ -117,7 +132,7 @@ class BlackJackState extends State<BlackJack> {
         backgroundColor: Color(0xffe1e1e1),
         body:  Center(
             child: Container(
-              
+              height: height,
               decoration: BoxDecoration(
                 image: DecorationImage(
                   image: AssetImage('assets/coin-background.png'),
@@ -125,53 +140,92 @@ class BlackJackState extends State<BlackJack> {
                 )
               ),
           width: width,
-          child: ListView(
-              scrollDirection: Axis.horizontal,
+          child: Center(
+            
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                 SizedBox(
+                  height: height*0.02,
+                ),
+                Center(
+                  child: Container(
+                    height: height*0.3,
+                    child: (showRandomizing?randomizing?card(width, height, value, 0):cardBack(width, height, value):Center()),
+                  )
+                ),
+                SizedBox(
+                  height: height*0.05,
+                ),
+                Container(
+              width: width,
+              height: height*0.3,
+              child: Stack(
+            alignment: Alignment.center,
+              // scrollDirection: Axis.horizontal,
               children: 
-                cardWidget.map((item) {
-                                      return item;
-                                    }).toList() + [(randomizing?card(width, height, value):cardBack(width, height, value))]
+                cards.map((item) {
+                                      return card(width, height, item, cards.indexOf(item));
+                                    }).toList()
               
         
+          ),
+            ), 
+            
+            ])
           ))));
   }
 
-  Widget card(var width, var height, int value){
-    return Container(
-      width: width*0.25*size,
-      height: height*0.25*size,
+  Widget card(var width, var height, int value, int index){
+    return Padding(
+      padding: EdgeInsets.only(left: index*width*0.12),
+      child: GestureDetector(
+      onTap: (){
+
+      },
+      child: Container(
+      width: width*0.4*size,
+      height: height*0.3*size,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.black),
         color: Colors.white,
          boxShadow: [BoxShadow(
             color: Color(0xffffffff),
-            blurRadius: width*0.02,
-            spreadRadius: width*0.02
+            blurRadius: width*0.01,
+            spreadRadius: width*0.01
           )],
       ),
       child: Center(
         child: Text(value.toString(), style: TextStyle(color: Colors.black, fontFamily: 'Muli', fontSize: 45, fontWeight: FontWeight.w900)),
       ),
-    );
-  }
+    ),
+    )
+  ,
+    );}
 
    Widget cardBack(var width, var height, int value){
-    return Container(
-      width: width*0.25*size,
-      height: height*0.25*size,
+    return MaterialButton(
+      onPressed: (){
+        if(cardWidget.length >1){
+         
+        }
+        randomize(width, height);
+      },
+      child: Container(
+      width: width*0.4*size,
+      height: height*0.3*size,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         color: Colors.brown,
-         boxShadow: [BoxShadow(
-            color: Colors.brown,
-            blurRadius: width*0.02,
-            spreadRadius: width*0.02
-          )],
+        
       ),
       child: Center(
         child: Text('Randomize', style: TextStyle(color: Colors.white, fontFamily: 'Muli', fontSize: 18, fontWeight: FontWeight.w900)),
       ),
-    );
+    ),
+      );
   }
 
      Widget menuOption(var width, var height, int index, List<String> images, UserVariables variables){
