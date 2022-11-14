@@ -120,6 +120,26 @@ class _FootballersState extends State<Footballers>
   dynamic playerInfotemp;
   bool resetColor = true;
   List<dynamic> playerList = [];
+  Timer _timer;
+  int _start = 3;
+
+void startTimer() {
+  const oneSec = const Duration(milliseconds: 10);
+  _timer = new Timer.periodic(
+    oneSec,
+    (Timer timer) {
+      if (_start == 0) {
+        setState(() {
+          timer.cancel();
+        });
+      } else {
+        setState(() {
+          _start--;
+        });
+      }
+    },
+  );
+}
 
  @override
   void dispose() {
@@ -209,7 +229,7 @@ _bounceController.addListener(() {
       setState(() {
       retrievingWinner = true;
     });
-   Future.delayed(Duration(seconds: 10)).then((value) {
+   Future.delayed(Duration(seconds: 6)).then((value) {
      _firebaseProvider.getLobbyWinner(widget.lobbyId).then((lobbyWinner) {
       if(lobbyWinner!=null){
         setState(() {
@@ -379,7 +399,7 @@ _bounceController.addListener(() {
 
       // print(timeLeft/resetValue); print (' is the timer');
 
-       if(!gotWinner && playerAmount<1){
+       if(!gotWinner && playerAmount<1 && !disposed){
         print('baaaam');
         getWinner().then((value) {
           setState(() {
@@ -389,7 +409,7 @@ _bounceController.addListener(() {
         });
       }
 
-      if(setupPlayers && playerInfotemp!=null){
+      if(setupPlayers && playerInfotemp!=null && !disposed){
         List<dynamic> list =  playerInfotemp.entries.map( (entry) => entry.value).toList();
         setState(() {
           playerList = list;
@@ -427,7 +447,7 @@ void handleTimeout() {  // callback function
         stopGame();
        }
         }
-        Future.delayed(Duration(seconds: 5)).then((value) {
+        Future.delayed(Duration(seconds: 3)).then((value) {
           setState(() {
             defeated = true;
             
@@ -2033,7 +2053,7 @@ void handleTimeout() {  // callback function
                               ),
                               new TextButton(
                                 onPressed: () {
-                                  _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
+                                  // _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
                                   Navigator.pop(context);
                                  _bounceController.reset();
                   _animationController.reset();
@@ -2550,7 +2570,7 @@ void handleTimeout() {  // callback function
           setState(() {
             correctPicked = true;
             currentPage = currentPage+1;
-             _colorController = AnimationController(duration: Duration(seconds: resetValue.toInt()), vsync: this);
+             _colorController = AnimationController(duration: Duration(seconds: (resetValue+0.2).toInt()), vsync: this);
            colorAnimation = ColorTween(begin: Color(0xff63ff00), end: Color(0xffff2389)).animate(_colorController)
           ..addListener(() {
             setState(() {
@@ -2607,7 +2627,7 @@ void handleTimeout() {  // callback function
     });
     }
         });
-        Future.delayed(Duration(seconds: 5)).then((value) {
+        Future.delayed(Duration(seconds: 3)).then((value) {
           setState(() {
             defeated = true;
             

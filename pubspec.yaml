@@ -126,9 +126,13 @@ flutter:
     - assets/send-coins.png
     - assets/banker-removed.png
     - assets/banker.png
-    - assets/blackjack_backgroud.png
-    - assets/blackjack_option.png
+    - assets/blackjack_wallpaper.png
+    - assets/blackjack-option.png
     - assets/rapidBall.png
+    - assets/clubs.svg
+    - assets/spade.svg
+    - assets/diamond.svg
+    - assets/heart_fill.svg
 
 
   fonts:

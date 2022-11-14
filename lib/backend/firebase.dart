@@ -222,7 +222,8 @@ Future<User> fetchUserDetailsById(String uid) async {
   }
 
   Future<void> submitUserScore(User user, String lobbyId, int score) async{
-    await _firestore.collection('lobbies').doc(lobbyId).collection('playerScores').doc(user.uid).set({'userId': user.uid, 'score': score, 'userName': user.userName });
+    var currentTime = DateTime.now().millisecondsSinceEpoch;
+    await _firestore.collection('lobbies').doc(lobbyId).collection('playerScores').doc(user.uid).set({'userId': user.uid, 'score': score, 'userName': user.userName, 'time': currentTime });
   }
 
   Future<DocumentSnapshot> getLobbyWinner(String lobbyId) async{
@@ -246,6 +247,11 @@ Future<User> fetchUserDetailsById(String uid) async {
   }
 
   Future<void> startLobbyGame (String userId, String lobbyId) async{
+    await _firestore.collection('lobbies').doc(lobbyId).collection('playerScores').get().then((documentList) {
+      for (DocumentSnapshot ds in documentList.docs){
+        ds.reference.delete();
+      }
+    });
     Map<String, dynamic> updateMap = {'active': true};
     await _firestore.collection('lobbies').doc(lobbyId).update(updateMap);
   }

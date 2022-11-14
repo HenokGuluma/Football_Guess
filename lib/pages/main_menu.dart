@@ -8,6 +8,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:instagram_clone/backend/firebase.dart';
 import 'package:instagram_clone/main.dart';
+import 'package:instagram_clone/models/user.dart';
 import 'package:instagram_clone/pages/black_jack.dart';
 import 'package:instagram_clone/pages/buy_coins.dart';
 import 'package:instagram_clone/pages/football_menu.dart';
@@ -17,10 +18,15 @@ import 'package:instagram_clone/pages/send_coins.dart';
 
 
 class GameMenu extends StatefulWidget {
-  final UserVariables variables;
   bool creating;
+  String uid;
+  String name;
+  String rate;
+  User thisUser;
+  UserVariables variables;
 
-  GameMenu({this.variables, this.creating});
+
+  GameMenu({this.creating, this.uid, this.name, this.rate, this.thisUser, this.variables});
 
   @override
   GameMenuState createState() => GameMenuState();
@@ -33,8 +39,8 @@ class GameMenuState extends State<GameMenu> {
   FirebaseProvider _firebaseProvider = FirebaseProvider();
   bool like;
   int counter = 0;
-  List<String> modes = ['assets/rapidBall.png', 'assets/blackjack_option.png'];
-  List<String> options = ['RapidBall', 'Send coins'];
+  List<String> modes = ['assets/rapidBall.png', 'assets/blackjack-option.png'];
+  List<String> options = ['RapidBall', 'Black Jack'];
   Map<int, double> optionsMap = {1: 25, 3: 50, 5: 75, 10: 100};
 
   List<bool> balls = [true, true, true, true, true];
@@ -83,7 +89,7 @@ class GameMenuState extends State<GameMenu> {
               height: height*0.05,
             ),
             Text(
-                'Pick a Game Mode', style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 35, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
+                'Pick a Game Category', style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 35, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
               ),
             SizedBox(
               height: height*0.05,
@@ -99,13 +105,32 @@ class GameMenuState extends State<GameMenu> {
             ) */
           Container(
             width: width,
-            height: height*0.6,
+            height: height*0.75,
             child:  ListView(
   padding: const EdgeInsets.all(5),
   children: <Widget>[
    menuOption(width, height, 0, modes, widget.variables),
    SizedBox(height: height*0.08,),
    menuOption(width, height, 1, modes, widget.variables),
+   SizedBox(height: height*0.08,),
+   Center(
+    child: GestureDetector(
+            onTap: (){
+              Navigator.pop(context);
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.3,
+              height: height*0.06,
+              child: Center(
+                child: Text('Go Back', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            ),
+            ),
+   )
   ],
 ),
           )
@@ -134,7 +159,14 @@ class GameMenuState extends State<GameMenu> {
           Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           // return LobbyMenu();
-                          return FootBallMenu(variables: variables, creating: widget.creating);
+                          return FootBallMenu(
+                            creating: widget.creating,
+                            uid: widget.uid,
+                            name: widget.name,
+                            rate: widget.rate,
+                            thisUser: widget.variables.currentUser,
+                            variables: widget.variables,
+                          );
                         },
                         ));
         }

@@ -11,6 +11,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_countdown_timer/flutter_countdown_timer.dart';
 import 'package:flutter_spinning_wheel/src/utils.dart';
 import 'package:flutter_countdown_timer/countdown.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:instagram_clone/backend/firebase.dart';
 import 'package:instagram_clone/main.dart';
 import 'package:progress_indicators/progress_indicators.dart';
@@ -51,6 +52,20 @@ class _BlackJackState extends State<BlackJack>
     'willSmith', 'ruthaBG89'
   ];
 
+  Map<int, dynamic> cardMap = {
+    0: 'A', 10: 'J', 11: 'Q', 12: 'K'
+  };
+
+  Map<int, Color> colorMap = {
+    0: Color(0xffffffff), 1: Color(0xfffffff)
+  };
+
+  Map<int, String> typeMap = {
+    0: 'assets/spade.svg', 1: 'assets/clubs.svg',  2: 'assets/heart_fill.svg', 3: 'diamond.svg'
+  };
+
+ 
+
   List<String> categories = ['Jersey No.', 'Goals', 'Age', 'Height'];
   List<String> categoryId = ['jersey', 'goals', 'age', 'height'];
 
@@ -81,6 +96,10 @@ class _BlackJackState extends State<BlackJack>
   ];
 
   List<String> menuImages = ['assets/football2.jpg', 'assets/football3.jpg','assets/football4.jpg',  'assets/football1.png'];
+
+  int value;
+  int color;
+  int type;
 
   AnimationController _animationController;
   AnimationController _slideController;
@@ -114,12 +133,37 @@ class _BlackJackState extends State<BlackJack>
   bool retrievingWinner = false;
   bool shouldGetWinner = false;
   bool gotWinner = false;
+    var rng = Random();
   int playerAmount = 0;
   bool setupPlayers = true;
   dynamic playerInfos;
   dynamic playerInfotemp;
   bool resetColor = true;
   List<dynamic> playerList = [];
+  List<Widget> drawnCards = [];
+  Timer _timer;
+  int _start = 3;
+
+void startTimer() {
+  const oneSec = const Duration(milliseconds: 10);
+  _timer = new Timer.periodic(
+    oneSec,
+    (Timer timer) {
+      if (_start == 0) {
+        setState(() {
+          timer.cancel();
+        });
+      } else {
+        print(_start);
+        setState(() {
+          _start--;
+          value = rng.nextInt(13);
+          type = rng.nextInt(4);
+        });
+      }
+    },
+  );
+}
 
  @override
   void dispose() {
@@ -127,6 +171,8 @@ class _BlackJackState extends State<BlackJack>
     _animationController.dispose();
     _slideController.dispose();
     _bounceController.dispose();
+    startTimer();
+    _timer.cancel();
    
     super.dispose();
   }
@@ -134,8 +180,11 @@ class _BlackJackState extends State<BlackJack>
 
   @override
   void initState() {
-    
-    _navigator = Navigator.of(context);
+  
+    value = rng.nextInt(12);
+    color = rng.nextInt(2);
+    type = rng.nextInt(4);
+   /*  _navigator = Navigator.of(context);
     _pageController = PageController(initialPage: currentPage, viewportFraction: 1);
     _animationController = AnimationController(vsync: this, duration: Duration(milliseconds: 500));
     _colorController = AnimationController(duration: Duration(seconds: 13), vsync: this);
@@ -149,11 +198,11 @@ class _BlackJackState extends State<BlackJack>
         setState(() {});
       });
       // _slideController.reset(); _colorController.reset();
-    _slideController.repeat(reverse: false);
+    _slideController.repeat(reverse: false); */
 
     super.initState();
 
-    _colorController.repeat(reverse: false);
+    /* _colorController.repeat(reverse: false);
     
     _animationController.repeat(reverse: true);
     // _animationController.reset();
@@ -195,11 +244,11 @@ _bounceController.addListener(() {
         setState(() {
           startDown = true;
         });
-      }
-    
+      } */
+   /*  
    startCountDown();
    startGamePlayCountDown();
-    startSecondCountDown();
+    startSecondCountDown(); */
     // scheduleTimeout(second * 1000);
     
   }
@@ -223,6 +272,13 @@ _bounceController.addListener(() {
     else{
 
     }
+  }
+
+  void randomize(){
+    setState(() {
+      _start = 50;
+    });
+  startTimer();
   }
 
   void startCountDown(){
@@ -443,43 +499,12 @@ void handleTimeout() {  // callback function
  
     return WillPopScope(
     onWillPop: () async => false,
-    child: !widget.solo
-    ?StreamBuilder<DocumentSnapshot>(
-      stream: _firestore
-          .collection("lobbies").doc(widget.lobbyId).snapshots(),
-      builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-        
-        if(snapshot.hasData){
-          playerAmount = snapshot.data['players'].length;
-          playerInfotemp = snapshot.data['playerInfo'];
-          if(snapshot.data['players'].length<2){
-            lastPlayer = true;
-             
-          }
-          else if(snapshot.data['players'].length <1){
-            shouldGetWinner = true;
-          }
-
-          if(snapshot.data['active']){
-             startDown = true;
-            
-          }
-           
-          else{
-             startDown = false;
-            
-          }
-        }
-        else{
-         
-        }
-        return gameScreen(width, height, snapshot);})
-        :gameScreenSolo(width, height)
+    child: gameScreen(width, height)
         );
    
    }
 
-   Widget gameScreen(var width, var height, AsyncSnapshot<DocumentSnapshot> snapshot){
+   Widget gameScreen(var width, var height){
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
@@ -489,12 +514,66 @@ void handleTimeout() {  // callback function
             height: height,
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: AssetImage('assets/blackjack_background.png'),
+                image: AssetImage('assets/blackjack_wallpaper.png'),
                 fit: BoxFit.cover
               )
             ),
           ),
-          Container()
+          Center(
+            child: Container(
+              width: width,
+              height: height,
+              child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  height: height*0.15,
+                ),
+                // cardBack(value, color, type, width, height),
+                card(value, color, type, width, height),
+                Container(
+                  height: height*0.1,
+                ),
+                MaterialButton(
+                  onPressed:(){
+                    randomize();
+                  },
+                  child: Container(
+                    width: width*0.5,
+                    height: width*0.1,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: Color(0xff00ffff)
+                    ),
+                    child: Center(
+                      child: Text('Randomize', style: TextStyle(color: Colors.black, fontFamily: 'Muli', fontWeight: FontWeight.w900, fontSize: 18),),
+                    ),
+                  ),
+                  ),
+                  SizedBox(
+                    height: height*0.05,
+                  ),
+                   GestureDetector(
+            onTap: (){
+              Navigator.pop(context);
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.3,
+              height: height*0.06,
+              child: Center(
+                child: Text('Go Back', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            ),
+            ),
+              ],
+            ),
+          
+            ))
         ],
       ));
    }
@@ -565,6 +644,7 @@ void handleTimeout() {  // callback function
                 fit: BoxFit.cover
               )
             ),
+            child: card(value, color, type, width, height),
           ),
           Container()
         ],
@@ -573,6 +653,202 @@ void handleTimeout() {  // callback function
 
    bool compare(var first, var second){
     return first>second;
+   }
+
+   Widget symbolLetter(String value, Color color, int type, var width, var height){
+    print(typeMap[type]);
+    return Container(
+      width: width*0.15,
+      height: width*0.15,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(value, style: TextStyle(color: color, fontFamily: 'Muli', fontWeight: FontWeight.w900, fontSize: width*0.07),),
+          SvgPicture.asset(typeMap[type],  color: color, width: width*0.05, height: width*0.05,)
+        ],
+      ),
+    );
+   }
+
+   Widget cardBack(int value, int color, int type, var width, var height){
+    String cardValue = '';
+    Map<int, String> map;
+    if (value <1 || value >9){
+      cardValue = cardMap[value];
+    }
+    else{
+      cardValue = (value+1).toString();
+    }
+
+
+    print(typeMap[type]); print('babbby');
+
+    return Container(
+      width: width*0.5,
+      height: width*0.8,
+      decoration: BoxDecoration(
+               
+                color: Colors.black,
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  stops: [0.0, 0.5, 1.0],
+                  colors: [Colors.black, Color(0xff180018), Color(0xff300030)]
+                ),
+                 boxShadow: [BoxShadow(
+            color: Colors.white,
+            blurRadius: 3,
+            spreadRadius: 3
+          )],
+          borderRadius: BorderRadius.circular(20)
+              ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          SizedBox(
+            height: width*0.01,
+          ),
+         Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Padding(
+              padding: EdgeInsets.only(left: width*0.02),
+              child: Container(
+                width: width*0.08,
+                height: width*0.08,
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage('assets/banker-removed.png'),
+                    fit: BoxFit.cover
+                  )
+                ),
+              ),
+              ),
+              Padding(
+              padding: EdgeInsets.only(right: width*0.02),
+              child: Container(
+                width: width*0.08,
+                height: width*0.08,
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage('assets/banker-removed.png'),
+                    fit: BoxFit.cover
+                  )
+                ),
+              ),
+              ),
+          ],
+         ),
+          Center(
+            child: Container(
+                width: width*0.3,
+                height: width*0.3,
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage('assets/banker-removed.png'),
+                    fit: BoxFit.cover
+                  )
+                ),
+              ),
+          ),
+          Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Padding(
+              padding: EdgeInsets.only(left: width*0.02),
+              child: Container(
+                width: width*0.08,
+                height: width*0.08,
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage('assets/banker-removed.png'),
+                    fit: BoxFit.cover
+                  )
+                ),
+              ),
+              ),
+              Padding(
+              padding: EdgeInsets.only(right: width*0.02),
+              child: Container(
+                width: width*0.08,
+                height: width*0.08,
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage('assets/banker-removed.png'),
+                    fit: BoxFit.cover
+                  )
+                ),
+              ),
+              ),
+          ],
+         ),
+          SizedBox(
+            height: width*0.01,
+          )
+        ]
+      ),
+    );
+   }
+
+
+   Widget card(int value, int color, int type, var width, var height){
+    String cardValue = '';
+    Map<int, String> map;
+    if (value <1 || value >9){
+      cardValue = cardMap[value];
+    }
+    else{
+      cardValue = (value+1).toString();
+    }
+
+
+    print(typeMap[type]); print('babbby');
+
+    return Container(
+      width: width*0.5,
+      height: width*0.8,
+      decoration: BoxDecoration(
+               
+                color: Colors.black,
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  stops: [0.0, 0.5, 1.0],
+                  colors: [Colors.white, Color(0xffe2ffff), Color(0xffbbffff)]
+                ),
+                 boxShadow: [BoxShadow(
+            color: Colors.white,
+            blurRadius: 3,
+            spreadRadius: 3
+          )],
+          borderRadius: BorderRadius.circular(20)
+              ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          SizedBox(
+            height: width*0.01,
+          ),
+          Align(
+            alignment: Alignment.topLeft,
+            child: symbolLetter(cardValue, Colors.black, type, width, height),
+          ),
+          SvgPicture.asset(typeMap[type], color: Colors.black, width: width*0.25, height: width*0.25,),
+          Align(
+             alignment: Alignment.bottomRight,
+             child: Transform(
+              alignment: Alignment.center,
+              transform: Matrix4.rotationZ(pi),
+              child: symbolLetter(cardValue, Colors.black, type, width, height),
+             ),
+          ),
+          SizedBox(
+            height: width*0.01,
+          )
+        ]
+      ),
+    );
    }
 
    Widget winnerWidget(var width, var height, DocumentSnapshot winner){
