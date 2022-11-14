@@ -23,7 +23,7 @@ class _BoardViewState extends State<BoardView> {
   Size get size => Size(MediaQuery.of(context).size.width * 0.8,
       MediaQuery.of(context).size.width * 0.8);
 
-  double _rotote(int index) => (index / widget.items.length) * 2 * pi;
+  double _rotote(int index) => ((index / widget.items.length) * 2 * pi);
 
   @override
   Widget build(BuildContext context) {
@@ -32,11 +32,13 @@ class _BoardViewState extends State<BoardView> {
       children: <Widget>[
         //shadow
         Container(
-          height: size.height,
-          width: size.width,
+          height: size.height*1.2,
+          width: size.width*1.2,
           decoration: BoxDecoration(
               shape: BoxShape.circle,
-              boxShadow: [BoxShadow(blurRadius: 20, color: Colors.black38)]),
+               border: Border.all(color: Colors.white),
+              // boxShadow: [BoxShadow(blurRadius: 20, color: Colors.black38)]
+              ),
         ),
         Transform.rotate(
           angle: -(widget.current + widget.angle) * 2 * pi,
@@ -65,15 +67,23 @@ class _BoardViewState extends State<BoardView> {
       child: ClipPath(
         clipper: _LuckPath(_angle),
         child: Container(
-          height: size.height,
-          width: size.width,
+          height: size.height*1.2,
+          width: size.width*1.2,
           decoration: BoxDecoration(
-              gradient: LinearGradient(
+             border: Border.all(color: Colors.white),
+             /*  gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [luck.color, luck.color.withOpacity(0)])),
+                  colors: [luck.color, luck.color.withOpacity(0)]) */),
         ),
       ),
+    );
+  }
+
+  Widget displayName(String name, var width){
+    return Container(
+      width: width*0.2,
+      child: Text(name, style: TextStyle(color: Colors.black, fontFamily: 'Muli', fontSize: 16, fontWeight: FontWeight.w900),)
     );
   }
 
@@ -87,8 +97,15 @@ class _BoardViewState extends State<BoardView> {
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
           constraints:
-              BoxConstraints.expand(height: size.height / 3, width: 44),
-          child: Image.asset(luck.asset),
+              BoxConstraints.expand(height: size.height / 3, width: size.width*0.7),
+          child: Container(
+            
+            child: Transform(
+            transform: Matrix4.rotationZ((-pi/2)),
+            alignment: Alignment.topCenter,
+            child: Transform.translate(offset: Offset( 0, -size.height*0.03), child: displayName(luck.asset, size.width)),)
+          )
+          // Image.asset(luck.asset),
         ),
       ),
     );

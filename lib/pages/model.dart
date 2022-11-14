@@ -8,5 +8,5 @@ class Luck{
   Luck(this.image, this.color);
 
 
-  String get asset =>  "asset/image/$image.png";
+  String get asset =>  image;
 }

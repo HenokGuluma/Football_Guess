@@ -89,10 +89,7 @@ void handleTimeout() {  // callback function
       print(widget.email); print('Emmmmail');
     //  auth.User thisUser = await _firebaseProvider.getCurrentUser();
    await Future.delayed(Duration(seconds: 2));
-    User user = await _firebaseProvider.fetchUserDetailsById(widget.uid);
-    setState(() {
-      currentUser = user;
-    });
+   
      if(widget.loggedIn){
       User user = await _firebaseProvider.fetchUserDetailsById(widget.uid);
     setState(() {

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:instagram_clone/backend/firebase.dart';
 import 'package:instagram_clone/main.dart';
 import 'package:instagram_clone/pages/lobby_menu.dart';
+import 'package:instagram_clone/pages/select_lobby.dart';
 import 'package:instagram_clone/pages/setup_profile.dart';
 import 'package:progress_indicators/progress_indicators.dart';
 
@@ -198,7 +199,7 @@ class _LoginScreenState extends State<LoginScreen> {
         print(widget.variables.keys);
         Navigator.pushReplacement(context,
             MaterialPageRoute(builder: (context) {
-              return LobbyMenu(variables: widget.variables,);
+              return SelectLobby(variables: widget.variables,);
         }));
       }
     });
