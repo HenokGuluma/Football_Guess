@@ -15,6 +15,7 @@ import 'package:instagram_clone/models/user.dart';
 import 'package:instagram_clone/pages/buy_coins.dart';
 import 'package:instagram_clone/pages/coin_wallet.dart';
 import 'package:instagram_clone/pages/edit_profile_screen.dart';
+import 'package:instagram_clone/pages/spinning_wheel.dart';
 import 'package:progress_indicators/progress_indicators.dart';
 import 'package:progressive_image/progressive_image.dart';
 import 'package:provider/provider.dart';
@@ -228,6 +229,16 @@ class _InstaProfileScreenState extends State<InstaProfileScreen>
                   context,
                   MaterialPageRoute(
                       builder: ((context) => CoinWallet(variables: widget.variables))));
+            },
+          ),
+
+            GestureDetector(
+            child: ProfileButtons('Spinning Wheel', width, height),
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: ((context) => SpinningBaby())));
             },
           ),
 
