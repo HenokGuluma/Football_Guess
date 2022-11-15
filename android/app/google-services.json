@@ -14,11 +14,43 @@
       },
       "oauth_client": [
         {
+          "client_id": "684932941572-4f8gi3mg6ce58k9dvvus1kkcq27b76n1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.letsBet.eth",
+            "certificate_hash": "7e1cdabf92bf79f65b149cbb31300eb7e31a3ad8"
+          }
+        },
+        {
+          "client_id": "684932941572-brk9g7f4228qhffpta017cng6r6euf45.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.letsBet.eth",
+            "certificate_hash": "0f43ef960d338fda29734abdb5065b4d97c41da1"
+          }
+        },
+        {
+          "client_id": "684932941572-jmsd4fjntljoh2o4r6pilaq3grk0056j.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.letsBet.eth",
+            "certificate_hash": "2f782973257f93f402f7a3e882e215370722d84f"
+          }
+        },
+        {
           "client_id": "684932941572-mjtam1tnrmsopgs4m9u3r4v4dirs2cah.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.letsBet.eth",
             "certificate_hash": "639aad5c2a72a7a56ada9b9f2a0eddb7dbe362e3"
+          }
+        },
+        {
+          "client_id": "684932941572-pfakhmha8hm90pg37hmnak2jchmach52.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.letsBet.eth",
+            "certificate_hash": "c2793081b7d57dab0506eb805aa16fa4c4cfd906"
           }
         },
         {

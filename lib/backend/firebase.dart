@@ -139,9 +139,15 @@ class FirebaseProvider {
   }
 
 Future<User> fetchUserDetailsById(String uid) async {
-    DocumentSnapshot documentSnapshot =
+  if(uid!=null){
+     DocumentSnapshot documentSnapshot =
         await _firestore.collection("users").doc(uid).get();
-    return User.fromMap(documentSnapshot.data());
+        if(documentSnapshot.data().isNotEmpty){
+          return User.fromMap(documentSnapshot.data());
+        }
+  }
+   return User();
+    
   }
 
   Future<Lobby> getLobbyById(String lobbyId) async{
@@ -215,16 +221,17 @@ Future<User> fetchUserDetailsById(String uid) async {
       playerList.add(user.uid);
       playerInfo[user.uid] = user.toMap(user);
     }
-    Map<String, dynamic> updateMap = {'players': playerList};
+    Map<String, dynamic> updateMap = {'players': playerList, 'playerInfo': playerInfo};
     await _firestore.collection('lobbies').doc(lobbyId).update(updateMap);
   }
 
   Future<void> submitUserScore(User user, String lobbyId, int score) async{
-    await _firestore.collection('lobbies').doc(lobbyId).collection('playerScores').doc(user.uid).set({'userId': user.uid, 'score': score, 'userName': user.userName });
+    var currentTime = DateTime.now().millisecondsSinceEpoch;
+    await _firestore.collection('lobbies').doc(lobbyId).collection('playerScores').doc(user.uid).set({'userId': user.uid, 'score': score, 'userName': user.userName, 'time': currentTime });
   }
 
   Future<DocumentSnapshot> getLobbyWinner(String lobbyId) async{
-    QuerySnapshot snapshot = await _firestore.collection('lobbies').doc(lobbyId).collection('playerScores').orderBy('score').limit(1).get();
+    QuerySnapshot snapshot = await _firestore.collection('lobbies').doc(lobbyId).collection('playerScores').orderBy('score', descending: true).limit(1).get();
     return snapshot.docs[0];
   }
 
@@ -244,6 +251,11 @@ Future<User> fetchUserDetailsById(String uid) async {
   }
 
   Future<void> startLobbyGame (String userId, String lobbyId) async{
+    await _firestore.collection('lobbies').doc(lobbyId).collection('playerScores').get().then((documentList) {
+      for (DocumentSnapshot ds in documentList.docs){
+        ds.reference.delete();
+      }
+    });
     Map<String, dynamic> updateMap = {'active': true};
     await _firestore.collection('lobbies').doc(lobbyId).update(updateMap);
   }

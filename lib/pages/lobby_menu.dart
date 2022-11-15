@@ -326,7 +326,7 @@ void handleTimeout() {  // callback function
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 image: DecorationImage(
-                  image: AssetImage('assets/bankeru_blue.png'),
+                  image: AssetImage('assets/banker.png'),
                   fit: BoxFit.cover
                 ),
                  boxShadow: [BoxShadow(

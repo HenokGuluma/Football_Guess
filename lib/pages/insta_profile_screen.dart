@@ -232,6 +232,16 @@ class _InstaProfileScreenState extends State<InstaProfileScreen>
                       builder: ((context) => CoinWallet(variables: widget.variables))));
             },
           ),
+           GestureDetector(
+            child: ProfileButtons('Spinning Wheel', width, height),
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: ((context) => SpinningBaby())));
+            },
+          ),
+          
 
             GestureDetector(
             child: ProfileButtons('Spinning Wheel', width, height),

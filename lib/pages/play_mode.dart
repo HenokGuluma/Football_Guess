@@ -17,6 +17,7 @@ import 'package:instagram_clone/pages/football_menu.dart';
 import 'package:instagram_clone/pages/footballers.dart';
 import 'package:instagram_clone/pages/lobby_menu.dart';
 import 'package:instagram_clone/pages/login_screen.dart';
+import 'package:instagram_clone/pages/main_menu.dart';
 import 'package:instagram_clone/pages/select_lobby.dart';
 import 'package:instagram_clone/pages/setup_profile.dart';
 import 'package:progress_indicators/progress_indicators.dart';
@@ -35,7 +36,7 @@ class PlayMode extends StatefulWidget {
 }
 
 class _PlayModeState extends State<PlayMode>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   List<String> modes = ['assets/group.jpg', 'assets/solo.jpg'];
   List<String> options = ['Squad-Mode', 'Solo-Mode'];
   FirebaseProvider _firebaseProvider = FirebaseProvider();
@@ -44,6 +45,7 @@ class _PlayModeState extends State<PlayMode>
   PageController _pageController;
   FirebaseFirestore _firestore = FirebaseFirestore.instance;
   Animation _animation;
+  bool loggedIn;
   bool animate = false;
   bool correctPicked = false;
   int currentPage = 0;
@@ -58,15 +60,20 @@ class _PlayModeState extends State<PlayMode>
   User currentUser = User();
   bool loading = true;
   
+
+  @override
+  bool get wantKeepAlive => true;
   
   @override
   void initState() {
     super.initState();
+     loggedIn = widget.loggedIn;
      getCurrentUser().then((value) {
       setState(() {
         loading = false;
       });
     });
+   
   /*  }
    else{
     setState(() {
@@ -157,7 +164,8 @@ void handleTimeout() {  // callback function
               ],
             )
           )
-          :Container(
+          :
+          Container(
         width: width,
         height: height,
         child: Column(
@@ -212,6 +220,9 @@ void handleTimeout() {  // callback function
    }
 
    void finishNavigation(UserVariables variables){
+    setState(() {
+      loggedIn = true;
+    });
      Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           return SelectLobby(variables: variables,);
@@ -226,12 +237,12 @@ void handleTimeout() {  // callback function
             Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           // return LobbyMenu();
-                          return FootBallMenu(creating: false,);
+                          return GameMenu(variables: variables, creating: false,);
                         },
                         ));
         }
-        else if(!widget.loggedIn || widget.email==null ){
-          print(variables.keys); print (' is the keys');
+        else if(!loggedIn && variables.currentUser.uid==null ){
+          print(variables.currentUser.uid); print (' is the uid');
           print(widget.loggedIn); print (' is loggedddd in');
           Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
