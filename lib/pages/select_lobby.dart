@@ -187,10 +187,32 @@ void handleTimeout() {  // callback function
             ),
             Stack(
               children: [
-                Align(
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                     GestureDetector(
+            onTap: (){
+              Navigator.pop(context);
+            },
+            child: Padding(
+              padding: EdgeInsets.only(left: 20),
+              child: Container(
+              
+              decoration: BoxDecoration(
+                color: Color(0xffff2389),
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.2,
+              height: width*0.08,
+              child: Center(
+                child: Text('Back', style: TextStyle(color: Colors.white, fontSize: 16, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              )),
+            ),
+            ),
+            Align(
               alignment: Alignment.topRight,
               child: Padding(
-                padding: EdgeInsets.only(top: 10),
+                padding: EdgeInsets.only( right: 20),
                 child: IconButton(
                 onPressed: (){
                   FocusScope.of(context).unfocus();
@@ -218,7 +240,10 @@ void handleTimeout() {  // callback function
                 ),
               )),
             ),
-           Padding(
+           
+                  ],
+                ),
+                Padding(
             padding: EdgeInsets.only(top: height*0.1),
             child:  Center(
               child: Text(
@@ -388,8 +413,8 @@ void handleTimeout() {  // callback function
                         ));
             },
             child:Container(
-            width: width*0.4,
-            height: width*0.4,
+            width: width*0.45,
+            height: width*0.45,
             child: Column(
               children: [
                 Container(
@@ -398,15 +423,15 @@ void handleTimeout() {  // callback function
                     width: width*0.2,
                     child: Text('Public Lobbies', style: TextStyle(color: Color(0xff00ffff), fontSize: width*0.06, fontFamily: 'Muli', fontWeight: FontWeight.w900), textAlign: TextAlign.center),
                   )),
-              width: width*0.35*(pow(size, 0.5)),
-              height: width*0.35*pow(size, 0.5),
+              width: width*0.4*(pow(size, 0.5)),
+              height: width*0.4*pow(size, 0.5),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: Colors.black,
                  boxShadow: [BoxShadow(
             color: Color(0xff00ffff),
-            blurRadius: pow(_animation.value, 5)/200000,
-            spreadRadius: pow(_animation.value, 5)/200000
+            blurRadius: pow(_animation.value, 5)/180000,
+            spreadRadius: pow(_animation.value, 5)/180000
           )],
               ),
             ),
@@ -429,26 +454,10 @@ void handleTimeout() {  // callback function
             height: searchedLobby!=null?height*0.07:height*0.12,
           ),
          
-         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-             GestureDetector(
-            onTap: (){
-              Navigator.pop(context);
-            },
-            child: Container(
-              decoration: BoxDecoration(
-                color: Color(0xffff2389),
-                borderRadius: BorderRadius.circular(20)
-              ),
-              width: width*0.3,
-              height: height*0.06,
-              child: Center(
-                child: Text('Go Back', style: TextStyle(color: Colors.white, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
-              ),
-            ),
-            ),
-              GestureDetector(
+        Container(
+          width: width*0.5,
+          child: Center(
+            child: GestureDetector(
             onTap: (){
               FocusScope.of(context).unfocus();
                Navigator.push(context, MaterialPageRoute( 
@@ -469,10 +478,10 @@ void handleTimeout() {  // callback function
                 child: Text('Create a Lobby', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
               ),
             ),
-            )
+            ),),
+        ),
 
-          ],
-         ),
+        
 
          SizedBox(
           height: height*0.05,

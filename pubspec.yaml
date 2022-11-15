@@ -133,6 +133,7 @@ flutter:
     - assets/spade.svg
     - assets/diamond.svg
     - assets/heart_fill.svg
+    - assets/bank_vault.png
 
 
   fonts:

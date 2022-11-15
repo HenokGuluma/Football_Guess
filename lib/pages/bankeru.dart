@@ -14,10 +14,9 @@ import 'package:flutter_countdown_timer/countdown.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:instagram_clone/backend/firebase.dart';
 import 'package:instagram_clone/main.dart';
-import 'package:instagram_clone/models/exploding_widget.dart';
 import 'package:progress_indicators/progress_indicators.dart';
 
-class BlackJack extends StatefulWidget {
+class Bankeru extends StatefulWidget {
 
   String category;
   String lobbyId;
@@ -26,16 +25,16 @@ class BlackJack extends StatefulWidget {
   bool solo;
   UserVariables variables;
  
-  BlackJack({
+  Bankeru({
     this.category, this.lobbyId, this.solo, this.variables, this.creatorId, this.categoryNo,
   });
 
   @override
-  _BlackJackState createState() => _BlackJackState();
+  _BankeruState createState() => _BankeruState();
 }
 
-class _BlackJackState extends State<BlackJack>
-    with TickerProviderStateMixin {
+class _BankeruState extends State<Bankeru>
+    with TickerProviderStateMixin,  AutomaticKeepAliveClientMixin {
   List<List<String>> images = 
   [['assets/Alexis-Sanchez.png', 'assets/Paul-Pogba.png'],
     ['assets/Alexis-Sanchez.png', 'assets/Paul-Pogba.png'],
@@ -144,84 +143,29 @@ class _BlackJackState extends State<BlackJack>
   List<Widget> drawnCards = [];
   Timer _timer;
   int _start = 100;
-  bool randomizing = false;
+  bool randomizing = true;
   bool showRandomizing = true;
    List<int> cards = [];
    List<Map<String, dynamic>> cardValues = [];
    int score = 0;
-   int addedScore = 0;
-   bool exploded = false;
-   bool perfectScore = false;
 
-void startTimer(var width, var height, Function shatter) {
-  
-  const oneSec = const Duration(milliseconds: 10);
-  _timer = new Timer.periodic(
-    oneSec,
-    (Timer timer) {
-      var added = 0;
-      if(value == 0){
-        added = 11;
-      }
-      else if(value <9){
-        added = value+1;
-      }
-      else{
-        added = 10;
-      }
-      if (_start == 0) {
-        timer.cancel();
-        cards.add(value);
-        cardValues.add({'value': value, 'type': type});
-          setState(() {
-            showRandomizing = false;
-            addedScore = added;
-          });
-          Future.delayed(Duration(milliseconds: 500)).then((value) {
-            if (score+added ==21){
-               Future.delayed(Duration(seconds: 1)).then((value) {
-              setState(() {
-                
-              perfectScore = true;
-               randomizing = false;
-              showRandomizing = true;
-            });
-            });
-            }
-             if (score+added > 21){
-            shatter();
-            Future.delayed(Duration(seconds: 1)).then((value) {
-              setState(() {
-                
-              exploded = true;
-               randomizing = false;
-              showRandomizing = true;
-            });
-            });
-          }
-          else{
-             setState(() {
-            randomizing = false;
-            showRandomizing = true;
-            score = score+added;
-          });
-          }
-
-         
-          });
-      } else {
-        print(_start);
-        setState(() {
-          _start--;
-          value = rng.nextInt(12);
-          type = rng.nextInt(3);
-        });
-      }
-    },
-  );
-}
 
  @override
+  bool get wantKeepAlive => true;
+
+
+  @override
+  void initState() {
+    super.initState();
+     print('bankeruu');
+    Future.delayed(Duration(milliseconds: 100)).then((value) {
+      randomize();
+    });
+
+    
+  }
+
+   @override
   void dispose() {
     // _pageController.dispose();
     _animationController.dispose();
@@ -233,81 +177,53 @@ void startTimer(var width, var height, Function shatter) {
     super.dispose();
   }
 
-
-  @override
-  void initState() {
+  void startTimer() {
   
-    value = rng.nextInt(12);
-    color = rng.nextInt(2);
-    type = rng.nextInt(3);
-   /*  _navigator = Navigator.of(context);
-    _pageController = PageController(initialPage: currentPage, viewportFraction: 1);
-    _animationController = AnimationController(vsync: this, duration: Duration(milliseconds: 500));
-    _colorController = AnimationController(duration: Duration(seconds: 13), vsync: this);
-     _slideController = AnimationController(
-      /// [AnimationController]s can be created with `vsync: this` because of
-      /// [TickerProviderStateMixin].
-      vsync: this,
-      duration: Duration(seconds: second),
-      // value: timeLeft.toDouble(),
-    )..addListener(() {
-        setState(() {});
-      });
-      // _slideController.reset(); _colorController.reset();
-    _slideController.repeat(reverse: false); */
-
-    super.initState();
-
-    /* _colorController.repeat(reverse: false);
-    
-    _animationController.repeat(reverse: true);
-    // _animationController.reset();
-    _animation = Tween(begin: 2.0, end: 15.0).animate(_animationController)..addListener(() {
-      setState(() {
-        
-      });
-    });
-
-    colorAnimation = ColorTween(begin: Color(0xff63ff00), end: Color(0xffff2389)).animate(_colorController)
-          ..addListener(() {
+  const oneSec = const Duration(milliseconds: 10);
+  _timer = new Timer.periodic(
+    oneSec,
+    (Timer timer) {
+      var added = 0;
+      if(value <9){
+        added = value+1;
+      }
+      else if(value == 0){
+        added = 11;
+      }
+      else{
+        added = 10;
+      }
+      if (_start == 0) {
+        timer.cancel();
+        cards.add(value);
+        cardValues.add({'value': value, 'type': type});
+          setState(() {
+            showRandomizing = false;
+          });
+          Future.delayed(Duration(milliseconds: 500)).then((value) {
             setState(() {
-              // The state that has changed here is the animation object’s value.
-            });
+            randomizing = false;
+            showRandomizing = true;
+            score = score+added;
+          });
           });
 
-      _bounceController = AnimationController(
-
-      duration: Duration(milliseconds: 500),
-
-      vsync: this,
-
-      upperBound: 1.2,
-      lowerBound: 1
-
-    );
-     _colorController.forward();
-_bounceController.forward();
-_bounceController.repeat(reverse: true);
-_bounceController.addListener(() {
-
-      setState(() {
-           size = _bounceController.value;
-      });
-
-     });
-     
-     if(widget.solo){
+          if (cardValues.length<2){
+            print('dauuuwerwm');
+            randomize();
+          }
+      } else {
+        // print(_start);
         setState(() {
-          startDown = true;
+          _start--;
+          value = rng.nextInt(12);
+          type = rng.nextInt(3);
         });
-      } */
-   /*  
-   startCountDown();
-   startGamePlayCountDown();
-    startSecondCountDown(); */
-    // scheduleTimeout(second * 1000);
-    
-  }
+      }
+    },
+  );
+}
+
 
   Future<void> getWinner() async{
     if(!widget.solo){
@@ -330,7 +246,7 @@ _bounceController.addListener(() {
     }
   }
 
- void randomize(var width, var height, Function shatter){
+ void randomize(){
     print('daaum');
     setState(() {
       _start = 100;
@@ -338,7 +254,7 @@ _bounceController.addListener(() {
       showRandomizing = true;
       
     });
-    startTimer(width, height, shatter);
+    startTimer();
   }
 
 
@@ -564,141 +480,9 @@ void handleTimeout() {  // callback function
         );
    
    }
-  
-   Widget perfectScoreWidget(var width, var height){
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: Stack(
-        children: [
-          Container(
-            width: width,
-            height: height,
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/blackjack_wallpaper.png'),
-                fit: BoxFit.cover
-              )
-            ),
-          ),
-          Center(
-            
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                   SizedBox(
-            height: height*0.3,
-          ),
-               
-                  Text('You got a perfect Score', style: TextStyle(color: Color(0xff12ff23), fontSize: 40, fontFamily: 'Muli', fontWeight: FontWeight.w900))
-                 ,
-          SizedBox(height: height*0.1,),
-            Text('Score: '+ score.toString(), style: TextStyle(color: Color(0xffffffff), fontSize: 30, fontFamily: 'Muli', fontWeight: FontWeight.w900))
-                 ,
-          SizedBox(height: height*0.1,),
-            GestureDetector(
-            onTap: (){
-              // Navigator.pop(context);
-              setState(() {
-                exploded = false;
-                cardValues = [];
-                score = 0;
-              });
-            },
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20)
-              ),
-              width: width*0.3,
-              height: height*0.06,
-              child: Center(
-                child: Text('Try Again', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
-              ),
-            ),
-            ),
-           
-            
-            ])
-          ), 
-         
-          ],
-      ));
- 
-   }
-
-   Widget explodedView(var width, var height){
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: Stack(
-        children: [
-          Container(
-            width: width,
-            height: height,
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/blackjack_wallpaper.png'),
-                fit: BoxFit.cover
-              )
-            ),
-          ),
-          Center(
-            
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                   SizedBox(
-            height: height*0.3,
-          ),
-               
-                  Text('You Just Exploded', style: TextStyle(color: Color(0xff00ffff), fontSize: 40, fontFamily: 'Muli', fontWeight: FontWeight.w900))
-                 ,
-          SizedBox(height: height*0.1,),
-          Text('The total was: '+ (score + addedScore).toString(), style: TextStyle(color: Color(0xffff2389), fontSize: 25, fontFamily: 'Muli', fontWeight: FontWeight.w900))
-                 ,
-                 SizedBox(height: height*0.1,),
-            Text('Score: '+ score.toString(), style: TextStyle(color: Color(0xffffffff), fontSize: 30, fontFamily: 'Muli', fontWeight: FontWeight.w900))
-                 ,
-          SizedBox(height: height*0.1,),
-            GestureDetector(
-            onTap: (){
-              // Navigator.pop(context);
-              setState(() {
-                exploded = false;
-                cardValues = [];
-                score = 0;
-              });
-            },
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20)
-              ),
-              width: width*0.3,
-              height: height*0.06,
-              child: Center(
-                child: Text('Try Again', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
-              ),
-            ),
-            ),
-           
-            
-            ])
-          ), 
-         
-          ],
-      ));
- 
-   }
 
    Widget gameScreen(var width, var height){
-    return exploded
-    ?explodedView(width, height)
-    :perfectScore
-    ?perfectScoreWidget(width, height)
-    :ShatteringWidget(
-            builder: (shatter) => Scaffold(
+    return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
         children: [
@@ -749,7 +533,7 @@ void handleTimeout() {  // callback function
                 Center(
                   child: Container(
                     height: height*0.3,
-                    child: (showRandomizing?randomizing?card(width, height, {'value': value, 'type': type}, 0):cardBack(width, height, shatter):Center()),
+                    child: (showRandomizing?randomizing?card(width, height, {'value': value, 'type': type}, 0):cardBack(width, height):Center()),
                   )
                 ),
                 SizedBox(
@@ -797,7 +581,7 @@ void handleTimeout() {  // callback function
           ), 
          
           ],
-      )));
+      ));
    }
 
     Widget menuOption(var width, var height, int index, List<String> images){
@@ -893,7 +677,7 @@ void handleTimeout() {  // callback function
     );
    }
 
-   Widget cardBack(var width, var height, Function shatter){
+   Widget cardBack(var width, var height){
     String cardValue = '';
     Map<int, String> map;
     if (value <1 || value >9){
@@ -904,11 +688,11 @@ void handleTimeout() {  // callback function
     }
 
 
-    print(typeMap[type]); print('babbby');
+    // print(typeMap[type]); print('babbby');
 
     return GestureDetector(
          onTap: (){
-        randomize(width, height, shatter);
+        randomize();
       },
       child: Container(
       width: width*0.35,
@@ -927,7 +711,7 @@ void handleTimeout() {  // callback function
             blurRadius: 3,
             spreadRadius: 3
           )],
-          borderRadius: BorderRadius.circular(15)
+          borderRadius: BorderRadius.circular(20)
               ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1042,7 +826,7 @@ void handleTimeout() {  // callback function
     }
 
     return Padding(
-      padding: EdgeInsets.only(left: cardValues.length>4?index*width*0.1:index*width*0.15),
+      padding: EdgeInsets.only(left: index*width*0.15),
       child: Container(
       width: width*0.35,
       height: height*0.3,
@@ -1060,7 +844,7 @@ void handleTimeout() {  // callback function
             blurRadius: 3,
             spreadRadius: 3
           )], */
-          borderRadius: BorderRadius.circular(15),
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(color: Colors.black)
               ),
       child: Column(

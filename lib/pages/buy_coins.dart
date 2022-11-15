@@ -146,24 +146,29 @@ class BuycoinsState extends State<BuyCoins> {
                             padding: EdgeInsets.only(left: 5, top: 0),
                             child: Center(
                               child: TextField(
+                                 inputFormatters: <TextInputFormatter>[
+   // for below version 2 use this
+ FilteringTextInputFormatter.allow(RegExp(r'[0-9]')), 
+// for version 2 and greater youcan also use this
+ FilteringTextInputFormatter.digitsOnly
+
+  ],
+                                keyboardType: TextInputType.number,
                                 textAlign: TextAlign.center,
                               style: TextStyle(
                                   fontFamily: 'Muli',
-                                  color: Colors.black,
+                                  color: Colors.white,
                                   fontSize: 16,
                                   fontWeight: FontWeight.w900),
                               controller: controller,
-                              cursorColor: Colors.black,
+                              cursorColor: Colors.white,
                               autofocus: false,
                               focusNode: FocusNode(),
                               cursorHeight: 20,
                               maxLength: 20,
                               cursorWidth: 0.5,
                               onChanged: searchQuery,
-                               inputFormatters: [
-                  FilteringTextInputFormatter.deny(
-                      RegExp(r'\s')),
-              ],
+                              
                               decoration: InputDecoration(
                                 
                                   hintText: 'Amount of coins',

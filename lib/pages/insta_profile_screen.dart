@@ -12,6 +12,7 @@ import 'package:instagram_clone/backend/firebase.dart';
 
 import 'package:instagram_clone/main.dart';
 import 'package:instagram_clone/models/user.dart';
+import 'package:instagram_clone/pages/bankeru.dart';
 import 'package:instagram_clone/pages/buy_coins.dart';
 import 'package:instagram_clone/pages/coin_wallet.dart';
 import 'package:instagram_clone/pages/edit_profile_screen.dart';
@@ -232,7 +233,7 @@ class _InstaProfileScreenState extends State<InstaProfileScreen>
             },
           ),
            GestureDetector(
-            child: ProfileButtons('Spinning Wheel', width, height),
+            child: ProfileButtons('Spinner Wheel', width, height),
             onTap: () {
               Navigator.push(
                   context,
@@ -241,6 +242,8 @@ class _InstaProfileScreenState extends State<InstaProfileScreen>
             },
           ),
           
+
+            
 
           /*  GestureDetector(
             child: ProfileButtons('Terms Of Service', width, height),

@@ -163,23 +163,27 @@ Future<User> fetchUserDetailsById(String uid) async {
         await _firestore.collection("users").doc(senderId).get();
        int previousCoins = documentSnapshot.data()['coins'];
        int currentCoins = previousCoins - coins;
-    await _firestore.collection('users').doc(senderId).update({'coins': currentCoins});
 
     DocumentSnapshot newDocumentSnapshot =
         await _firestore.collection("users").doc(receiverId).get();
        int prevCoins = newDocumentSnapshot.data()['coins'];
-       int curCoins = prevCoins - coins;
+       int curCoins = prevCoins + coins;
+
+     await _firestore.collection('users').doc(senderId).update({'coins': currentCoins});
     return _firestore.collection('users').doc(receiverId).update({'coins': curCoins});
   }
 
  Future<User> getUserById(String userId) async{
     QuerySnapshot snapshot = await _firestore.collection('users').where('userName', isEqualTo: userId).get();
     if(snapshot.docs.isNotEmpty){
-       if(snapshot.docs[0].data()==null){
+       if(snapshot.docs[0].data()==null || snapshot.docs.length ==0){
       return User();
     }
+    else{
+        return User.fromMap(snapshot.docs[0].data());
     }
-    return User.fromMap(snapshot.docs[0].data());
+    }
+    return User();
   }
 
 
@@ -265,6 +269,12 @@ Future<User> fetchUserDetailsById(String uid) async {
     await _firestore.collection('phones').doc(phone).set({'phone': phone, 'userId': userId});
   }
 
+   Future<List<DocumentSnapshot>> getAllPhones() async {
+       var phones = await _firestore
+        .collection('phones')
+        .get();
+    return phones.docs;
+  }
    Future<void> editPhone(String phone, String previousPhone, String userId) async{
     await _firestore.collection('phones').doc(previousPhone).delete();
     await _firestore.collection('phones').doc(phone).set({'phone': phone, 'userId': userId});

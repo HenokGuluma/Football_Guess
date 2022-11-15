@@ -43,6 +43,7 @@ class _SpinningBabyState extends State<SpinningBaby>
   int timeLeft = 1200;
   bool spinning = false;
   bool haveSpun = false;
+  bool showWinner = false;
 
   @override
   void initState() {
@@ -79,7 +80,7 @@ class _SpinningBabyState extends State<SpinningBaby>
               height: height*0.05,
             ),
             Center(
-              child: Text('SPIN-MANIA', style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 40, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),),
+              child: Text('Spinner-Wheel', style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 35, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),),
             ),
             SizedBox(
               height: height*0.05,
@@ -154,6 +155,7 @@ class _SpinningBabyState extends State<SpinningBaby>
           Future.delayed(Duration(milliseconds: 500)).then((value) {
             setState(() {
             spinning = false;
+            showWinner = true;
           });
           });
         }
@@ -171,6 +173,8 @@ class _SpinningBabyState extends State<SpinningBaby>
     setState(() {
       spinning = true;
       haveSpun = true;
+      showWinner = false;
+      timeLeft = 1200;
     });
     if (!_ctrl.isAnimating) {
       var _random = Random().nextDouble();
@@ -196,7 +200,7 @@ class _SpinningBabyState extends State<SpinningBaby>
       padding: EdgeInsets.symmetric(vertical: 16.0),
       child: Align(
         alignment: Alignment.bottomCenter,
-        child: Text(spinning?_asset:haveSpun?'Winner: '+ _asset:'', style: TextStyle(color: spinning?Colors.white:Color(0xff63ff00), fontFamily: 'Muli', fontSize: 25, fontWeight: FontWeight.w900),),
+        child: Text(spinning?_asset:haveSpun && showWinner?'Winner: '+ _asset:haveSpun?_asset:'', style: TextStyle(color: spinning?Colors.white:Color(0xff63ff00), fontFamily: 'Muli', fontSize: 25, fontWeight: FontWeight.w900),),
       ),
     );
   }

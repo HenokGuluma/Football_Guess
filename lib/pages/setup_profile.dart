@@ -59,6 +59,7 @@ class _SetupProfileState extends State<SetupProfile> {
   @override
   void initState() {
     super.initState();
+    getPhones();
     _nameController = TextEditingController();
     if (widget.emailAddress != null) {
       _emailController.text = widget.emailAddress;
@@ -80,6 +81,23 @@ class _SetupProfileState extends State<SetupProfile> {
 
     return selectedImage;
   }
+
+    Future<void> getPhones (){
+    _firebaseProvider.getAllPhones().then((phoneNumbers) {
+      List<String> phones = [];
+      for(int i=0; i<phoneNumbers.length; i++){
+        String phone = phoneNumbers[i].id;
+        phones.add(phone);
+      }
+      setState(() {
+              phoneList = phones;
+              widget.variables.updatePhones(phones);
+              // loadingPhones = false;
+            });
+    });
+    return null;
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -165,7 +183,9 @@ class _SetupProfileState extends State<SetupProfile> {
               ],
                     style: TextStyle(fontFamily: 'Muli', color: Colors.white),
                     controller: _nameController,
+                    maxLength: 10,
                     decoration: InputDecoration(
+                      
                       hintText: 'UserName',
                       hintStyle: TextStyle(
                           fontFamily: 'Muli',
@@ -216,7 +236,7 @@ class _SetupProfileState extends State<SetupProfile> {
                   width: size.width*0.6,
                   height: size.height*0.05,
                   child: Center(
-                    child: Text('Enter at least 7 characters', style: TextStyle(color: Color(0xffff2389), fontSize: 14, fontFamily: 'Muli', fontWeight: FontWeight.w600)),
+                    child: Text('Enter at least 5 characters', style: TextStyle(color: Color(0xffff2389), fontSize: 14, fontFamily: 'Muli', fontWeight: FontWeight.w600)),
                   ),
                 )
               :available
@@ -327,13 +347,16 @@ class _SetupProfileState extends State<SetupProfile> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 15.0, vertical: 4.0),
                 child: TextFormField(
-                  inputFormatters: [
-                  FilteringTextInputFormatter.deny(
-                      RegExp(r'\s')),
-              ],
+                  inputFormatters: <TextInputFormatter>[
+   // for below version 2 use this
+ FilteringTextInputFormatter.allow(RegExp(r'[0-9]')), 
+// for version 2 and greater youcan also use this
+ FilteringTextInputFormatter.digitsOnly
+
+  ],
+                                keyboardType: TextInputType.number,
                     style: TextStyle(fontFamily: 'Muli', color: Colors.white),
                     controller: _phoneController,
-                    keyboardType: TextInputType.number,
                     autofocus: false,
                     decoration: InputDecoration(
                         hintText: 'Phone Number',
@@ -484,7 +507,7 @@ class _SetupProfileState extends State<SetupProfile> {
       checking = false;
     });
 
-    if(text.length>=7){
+    if(text.length>=5){
       setState(() {
         userNameShort = false;
         userNameLongEnough = true;
