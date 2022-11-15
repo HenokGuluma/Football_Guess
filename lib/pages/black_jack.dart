@@ -8,7 +8,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_audio_player/flutter_audio_player.dart';
 import 'package:flutter_countdown_timer/flutter_countdown_timer.dart';
 import 'package:flutter_spinning_wheel/src/utils.dart';
 import 'package:flutter_countdown_timer/countdown.dart';
@@ -182,21 +181,21 @@ void startTimer(var width, var height, Function shatter) {
           });
           Future.delayed(Duration(milliseconds: 500)).then((value) {
             if (score+added ==21){
+              setState(() {
+              perfectScore = true;
+              });
                Future.delayed(Duration(seconds: 1)).then((value) {
               setState(() {
-                
-              perfectScore = true;
-               randomizing = false;
+              randomizing = false;
               showRandomizing = true;
             });
             });
             }
-             if (score+added > 21){
+            else if (score+added > 21){
             shatter();
-            AudioPlayer.addSound('assets/glass.mp3');  
             Future.delayed(Duration(seconds: 1)).then((value) {
               setState(() {
-              AudioPlayer.removeAllSound();  
+                
               exploded = true;
                randomizing = false;
               showRandomizing = true;
@@ -594,10 +593,12 @@ void handleTimeout() {  // callback function
             height: height*0.3,
           ),
                
-                  Text('You got a perfect Score', style: TextStyle(color: Color(0xff12ff23), fontSize: 40, fontFamily: 'Muli', fontWeight: FontWeight.w900))
+                  Center(
+                    child: Text('You got a perfect Score', style: TextStyle(color: Color(0xff12ff23), fontSize: 40, fontFamily: 'Muli', fontWeight: FontWeight.w900), textAlign: TextAlign.center,),
+                  )
                  ,
           SizedBox(height: height*0.1,),
-            Text('Score: '+ score.toString(), style: TextStyle(color: Color(0xffffffff), fontSize: 30, fontFamily: 'Muli', fontWeight: FontWeight.w900))
+            Text('Score: 12', style: TextStyle(color: Color(0xffffffff), fontSize: 30, fontFamily: 'Muli', fontWeight: FontWeight.w900))
                  ,
           SizedBox(height: height*0.1,),
             GestureDetector(
@@ -605,6 +606,7 @@ void handleTimeout() {  // callback function
               // Navigator.pop(context);
               setState(() {
                 exploded = false;
+                perfectScore = false;
                 cardValues = [];
                 score = 0;
               });
