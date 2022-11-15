@@ -59,6 +59,7 @@ class _PlayModeState extends State<PlayMode>
   int gamePlayDuration = 0;
   User currentUser = User();
   bool loading = true;
+  List<String> phoneList = [];
   
 
   @override
@@ -108,7 +109,26 @@ void handleTimeout() {  // callback function
      else{
       return;
      }
+
+     getPhones();
     
+  }
+
+  
+    Future<void> getPhones (){
+    _firebaseProvider.getAllPhones().then((phoneNumbers) {
+      List<String> phones = [];
+      for(int i=0; i<phoneNumbers.length; i++){
+        String phone = phoneNumbers[i].id;
+        phones.add(phone);
+      }
+      setState(() {
+              phoneList = phones;
+              
+              // loadingPhones = false;
+            });
+    });
+    return null;
   }
    
 
@@ -124,11 +144,12 @@ void handleTimeout() {  // callback function
     }
      var width = MediaQuery.of(context).size.width;
     var height = MediaQuery.of(context).size.height;
- 
-    return StreamBuilder<DocumentSnapshot>(
+    if(widget.uid !=null){
+       return StreamBuilder<DocumentSnapshot>(
       stream: _firestore.collection('users').doc(widget.uid).snapshots(),
       builder: (BuildContext context, AsyncSnapshot snapshot){
         variables.setCurrentUser(User.fromDoc(snapshot.data));
+        variables.updatePhones(phoneList);
         return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
@@ -213,6 +234,92 @@ void handleTimeout() {  // callback function
    
       }
       );
+    }
+    else{
+      return Scaffold(
+      backgroundColor: Colors.black,
+      body: Stack(
+        children: [
+          Container(
+            width: width,
+            height: height,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/profile_background.png'),
+                fit: BoxFit.cover
+              )
+            ),
+          ),
+          loading
+          ?Container(
+            width: width,
+            height: height,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Center(
+            child: Text(
+                'Preparing Game', style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 35, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
+              ),
+          ),
+          JumpingDotsProgressIndicator(color: Color(0xff00ffff), fontSize: 70,),
+           Center(
+            child: Text(
+                'Sit back and Relax', style: TextStyle(color: Colors.white, fontFamily: 'Muli', fontSize: 25, fontWeight: FontWeight.w900, fontStyle: FontStyle.normal),
+              ),
+          ),
+              ],
+            )
+          )
+          :
+          Container(
+        width: width,
+        height: height,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+             SizedBox(
+              height: height*0.05,
+            ),
+            Text(
+                'Pick a Game Mode', style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 35, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
+              ),
+            SizedBox(
+              height: height*0.05,
+            ),
+            /* Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                menuOption(width, height, 0, menuImages),
+                menuOption(width, height, 1, menuImages),
+                menuOption(width, height, 2, menuImages),
+              ],
+            ) */
+          Container(
+            width: width,
+            height: height*0.6,
+            child:  ListView(
+  padding: const EdgeInsets.all(5),
+  children: <Widget>[
+   menuOption(width, height, 0, modes, variables),
+   SizedBox(height: height*0.08,),
+   menuOption(width, height, 1, modes, variables),
+  ],
+),
+          )
+
+          ],
+        )
+        
+      ),
+    
+        ],
+      ));
+   
+    }
+   
    }
 
    bool compare(int first, int second){

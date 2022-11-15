@@ -233,7 +233,7 @@ class _InstaProfileScreenState extends State<InstaProfileScreen>
             },
           ),
            GestureDetector(
-            child: ProfileButtons('Spinning Wheel', width, height),
+            child: ProfileButtons('Spinner Wheel', width, height),
             onTap: () {
               Navigator.push(
                   context,
@@ -243,24 +243,7 @@ class _InstaProfileScreenState extends State<InstaProfileScreen>
           ),
           
 
-            GestureDetector(
-            child: ProfileButtons('Spinning Wheel', width, height),
-            onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: ((context) => SpinningBaby())));
-            },
-          ),
-           GestureDetector(
-            child: ProfileButtons('BlackJack', width, height),
-            onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: ((context) => BlackJack(variables: widget.variables))));
-            },
-          ),
+            
 
           /*  GestureDetector(
             child: ProfileButtons('Terms Of Service', width, height),

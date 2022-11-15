@@ -39,8 +39,8 @@ class GameMenuState extends State<GameMenu> {
   FirebaseProvider _firebaseProvider = FirebaseProvider();
   bool like;
   int counter = 0;
-  List<String> modes = ['assets/rapidBall.png', 'assets/blackjack-option.png'];
-  List<String> options = ['RapidBall', 'Black Jack'];
+  List<String> modes = ['assets/rapidBall.png', 'assets/blackjack-option.png', 'assets/bank_vault.png'];
+  List<String> options = ['RapidBall', 'Black Jack', 'Bankeru'];
   Map<int, double> optionsMap = {1: 25, 3: 50, 5: 75, 10: 100};
 
   List<bool> balls = [true, true, true, true, true];
@@ -105,7 +105,7 @@ class GameMenuState extends State<GameMenu> {
             ) */
           Container(
             width: width,
-            height: height*0.75,
+            height: height*0.7,
             child:  ListView(
   padding: const EdgeInsets.all(5),
   children: <Widget>[
@@ -113,7 +113,11 @@ class GameMenuState extends State<GameMenu> {
    SizedBox(height: height*0.08,),
    menuOption(width, height, 1, modes, widget.variables),
    SizedBox(height: height*0.08,),
-   Center(
+   menuOption(width, height, 2, modes, widget.variables),
+   ],
+),
+          ),
+Center(
     child: GestureDetector(
             onTap: (){
               Navigator.pop(context);
@@ -131,10 +135,7 @@ class GameMenuState extends State<GameMenu> {
             ),
             ),
    )
-  ],
-),
-          )
-
+  
           ],
         )
         

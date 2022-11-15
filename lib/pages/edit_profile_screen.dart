@@ -303,7 +303,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   width: width*0.6,
                   height: height*0.05,
                   child: Center(
-                    child: Text('Enter at least 7 characters', style: TextStyle(color: Color(0xffff2389), fontSize: 14, fontFamily: 'Muli', fontWeight: FontWeight.w600)),
+                    child: Text('Enter at least 5 characters', style: TextStyle(color: Color(0xffff2389), fontSize: 14, fontFamily: 'Muli', fontWeight: FontWeight.w600)),
                   ),
                 )
               :available
@@ -470,7 +470,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       checking = false;
     });
 
-    if(text.length>=7){
+    if(text.length>=5){
       setState(() {
         userNameShort = false;
       });

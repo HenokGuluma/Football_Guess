@@ -88,7 +88,7 @@ class _LoginScreenState extends State<LoginScreen> {
             child: loggingIn
             ?Container(
                 width: width * 0.7,
-                height: height * 0.08,
+                height: width*0.13,
                 decoration: BoxDecoration(
                   color: Colors.grey,
                   border: Border.all(color: Colors.grey),
@@ -105,7 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
             :GestureDetector(
               child: Container(
                 width: width * 0.7,
-                height: height * 0.08,
+                height: width * 0.13,
                 decoration: BoxDecoration(
                   color: Color(0xff00ffff),
                   border: Border.all(color: Color(0xff00ffff)),

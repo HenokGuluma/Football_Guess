@@ -269,6 +269,12 @@ Future<User> fetchUserDetailsById(String uid) async {
     await _firestore.collection('phones').doc(phone).set({'phone': phone, 'userId': userId});
   }
 
+   Future<List<DocumentSnapshot>> getAllPhones() async {
+       var phones = await _firestore
+        .collection('phones')
+        .get();
+    return phones.docs;
+  }
    Future<void> editPhone(String phone, String previousPhone, String userId) async{
     await _firestore.collection('phones').doc(previousPhone).delete();
     await _firestore.collection('phones').doc(phone).set({'phone': phone, 'userId': userId});
