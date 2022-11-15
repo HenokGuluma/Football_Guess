@@ -12,7 +12,7 @@ import 'package:instagram_clone/backend/firebase.dart';
 
 import 'package:instagram_clone/main.dart';
 import 'package:instagram_clone/models/user.dart';
-import 'package:instagram_clone/pages/blackjack.dart';
+import 'package:instagram_clone/pages/bankeru.dart';
 import 'package:instagram_clone/pages/buy_coins.dart';
 import 'package:instagram_clone/pages/coin_wallet.dart';
 import 'package:instagram_clone/pages/edit_profile_screen.dart';

@@ -14,6 +14,7 @@ import 'package:flutter_countdown_timer/countdown.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:instagram_clone/backend/firebase.dart';
 import 'package:instagram_clone/main.dart';
+import 'package:instagram_clone/models/exploding_widget.dart';
 import 'package:progress_indicators/progress_indicators.dart';
 
 class BlackJack extends StatefulWidget {
@@ -148,8 +149,9 @@ class _BlackJackState extends State<BlackJack>
    List<int> cards = [];
    List<Map<String, dynamic>> cardValues = [];
    int score = 0;
+   bool exploded = false;
 
-void startTimer(var width, var height) {
+void startTimer(var width, var height, Function shatter) {
   
   const oneSec = const Duration(milliseconds: 10);
   _timer = new Timer.periodic(
@@ -178,6 +180,13 @@ void startTimer(var width, var height) {
             showRandomizing = true;
             score = score+added;
           });
+
+          if (score+added > 21){
+            shatter();
+            setState(() {
+              exploded = true;
+            });
+          }
           });
       } else {
         print(_start);
@@ -300,7 +309,7 @@ _bounceController.addListener(() {
     }
   }
 
- void randomize(var width, var height){
+ void randomize(var width, var height, Function shatter){
     print('daaum');
     setState(() {
       _start = 100;
@@ -308,7 +317,7 @@ _bounceController.addListener(() {
       showRandomizing = true;
       
     });
-    startTimer(width, height);
+    startTimer(width, height, shatter);
   }
 
 
@@ -535,8 +544,63 @@ void handleTimeout() {  // callback function
    
    }
 
-   Widget gameScreen(var width, var height){
+   Widget explodedView(var width, var height){
     return Scaffold(
+      backgroundColor: Colors.black,
+      body: Stack(
+        children: [
+          Container(
+            width: width,
+            height: height,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/blackjack_wallpaper.png'),
+                fit: BoxFit.cover
+              )
+            ),
+          ),
+          Center(
+            
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                   SizedBox(
+            height: height*0.3,
+          ),
+               
+                  Text('You Just Exploded', style: TextStyle(color: score==0?Colors.white:Color(0xff00ffff), fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900))
+                 ,
+          SizedBox(height: height*0.1,),
+            GestureDetector(
+            onTap: (){
+              // Navigator.pop(context);
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.3,
+              height: height*0.06,
+              child: Center(
+                child: Text('Try Again', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            ),
+            ),
+           
+            
+            ])
+          ), 
+         
+          ],
+      ));
+ 
+   }
+
+   Widget gameScreen(var width, var height){
+    return ShatteringWidget(
+            builder: (shatter) => Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
         children: [
@@ -587,7 +651,7 @@ void handleTimeout() {  // callback function
                 Center(
                   child: Container(
                     height: height*0.3,
-                    child: (showRandomizing?randomizing?card(width, height, {'value': value, 'type': type}, 0):cardBack(width, height):Center()),
+                    child: (showRandomizing?randomizing?card(width, height, {'value': value, 'type': type}, 0):cardBack(width, height, shatter):Center()),
                   )
                 ),
                 SizedBox(
@@ -635,7 +699,7 @@ void handleTimeout() {  // callback function
           ), 
          
           ],
-      ));
+      )));
    }
 
     Widget menuOption(var width, var height, int index, List<String> images){
@@ -731,7 +795,7 @@ void handleTimeout() {  // callback function
     );
    }
 
-   Widget cardBack(var width, var height){
+   Widget cardBack(var width, var height, Function shatter){
     String cardValue = '';
     Map<int, String> map;
     if (value <1 || value >9){
@@ -746,7 +810,7 @@ void handleTimeout() {  // callback function
 
     return GestureDetector(
          onTap: (){
-        randomize(width, height);
+        randomize(width, height, shatter);
       },
       child: Container(
       width: width*0.35,
