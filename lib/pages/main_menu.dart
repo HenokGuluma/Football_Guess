@@ -117,6 +117,7 @@ class GameMenuState extends State<GameMenu> {
    ],
 ),
           ),
+          SizedBox(height: height*0.03,),
 Center(
     child: GestureDetector(
             onTap: (){
@@ -149,6 +150,14 @@ Center(
     return GestureDetector(
       onTap: (){
         if (index == 1){
+            Navigator.push(context, MaterialPageRoute( 
+          builder: (BuildContext context) {
+                          // return LobbyMenu();
+                          return BlackJack(solo: true,);
+                        },
+                        ));
+        }
+        else if (index == 2){
             Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           // return LobbyMenu();

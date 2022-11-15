@@ -16,7 +16,7 @@ import 'package:instagram_clone/backend/firebase.dart';
 import 'package:instagram_clone/main.dart';
 import 'package:progress_indicators/progress_indicators.dart';
 
-class BlackJack extends StatefulWidget {
+class Bankeru extends StatefulWidget {
 
   String category;
   String lobbyId;
@@ -25,15 +25,15 @@ class BlackJack extends StatefulWidget {
   bool solo;
   UserVariables variables;
  
-  BlackJack({
+  Bankeru({
     this.category, this.lobbyId, this.solo, this.variables, this.creatorId, this.categoryNo,
   });
 
   @override
-  _BlackJackState createState() => _BlackJackState();
+  _BankeruState createState() => _BankeruState();
 }
 
-class _BlackJackState extends State<BlackJack>
+class _BankeruState extends State<Bankeru>
     with TickerProviderStateMixin {
   List<List<String>> images = 
   [['assets/Alexis-Sanchez.png', 'assets/Paul-Pogba.png'],
@@ -149,7 +149,7 @@ class _BlackJackState extends State<BlackJack>
    List<Map<String, dynamic>> cardValues = [];
    int score = 0;
 
-void startTimer(var width, var height) {
+void startTimer() {
   
   const oneSec = const Duration(milliseconds: 10);
   _timer = new Timer.periodic(
@@ -226,6 +226,8 @@ void startTimer(var width, var height) {
       // _slideController.reset(); _colorController.reset();
     _slideController.repeat(reverse: false); */
 
+    randomize();
+
     super.initState();
 
     /* _colorController.repeat(reverse: false);
@@ -300,7 +302,7 @@ _bounceController.addListener(() {
     }
   }
 
- void randomize(var width, var height){
+ void randomize(){
     print('daaum');
     setState(() {
       _start = 100;
@@ -308,7 +310,7 @@ _bounceController.addListener(() {
       showRandomizing = true;
       
     });
-    startTimer(width, height);
+    startTimer();
   }
 
 
@@ -746,7 +748,7 @@ void handleTimeout() {  // callback function
 
     return GestureDetector(
          onTap: (){
-        randomize(width, height);
+        randomize();
       },
       child: Container(
       width: width*0.35,

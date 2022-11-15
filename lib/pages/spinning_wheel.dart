@@ -80,7 +80,7 @@ class _SpinningBabyState extends State<SpinningBaby>
               height: height*0.05,
             ),
             Center(
-              child: Text('SPINNER-WHEEL', style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 35, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),),
+              child: Text('Spinner-Wheel', style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 35, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),),
             ),
             SizedBox(
               height: height*0.05,
