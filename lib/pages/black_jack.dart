@@ -8,6 +8,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_audio_player/flutter_audio_player.dart';
 import 'package:flutter_countdown_timer/flutter_countdown_timer.dart';
 import 'package:flutter_spinning_wheel/src/utils.dart';
 import 'package:flutter_countdown_timer/countdown.dart';
@@ -97,6 +98,8 @@ class _BlackJackState extends State<BlackJack>
   ];
 
   List<String> menuImages = ['assets/football2.jpg', 'assets/football3.jpg','assets/football4.jpg',  'assets/football1.png'];
+
+  String sound = 'assets/glass.mp3';
 
   int value;
   int color;
@@ -190,9 +193,10 @@ void startTimer(var width, var height, Function shatter) {
             }
              if (score+added > 21){
             shatter();
+            AudioPlayer.addSound('assets/glass.mp3');  
             Future.delayed(Duration(seconds: 1)).then((value) {
               setState(() {
-                
+              AudioPlayer.removeAllSound();  
               exploded = true;
                randomizing = false;
               showRandomizing = true;
