@@ -34,7 +34,7 @@ class Bankeru extends StatefulWidget {
 }
 
 class _BankeruState extends State<Bankeru>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin,  AutomaticKeepAliveClientMixin {
   List<List<String>> images = 
   [['assets/Alexis-Sanchez.png', 'assets/Paul-Pogba.png'],
     ['assets/Alexis-Sanchez.png', 'assets/Paul-Pogba.png'],
@@ -143,13 +143,41 @@ class _BankeruState extends State<Bankeru>
   List<Widget> drawnCards = [];
   Timer _timer;
   int _start = 100;
-  bool randomizing = false;
+  bool randomizing = true;
   bool showRandomizing = true;
    List<int> cards = [];
    List<Map<String, dynamic>> cardValues = [];
    int score = 0;
 
-void startTimer() {
+
+ @override
+  bool get wantKeepAlive => true;
+
+
+  @override
+  void initState() {
+    super.initState();
+     print('bankeruu');
+    Future.delayed(Duration(milliseconds: 100)).then((value) {
+      randomize();
+    });
+
+    
+  }
+
+   @override
+  void dispose() {
+    // _pageController.dispose();
+    _animationController.dispose();
+    _slideController.dispose();
+    _bounceController.dispose();
+    // startTimer();
+    _timer.cancel();
+   
+    super.dispose();
+  }
+
+  void startTimer() {
   
   const oneSec = const Duration(milliseconds: 10);
   _timer = new Timer.periodic(
@@ -179,8 +207,13 @@ void startTimer() {
             score = score+added;
           });
           });
+
+          if (cardValues.length<2){
+            print('dauuuwerwm');
+            randomize();
+          }
       } else {
-        print(_start);
+        // print(_start);
         setState(() {
           _start--;
           value = rng.nextInt(12);
@@ -191,95 +224,6 @@ void startTimer() {
   );
 }
 
- @override
-  void dispose() {
-    _pageController.dispose();
-    _animationController.dispose();
-    _slideController.dispose();
-    _bounceController.dispose();
-    // startTimer();
-    _timer.cancel();
-   
-    super.dispose();
-  }
-
-
-  @override
-  void initState() {
-  
-    value = rng.nextInt(12);
-    color = rng.nextInt(2);
-    type = rng.nextInt(3);
-   /*  _navigator = Navigator.of(context);
-    _pageController = PageController(initialPage: currentPage, viewportFraction: 1);
-    _animationController = AnimationController(vsync: this, duration: Duration(milliseconds: 500));
-    _colorController = AnimationController(duration: Duration(seconds: 13), vsync: this);
-     _slideController = AnimationController(
-      /// [AnimationController]s can be created with `vsync: this` because of
-      /// [TickerProviderStateMixin].
-      vsync: this,
-      duration: Duration(seconds: second),
-      // value: timeLeft.toDouble(),
-    )..addListener(() {
-        setState(() {});
-      });
-      // _slideController.reset(); _colorController.reset();
-    _slideController.repeat(reverse: false); */
-
-    randomize();
-
-    super.initState();
-
-    /* _colorController.repeat(reverse: false);
-    
-    _animationController.repeat(reverse: true);
-    // _animationController.reset();
-    _animation = Tween(begin: 2.0, end: 15.0).animate(_animationController)..addListener(() {
-      setState(() {
-        
-      });
-    });
-
-    colorAnimation = ColorTween(begin: Color(0xff63ff00), end: Color(0xffff2389)).animate(_colorController)
-          ..addListener(() {
-            setState(() {
-              // The state that has changed here is the animation object’s value.
-            });
-          });
-
-      _bounceController = AnimationController(
-
-      duration: Duration(milliseconds: 500),
-
-      vsync: this,
-
-      upperBound: 1.2,
-      lowerBound: 1
-
-    );
-     _colorController.forward();
-_bounceController.forward();
-_bounceController.repeat(reverse: true);
-_bounceController.addListener(() {
-
-      setState(() {
-           size = _bounceController.value;
-      });
-
-     });
-     
-     if(widget.solo){
-        setState(() {
-          startDown = true;
-        });
-      } */
-   /*  
-   startCountDown();
-   startGamePlayCountDown();
-    startSecondCountDown(); */
-    // scheduleTimeout(second * 1000);
-    
-  }
 
   Future<void> getWinner() async{
     if(!widget.solo){
@@ -744,7 +688,7 @@ void handleTimeout() {  // callback function
     }
 
 
-    print(typeMap[type]); print('babbby');
+    // print(typeMap[type]); print('babbby');
 
     return GestureDetector(
          onTap: (){

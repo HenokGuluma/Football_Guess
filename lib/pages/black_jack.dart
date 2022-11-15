@@ -149,7 +149,9 @@ class _BlackJackState extends State<BlackJack>
    List<int> cards = [];
    List<Map<String, dynamic>> cardValues = [];
    int score = 0;
+   int addedScore = 0;
    bool exploded = false;
+   bool perfectScore = false;
 
 void startTimer(var width, var height, Function shatter) {
   
@@ -158,11 +160,11 @@ void startTimer(var width, var height, Function shatter) {
     oneSec,
     (Timer timer) {
       var added = 0;
-      if(value <9){
-        added = value+1;
-      }
-      else if(value == 0){
+      if(value == 0){
         added = 11;
+      }
+      else if(value <9){
+        added = value+1;
       }
       else{
         added = 10;
@@ -173,20 +175,39 @@ void startTimer(var width, var height, Function shatter) {
         cardValues.add({'value': value, 'type': type});
           setState(() {
             showRandomizing = false;
+            addedScore = added;
           });
           Future.delayed(Duration(milliseconds: 500)).then((value) {
-            setState(() {
+            if (score+added ==21){
+               Future.delayed(Duration(seconds: 1)).then((value) {
+              setState(() {
+                
+              perfectScore = true;
+               randomizing = false;
+              showRandomizing = true;
+            });
+            });
+            }
+             if (score+added > 21){
+            shatter();
+            Future.delayed(Duration(seconds: 1)).then((value) {
+              setState(() {
+                
+              exploded = true;
+               randomizing = false;
+              showRandomizing = true;
+            });
+            });
+          }
+          else{
+             setState(() {
             randomizing = false;
             showRandomizing = true;
             score = score+added;
           });
-
-          if (score+added > 21){
-            shatter();
-            setState(() {
-              exploded = true;
-            });
           }
+
+         
           });
       } else {
         print(_start);
@@ -202,7 +223,7 @@ void startTimer(var width, var height, Function shatter) {
 
  @override
   void dispose() {
-    _pageController.dispose();
+    // _pageController.dispose();
     _animationController.dispose();
     _slideController.dispose();
     _bounceController.dispose();
@@ -543,6 +564,68 @@ void handleTimeout() {  // callback function
         );
    
    }
+  
+   Widget perfectScoreWidget(var width, var height){
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Stack(
+        children: [
+          Container(
+            width: width,
+            height: height,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/blackjack_wallpaper.png'),
+                fit: BoxFit.cover
+              )
+            ),
+          ),
+          Center(
+            
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                   SizedBox(
+            height: height*0.3,
+          ),
+               
+                  Text('You got a perfect Score', style: TextStyle(color: Color(0xff12ff23), fontSize: 40, fontFamily: 'Muli', fontWeight: FontWeight.w900))
+                 ,
+          SizedBox(height: height*0.1,),
+            Text('Score: '+ score.toString(), style: TextStyle(color: Color(0xffffffff), fontSize: 30, fontFamily: 'Muli', fontWeight: FontWeight.w900))
+                 ,
+          SizedBox(height: height*0.1,),
+            GestureDetector(
+            onTap: (){
+              // Navigator.pop(context);
+              setState(() {
+                exploded = false;
+                cardValues = [];
+                score = 0;
+              });
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.3,
+              height: height*0.06,
+              child: Center(
+                child: Text('Try Again', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            ),
+            ),
+           
+            
+            ])
+          ), 
+         
+          ],
+      ));
+ 
+   }
 
    Widget explodedView(var width, var height){
     return Scaffold(
@@ -569,12 +652,23 @@ void handleTimeout() {  // callback function
             height: height*0.3,
           ),
                
-                  Text('You Just Exploded', style: TextStyle(color: score==0?Colors.white:Color(0xff00ffff), fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900))
+                  Text('You Just Exploded', style: TextStyle(color: Color(0xff00ffff), fontSize: 40, fontFamily: 'Muli', fontWeight: FontWeight.w900))
+                 ,
+          SizedBox(height: height*0.1,),
+          Text('The total was: '+ (score + addedScore).toString(), style: TextStyle(color: Color(0xffff2389), fontSize: 25, fontFamily: 'Muli', fontWeight: FontWeight.w900))
+                 ,
+                 SizedBox(height: height*0.1,),
+            Text('Score: '+ score.toString(), style: TextStyle(color: Color(0xffffffff), fontSize: 30, fontFamily: 'Muli', fontWeight: FontWeight.w900))
                  ,
           SizedBox(height: height*0.1,),
             GestureDetector(
             onTap: (){
               // Navigator.pop(context);
+              setState(() {
+                exploded = false;
+                cardValues = [];
+                score = 0;
+              });
             },
             child: Container(
               decoration: BoxDecoration(
@@ -599,7 +693,11 @@ void handleTimeout() {  // callback function
    }
 
    Widget gameScreen(var width, var height){
-    return ShatteringWidget(
+    return exploded
+    ?explodedView(width, height)
+    :perfectScore
+    ?perfectScoreWidget(width, height)
+    :ShatteringWidget(
             builder: (shatter) => Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
@@ -829,7 +927,7 @@ void handleTimeout() {  // callback function
             blurRadius: 3,
             spreadRadius: 3
           )],
-          borderRadius: BorderRadius.circular(20)
+          borderRadius: BorderRadius.circular(15)
               ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -944,7 +1042,7 @@ void handleTimeout() {  // callback function
     }
 
     return Padding(
-      padding: EdgeInsets.only(left: index*width*0.15),
+      padding: EdgeInsets.only(left: cardValues.length>4?index*width*0.1:index*width*0.15),
       child: Container(
       width: width*0.35,
       height: height*0.3,
@@ -962,7 +1060,7 @@ void handleTimeout() {  // callback function
             blurRadius: 3,
             spreadRadius: 3
           )], */
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(15),
           border: Border.all(color: Colors.black)
               ),
       child: Column(

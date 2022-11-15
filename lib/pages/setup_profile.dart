@@ -185,6 +185,7 @@ class _SetupProfileState extends State<SetupProfile> {
                     controller: _nameController,
                     maxLength: 10,
                     decoration: InputDecoration(
+                      
                       hintText: 'UserName',
                       hintStyle: TextStyle(
                           fontFamily: 'Muli',

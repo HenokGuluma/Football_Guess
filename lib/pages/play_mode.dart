@@ -148,7 +148,9 @@ void handleTimeout() {  // callback function
        return StreamBuilder<DocumentSnapshot>(
       stream: _firestore.collection('users').doc(widget.uid).snapshots(),
       builder: (BuildContext context, AsyncSnapshot snapshot){
-        variables.setCurrentUser(User.fromDoc(snapshot.data));
+        if(snapshot.hasData){
+          variables.setCurrentUser(User.fromDoc(snapshot.data));
+        }
         variables.updatePhones(phoneList);
         return Scaffold(
       backgroundColor: Colors.black,

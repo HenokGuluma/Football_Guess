@@ -202,7 +202,7 @@ void handleTimeout() {  // callback function
                 color: Color(0xffff2389),
                 borderRadius: BorderRadius.circular(20)
               ),
-              width: width*0.22,
+              width: width*0.2,
               height: width*0.08,
               child: Center(
                 child: Text('Back', style: TextStyle(color: Colors.white, fontSize: 16, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
