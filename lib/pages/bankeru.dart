@@ -97,9 +97,9 @@ class _BankeruState extends State<Bankeru>
 
   List<String> menuImages = ['assets/football2.jpg', 'assets/football3.jpg','assets/football4.jpg',  'assets/football1.png'];
 
-  int value;
-  int color;
-  int type;
+  int value = 0;
+  int color = 0;
+  int type = 0;
 
   AnimationController _animationController;
   AnimationController _slideController;

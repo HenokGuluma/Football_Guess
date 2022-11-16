@@ -17,18 +17,18 @@ import 'package:instagram_clone/models/lobby.dart';
 import 'package:instagram_clone/pages/football_menu.dart';
 import 'package:instagram_clone/pages/footballers.dart';
 
-class AddLobby extends StatefulWidget {
+class EditLobby extends StatefulWidget {
   
   UserVariables variables;
   Lobby lobby;
 
-  AddLobby({this.variables, this.lobby});
+  EditLobby({this.variables, this.lobby});
 
   @override
-  _AddLobbyState createState() => _AddLobbyState();
+  _EditLobbyState createState() => _EditLobbyState();
 }
 
-class _AddLobbyState extends State<AddLobby>
+class _EditLobbyState extends State<EditLobby>
     with TickerProviderStateMixin {
  
   AnimationController _animationController;
@@ -375,6 +375,7 @@ void handleTimeout() {  // callback function
           builder: (BuildContext context) {
                           // return SelectLobby();
                           return FootBallMenu(
+
                             creating: true,
                             uid: _uidController.text,
                             name: _nameController.text,

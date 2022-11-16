@@ -137,6 +137,7 @@ flutter:
     - assets/diamond.svg
     - assets/heart_fill.svg
     - assets/bank_vault.png
+    - assets/roulette.png
 
 
   fonts:

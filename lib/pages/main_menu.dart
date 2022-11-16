@@ -9,12 +9,14 @@ import 'package:image_picker/image_picker.dart';
 import 'package:instagram_clone/backend/firebase.dart';
 import 'package:instagram_clone/main.dart';
 import 'package:instagram_clone/models/user.dart';
+import 'package:instagram_clone/pages/bankeru.dart';
 import 'package:instagram_clone/pages/black_jack.dart';
 import 'package:instagram_clone/pages/buy_coins.dart';
 import 'package:instagram_clone/pages/football_menu.dart';
 import 'package:instagram_clone/pages/pay_for_coins.dart';
 import 'package:instagram_clone/pages/select_lobby.dart';
 import 'package:instagram_clone/pages/send_coins.dart';
+import 'package:instagram_clone/pages/spinning_wheel.dart';
 
 
 class GameMenu extends StatefulWidget {
@@ -39,13 +41,14 @@ class GameMenuState extends State<GameMenu> {
   FirebaseProvider _firebaseProvider = FirebaseProvider();
   bool like;
   int counter = 0;
-  List<String> modes = ['assets/rapidBall.png', 'assets/blackjack-option.png', 'assets/bank_vault.png'];
-  List<String> options = ['RapidBall', 'Black Jack', 'Bankeru'];
+  List<String> modes = ['assets/rapidBall.png', 'assets/blackjack-option.png', 'assets/bank_vault.png', 'assets/roulette.png'];
+  List<String> options = ['RapidBall', 'Black Jack', 'Bankeru', 'Spinner'];
   Map<int, double> optionsMap = {1: 25, 3: 50, 5: 75, 10: 100};
 
   List<bool> balls = [true, true, true, true, true];
   List<DocumentSnapshot> keyOrderList = [];
   List<DocumentSnapshot> pendingOrderList = [];
+  int selectedIndex;
 
   @override
   void initState() {
@@ -114,6 +117,8 @@ class GameMenuState extends State<GameMenu> {
    menuOption(width, height, 1, modes, widget.variables),
    SizedBox(height: height*0.08,),
    menuOption(width, height, 2, modes, widget.variables),
+   SizedBox(height: height*0.08,),
+   widget.creating?menuOption(width, height, 2, modes, widget.variables):Center(),
    ],
 ),
           ),
@@ -150,20 +155,50 @@ Center(
     return GestureDetector(
       onTap: (){
         if (index == 1){
-            Navigator.push(context, MaterialPageRoute( 
+            if(widget.creating){
+              setState(() {
+                selectedIndex = 1;
+              });
+            }
+            else{
+               Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           // return LobbyMenu();
                           return BlackJack(solo: true,);
                         },
                         ));
+            }
+           
         }
         else if (index == 2){
-            Navigator.push(context, MaterialPageRoute( 
+           if(widget.creating){
+            setState(() {
+              selectedIndex = 2;
+            });
+           }
+           else{
+             Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           // return LobbyMenu();
-                          return BlackJack(solo: true,);
+                          return Bankeru(solo: true,);
                         },
                         ));
+           }
+        }
+        else if (index == 3){
+           if(widget.creating){
+            setState(() {
+              selectedIndex = 3;
+            });
+           }
+           else{
+             Navigator.push(context, MaterialPageRoute( 
+          builder: (BuildContext context) {
+                          // return LobbyMenu();
+                          return SpinningBaby();
+                        },
+                        ));
+           }
         }
         else{
           Navigator.push(context, MaterialPageRoute( 
@@ -218,6 +253,18 @@ Center(
           child: Text(options[index], style: TextStyle(color: Colors.black, fontSize: 22, fontFamily: 'Muli', fontWeight: FontWeight.w900),)
         ),
       ),
+      index==selectedIndex
+      ?Container(
+        width: width*0.7,
+        height: width*0.4,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(15),
+         
+        ),
+        child: Center(
+          child: Icon(Icons.check, size: 40, color: Color(0xff23ff89),)
+          ),
+      ):Center()
         ],
       )
     );
