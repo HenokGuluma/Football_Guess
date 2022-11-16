@@ -60,6 +60,8 @@ dependencies:
   infinite_scroll_pagination: 3.0.0
   timeago: 
   dotted_border: 
+  # flutter_audio_player:
+
 
 
 dev_dependencies:
@@ -87,6 +89,7 @@ flutter:
     - lib/static/backgrounds/
     - lib/static/cards/
     - assets/google_icon.jpg
+    - assets/glass.mp3
     - assets/profile_background.png
     - assets/Alexis-Sanchez.png
     - assets/Paul-Pogba.png

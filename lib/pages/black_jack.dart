@@ -98,6 +98,8 @@ class _BlackJackState extends State<BlackJack>
 
   List<String> menuImages = ['assets/football2.jpg', 'assets/football3.jpg','assets/football4.jpg',  'assets/football1.png'];
 
+  String sound = 'assets/glass.mp3';
+
   int value;
   int color;
   int type;
@@ -179,16 +181,17 @@ void startTimer(var width, var height, Function shatter) {
           });
           Future.delayed(Duration(milliseconds: 500)).then((value) {
             if (score+added ==21){
+              setState(() {
+              perfectScore = true;
+              });
                Future.delayed(Duration(seconds: 1)).then((value) {
               setState(() {
-                
-              perfectScore = true;
-               randomizing = false;
+              randomizing = false;
               showRandomizing = true;
             });
             });
             }
-             if (score+added > 21){
+            else if (score+added > 21){
             shatter();
             Future.delayed(Duration(seconds: 1)).then((value) {
               setState(() {
@@ -590,10 +593,12 @@ void handleTimeout() {  // callback function
             height: height*0.3,
           ),
                
-                  Text('You got a perfect Score', style: TextStyle(color: Color(0xff12ff23), fontSize: 40, fontFamily: 'Muli', fontWeight: FontWeight.w900))
+                  Center(
+                    child: Text('You got a perfect Score', style: TextStyle(color: Color(0xff12ff23), fontSize: 40, fontFamily: 'Muli', fontWeight: FontWeight.w900), textAlign: TextAlign.center,),
+                  )
                  ,
           SizedBox(height: height*0.1,),
-            Text('Score: '+ score.toString(), style: TextStyle(color: Color(0xffffffff), fontSize: 30, fontFamily: 'Muli', fontWeight: FontWeight.w900))
+            Text('Score: 12', style: TextStyle(color: Color(0xffffffff), fontSize: 30, fontFamily: 'Muli', fontWeight: FontWeight.w900))
                  ,
           SizedBox(height: height*0.1,),
             GestureDetector(
@@ -601,6 +606,7 @@ void handleTimeout() {  // callback function
               // Navigator.pop(context);
               setState(() {
                 exploded = false;
+                perfectScore = false;
                 cardValues = [];
                 score = 0;
               });
