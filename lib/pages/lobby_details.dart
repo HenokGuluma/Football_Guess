@@ -14,6 +14,7 @@ import 'package:instagram_clone/backend/firebase.dart';
 import 'package:instagram_clone/main.dart';
 import 'package:instagram_clone/models/lobby.dart';
 import 'package:instagram_clone/pages/add_lobby.dart';
+import 'package:instagram_clone/pages/edit_lobby.dart';
 import 'package:instagram_clone/pages/football_menu.dart';
 import 'package:instagram_clone/pages/footballers.dart';
 import 'package:instagram_clone/pages/insta_profile_screen.dart';
@@ -177,7 +178,8 @@ void handleTimeout() {  // callback function
              SizedBox(
               height: height*0.01,
             ),
-            Stack(
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 
            Padding(
@@ -187,7 +189,40 @@ void handleTimeout() {  // callback function
                 widget.lobby.name.toUpperCase(), style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 30, fontWeight: FontWeight.w900, fontStyle: FontStyle.normal),
               )
             )
-           )
+           ),
+
+           widget.variables.currentUser.userName == widget.lobby.creatorId
+           ?GestureDetector(
+            onTap: (){
+              FocusScope.of(context).unfocus();
+              setState(() {
+                joining = true;
+              });
+            _firebaseProvider.getLobbyById(widget.variables.currentUser.lobbyId).then((lobby){
+               Navigator.push(context, MaterialPageRoute( 
+          builder: (BuildContext context) {
+                          // return SelectLobby();
+                          return  EditLobby(variables: widget.variables, lobby: lobby,);
+                        },
+                        ));
+                 setState(() {
+                joining = false;
+              });
+            });
+              
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.35,
+              height: height*0.06,
+              child: Center(
+                child: Text('Edit', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            ),
+            ):Center()
               ],
             ),
 

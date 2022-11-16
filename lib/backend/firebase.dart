@@ -206,7 +206,7 @@ Future<User> fetchUserDetailsById(String uid) async {
     print(setMap);
     await _firestore.collection('users').doc(creatorId.uid).collection('lobby').doc(id).set(setMap);
     print(creatorId); print('stage2');
-    await _firestore.collection('users').doc(creatorId.uid).update({'hasLobby': true});
+    await _firestore.collection('users').doc(creatorId.uid).update({'hasLobby': true, 'lobbyId': lobby.uid});
     print(creatorId); print('stage3');
     
     setMap['creator'] = creatorId.toMap(creatorId);

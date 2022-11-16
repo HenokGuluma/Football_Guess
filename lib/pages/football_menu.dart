@@ -22,10 +22,11 @@ class FootBallMenu extends StatefulWidget {
   String name;
   String rate;
   User thisUser;
+  int gameCategory;
   UserVariables variables;
 
 
-  FootBallMenu({this.creating, this.uid, this.name, this.rate, this.thisUser, this.variables});
+  FootBallMenu({this.creating, this.uid, this.name, this.rate, this.gameCategory, this.thisUser, this.variables});
   @override
   _FootBallMenuState createState() => _FootBallMenuState();
 }
@@ -95,7 +96,9 @@ class _FootBallMenuState extends State<FootBallMenu>
   @override
   void initState() {
     super.initState();
-    
+    if(widget.gameCategory!=null){
+      selectedIndex = widget.gameCategory;
+    }
   }
 
   

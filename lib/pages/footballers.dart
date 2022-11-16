@@ -98,7 +98,7 @@ class _FootballersState extends State<Footballers>
   int second = 8;
   double timeLeft = 8;
   double resetValue = 8;
-  double gamePlayTimeLeft = 5;
+  double gamePlayTimeLeft = 3;
   double divider = 8;
   bool defeated = false;
   bool wrongClick = false;
@@ -120,6 +120,7 @@ class _FootballersState extends State<Footballers>
   dynamic playerInfotemp;
   bool resetColor = true;
   List<dynamic> playerList = [];
+   List<dynamic> playerListOnline = [];
   
 
  @override
@@ -391,9 +392,9 @@ _bounceController.addListener(() {
       }
 
       if(setupPlayers && playerInfotemp!=null && !disposed){
-        List<dynamic> list =  playerInfotemp.entries.map( (entry) => entry.value).toList();
+        // List<dynamic> list =  playerInfotemp.entries.map( (entry) => entry.value).toList();
         setState(() {
-          playerList = list;
+          playerList = playerListOnline;
           playerInfos = playerInfotemp;
           setupPlayers = false;
         });
@@ -452,6 +453,7 @@ void handleTimeout() {  // callback function
         
         if(snapshot.hasData){
           playerAmount = snapshot.data['players'].length;
+          playerListOnline = snapshot.data['players'];
           playerInfotemp = snapshot.data['playerInfo'];
           if(snapshot.data['players'].length<2){
             lastPlayer = true;
@@ -515,7 +517,7 @@ void handleTimeout() {  // callback function
               height: height*0.15,
               child: ListView.builder(
                 itemBuilder: (BuildContext context, int index) { 
-                    return profileCircle(width, height, index, playerList[index], snapshot);
+                    return profileCircle(width, height, index, playerInfos[playerList[index]], snapshot);
                     //return CircularProgressIndicator();
                   },
                 scrollDirection: Axis.horizontal,
@@ -673,7 +675,7 @@ void handleTimeout() {  // callback function
                   finished = false;
                   wrongClick = false;
                   gameStarted = false;
-                  gamePlayTimeLeft = 5;
+                  gamePlayTimeLeft = 3;
                   correctPicked = false;
                   animate = false;
                   currentPage = 0;
@@ -827,7 +829,7 @@ void handleTimeout() {  // callback function
                   finished = false;
                   wrongClick = false;
                   gameStarted = false;
-                  gamePlayTimeLeft = 5;
+                  gamePlayTimeLeft = 3;
                   correctPicked = false;
                   animate = false;
                   currentPage = 0;
@@ -1057,7 +1059,7 @@ void handleTimeout() {  // callback function
               height: height*0.15,
               child: ListView.builder(
                 itemBuilder: (BuildContext context, int index) { 
-                    return profileCircle(width, height, index, playerList[index], snapshot);
+                    return profileCircle(width, height, index, playerInfos[playerList[index]], snapshot);
                     //return CircularProgressIndicator();
                   },
                 scrollDirection: Axis.horizontal,
@@ -2558,7 +2560,7 @@ void handleTimeout() {  // callback function
               // The state that has changed here is the animation object’s value.
             });
           });
-          _colorController.forward();
+         
             timeLeft = resetValue;
             divider = resetValue;
             _slideController.reset(); 
@@ -2580,7 +2582,8 @@ void handleTimeout() {  // callback function
              });
              _pageController.animateToPage(currentPage, duration: Duration(milliseconds: 400), curve: Curves.easeInOut);
              _animationController.reset();
-            
+             _colorController.forward();
+             
            }
             }); 
           });

@@ -16,11 +16,12 @@ class User {
    String bio;
    String phone;
    bool hasLobby;
+   String lobbyId;
    int coins;
    int dailyTimer;
    int recentActivity;
 
-   User({this.uid, this.email, this.photoUrl, this.userName, this.hasLobby, this.followers, this.following, this.bio, this.posts, this.phone, this.trending, this.coins, this.dailyTimer, this.recentActivity});
+   User({this.uid, this.email, this.photoUrl, this.userName, this.lobbyId, this.hasLobby, this.followers, this.following, this.bio, this.posts, this.phone, this.trending, this.coins, this.dailyTimer, this.recentActivity});
 
     Map toMap(User user) {
     var data = Map<String, dynamic>();
@@ -35,6 +36,7 @@ class User {
     data['bio'] = user.bio;
     data['posts'] = user.posts;
     data['phone'] = user.phone;
+    data['lobbyId'] = user.lobbyId;
     data['dailyTimer'] = user.dailyTimer;
     data['recentActivity'] = user.recentActivity;
     data['coins'] = user.coins;
@@ -52,6 +54,7 @@ class User {
     this.bio = mapData['bio'];
     this.posts = mapData['posts'];
     this.phone = mapData['phone'];
+    this.lobbyId = mapData['lobbyId'];
     this.dailyTimer = mapData['dailyTimer'];
     this.recentActivity = mapData['recentActivity'];
     this.coins = mapData['coins'];
@@ -67,6 +70,7 @@ class User {
       this.posts = doc['posts'];
       this.followers = doc['followers'];
       this.following = doc['following'];
+      this.lobbyId = doc['lobbyId'];
       this.trending = doc['trending'];
       this.phone = doc['phone'];
       this.dailyTimer = doc['dailyTimer'];

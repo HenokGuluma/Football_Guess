@@ -52,6 +52,7 @@ class _SelectLobbyState extends State<SelectLobby>
 
   List<String> categories = ['Number', 'Goals', 'Age', 'Height'];
   List<String> categoryId = ['jersey', 'goals', 'age', 'height'];
+  bool joining = false;
   
 
   List<String> menuImages = ['assets/football2.jpg', 'assets/football3.jpg','assets/football4.jpg',  'assets/football1.png'];
@@ -269,7 +270,7 @@ void handleTimeout() {  // callback function
                         ),
                         Container(
                       width: width * 0.6,
-                      height: height*0.06,
+                      height: width*0.1,
                       decoration: BoxDecoration(
                           color: Color(0xfff1f1f1),
                           // border: Border.all(color: Colors.grey, width: 0.5),
@@ -286,7 +287,7 @@ void handleTimeout() {  // callback function
                           Center(
                               child: Container(
                             width: width * 0.4,
-                            height: 30,
+                            height: width*0.08,
                             padding: EdgeInsets.only(left: 5, top: 0),
                             child: TextField(
                               style: TextStyle(
@@ -457,7 +458,39 @@ void handleTimeout() {  // callback function
         Container(
           width: width*0.5,
           child: Center(
-            child: GestureDetector(
+            child: widget.variables.currentUser.hasLobby
+            ?GestureDetector(
+            onTap: (){
+              FocusScope.of(context).unfocus();
+              setState(() {
+                joining = true;
+              });
+            _firebaseProvider.getLobbyById(widget.variables.currentUser.lobbyId).then((lobby){
+               Navigator.push(context, MaterialPageRoute( 
+          builder: (BuildContext context) {
+                          // return SelectLobby();
+                          return  LobbyDetails(variables: widget.variables, lobby: lobby,);
+                        },
+                        ));
+                 setState(() {
+                joining = false;
+              });
+            });
+              
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: joining?Colors.grey:Color(0xff23ff89),
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.35,
+              height: height*0.06,
+              child: Center(
+                child: Text(joining?'Joining...':'My Lobby', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            ),
+            )
+            :GestureDetector(
             onTap: (){
               FocusScope.of(context).unfocus();
                Navigator.push(context, MaterialPageRoute( 
