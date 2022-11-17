@@ -40,16 +40,17 @@ class _SpinningBabyState extends State<SpinningBaby>
     Luck("Elon Musk", Colors.accents[7]),
   ];
   Timer _timer;
-  int timeLeft = 1200;
+  int timeLeft = 150;
   bool spinning = false;
   bool haveSpun = false;
   bool showWinner = false;
+  bool disposed = false;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    var _duration = Duration(milliseconds: 20000);
+    var _duration = Duration(milliseconds: 15000);
     _ctrl = AnimationController(vsync: this, duration: _duration)..addListener(() {
         
       setState(() {
@@ -59,6 +60,8 @@ class _SpinningBabyState extends State<SpinningBaby>
      });;
     _ani = CurvedAnimation(parent: _ctrl, curve: Curves.fastLinearToSlowEaseIn);
   }
+
+  
 
   @override
   Widget build(BuildContext context) {
@@ -105,6 +108,9 @@ class _SpinningBabyState extends State<SpinningBaby>
             }),
             GestureDetector(
             onTap: (){
+              setState(() {
+                disposed = true;
+              });
               Navigator.pop(context);
             },
             child: Container(
@@ -140,15 +146,18 @@ class _SpinningBabyState extends State<SpinningBaby>
             style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.w900, fontFamily: 'Muli', ),
           ),
         ),
-        onTap: _animation,
+        onTap: spinning?_noPress:_animation,
       ),
     );
   }
 
    void startTimer(){
     _timer = Timer.periodic(
-      Duration(milliseconds: 10), (timer) {
-        if(timeLeft==0){
+      Duration(milliseconds: 100), (timer) {
+        if(disposed){
+
+        }
+        else if(timeLeft==0){
           _timer.cancel();
           // cardWidget.add(card(width, height, value));
          
@@ -167,6 +176,10 @@ class _SpinningBabyState extends State<SpinningBaby>
        });
   }
 
+  _noPress(){
+    print('boom');
+  }
+
 
   _animation() {
     _items.shuffle();
@@ -174,7 +187,7 @@ class _SpinningBabyState extends State<SpinningBaby>
       spinning = true;
       haveSpun = true;
       showWinner = false;
-      timeLeft = 1200;
+      timeLeft = 150;
     });
     if (!_ctrl.isAnimating) {
       var _random = Random().nextDouble();

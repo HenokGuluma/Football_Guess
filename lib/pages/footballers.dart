@@ -129,6 +129,9 @@ class _FootballersState extends State<Footballers>
     _animationController.dispose();
     _slideController.dispose();
     _bounceController.dispose();
+    _colorController.dispose();
+    _animation = null;
+    colorAnimation = null;
    
     super.dispose();
   }

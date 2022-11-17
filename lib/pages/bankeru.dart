@@ -147,7 +147,11 @@ class _BankeruState extends State<Bankeru>
   bool showRandomizing = true;
    List<int> cards = [];
    List<Map<String, dynamic>> cardValues = [];
+   Map<String, dynamic> middleCard = {};
+   bool middleCardDrawn = false;
    int score = 0;
+   bool gameOver = false;
+   bool win = false;
 
 
  @override
@@ -157,7 +161,7 @@ class _BankeruState extends State<Bankeru>
   @override
   void initState() {
     super.initState();
-     print('bankeruu');
+    //  print('bankeruu');
     Future.delayed(Duration(milliseconds: 100)).then((value) {
       randomize();
     });
@@ -196,22 +200,52 @@ class _BankeruState extends State<Bankeru>
       if (_start == 0) {
         timer.cancel();
         cards.add(value);
-        cardValues.add({'value': value, 'type': type});
-          setState(() {
+        if(!middleCardDrawn){
+          cardValues.add({'value': value, 'type': type});
+        }
+        
+           if (cardValues.length<2){
+            randomize();
+            setState(() {
+              score = score+added;
+            });
+          }
+          else if(middleCardDrawn){
+            print('shabobom');
+             int low = cardValues[0]['value'];
+            int high = cardValues[1]['value'];
+            bool winner;
+            if((low<value) && (value<high) || (high<value) && (value<low)){
+              winner = true;
+            }
+            else{
+              winner = false;
+            }
+             setState(() {
+            middleCard = {'value': value, 'type': type};
+            gameOver = true;
+            win = winner;
+            randomizing = false;
+          });
+          print(middleCard);
+          }
+          else{
+           
+             setState(() {
             showRandomizing = false;
           });
-          Future.delayed(Duration(milliseconds: 500)).then((value) {
+             Future.delayed(Duration(milliseconds: 500)).then((value) {
             setState(() {
+            score = score+added;
             randomizing = false;
             showRandomizing = true;
-            score = score+added;
           });
           });
-
-          if (cardValues.length<2){
-            print('dauuuwerwm');
-            randomize();
           }
+         
+         
+
+         
       } else {
         // print(_start);
         setState(() {
@@ -247,7 +281,7 @@ class _BankeruState extends State<Bankeru>
   }
 
  void randomize(){
-    print('daaum');
+    // print('daaum');
     setState(() {
       _start = 100;
       randomizing = true;
@@ -524,8 +558,7 @@ void handleTimeout() {  // callback function
               ),
             ),
             ),
-            Text('Total: ' + score.toString(), style: TextStyle(color: score==0?Colors.white:Color(0xff26ff45), fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900))
-                  ],
+            ],
                  ),
                  SizedBox(
                   height: height*0.08,
@@ -533,7 +566,7 @@ void handleTimeout() {  // callback function
                 Center(
                   child: Container(
                     height: height*0.3,
-                    child: (showRandomizing?randomizing?card(width, height, {'value': value, 'type': type}, 0):cardBack(width, height):Center()),
+                    child: (showRandomizing?randomizing||middleCardDrawn?card(width, height, {'value': value, 'type': type}, 0):cardBack(width, height):Center()),
                   )
                 ),
                 SizedBox(
@@ -559,9 +592,42 @@ void handleTimeout() {  // callback function
               )
             ), 
           SizedBox(height: height*0.05,),
-            GestureDetector(
+            !(randomizing) && gameOver
+            ?Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                win
+                ?Container(
+              decoration: BoxDecoration(
+                color: Color(0xff23ff12),
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.3,
+              height: height*0.06,
+              child: Center(
+                child: Text('Winner', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            ):Container(
+              decoration: BoxDecoration(
+                color: Color(0xffff2389),
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.3,
+              height: height*0.06,
+              child: Center(
+                child: Text('Loser', style: TextStyle(color: Colors.white, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            ),
+                GestureDetector(
             onTap: (){
-              Navigator.pop(context);
+              setState(() {
+                gameOver = false;
+                cardValues = [];
+                middleCard = {};
+                middleCardDrawn = false;
+                win = false;
+              });
+              randomize();
             },
             child: Container(
               decoration: BoxDecoration(
@@ -571,10 +637,12 @@ void handleTimeout() {  // callback function
               width: width*0.3,
               height: height*0.06,
               child: Center(
-                child: Text('Submit', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                child: Text('Try Again', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
               ),
             ),
-            ),
+            )
+              ],
+            ):Center(),
            
             
             ])
@@ -662,7 +730,7 @@ void handleTimeout() {  // callback function
    }
 
    Widget symbolLetter(String value, Color color, int type, var width, var height){
-    print(typeMap[type]);
+    // print(typeMap[type]);
     return Container(
       width: width*0.1,
       height: width*0.12,
@@ -692,6 +760,9 @@ void handleTimeout() {  // callback function
 
     return GestureDetector(
          onTap: (){
+          setState(() {
+            middleCardDrawn = true;
+          });
         randomize();
       },
       child: Container(
@@ -817,7 +888,7 @@ void handleTimeout() {  // callback function
     }
 
 
-    print(typeMap[type]); print('babbby');
+    // print(typeMap[type]); print('babbby');
 
     Color cardColor = Colors.black;
 
@@ -968,7 +1039,7 @@ void handleTimeout() {  // callback function
     return GestureDetector(
       onTap: (){
         if(wrongClick){
-          print('wrong click');
+          // print('wrong click');
         }
         
         else if(correct){

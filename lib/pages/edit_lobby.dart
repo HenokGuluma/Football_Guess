@@ -16,6 +16,7 @@ import 'package:instagram_clone/main.dart';
 import 'package:instagram_clone/models/lobby.dart';
 import 'package:instagram_clone/pages/football_menu.dart';
 import 'package:instagram_clone/pages/footballers.dart';
+import 'package:instagram_clone/pages/main_menu.dart';
 
 class EditLobby extends StatefulWidget {
   
@@ -52,7 +53,7 @@ class _EditLobbyState extends State<EditLobby>
   int gamePlayDuration = 0;
   double size = 1;
   bool creating = false;
-  bool available = false;
+  bool available = true;
   bool checking = false;
   bool unavailable = false;
   bool userNameLongEnough = false;
@@ -374,7 +375,7 @@ void handleTimeout() {  // callback function
                Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           // return SelectLobby();
-                          return FootBallMenu(
+                          return GameMenu(
 
                             creating: true,
                             uid: _uidController.text,

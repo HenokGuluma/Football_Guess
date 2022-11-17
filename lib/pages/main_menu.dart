@@ -2,12 +2,14 @@ import 'dart:async';
 import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:instagram_clone/backend/firebase.dart';
 import 'package:instagram_clone/main.dart';
+import 'package:instagram_clone/models/lobby.dart';
 import 'package:instagram_clone/models/user.dart';
 import 'package:instagram_clone/pages/bankeru.dart';
 import 'package:instagram_clone/pages/black_jack.dart';
@@ -26,6 +28,7 @@ class GameMenu extends StatefulWidget {
   String rate;
   User thisUser;
   UserVariables variables;
+  
 
 
   GameMenu({this.creating, this.uid, this.name, this.rate, this.thisUser, this.variables});
@@ -37,6 +40,7 @@ class GameMenu extends StatefulWidget {
 class GameMenuState extends State<GameMenu> {
   File _image;
   File imageFile;
+  bool creating = false;
   final picker = ImagePicker();
   FirebaseProvider _firebaseProvider = FirebaseProvider();
   bool like;
@@ -118,13 +122,49 @@ class GameMenuState extends State<GameMenu> {
    SizedBox(height: height*0.08,),
    menuOption(width, height, 2, modes, widget.variables),
    SizedBox(height: height*0.08,),
-   widget.creating?menuOption(width, height, 2, modes, widget.variables):Center(),
+   widget.creating?menuOption(width, height, 3, modes, widget.variables):Center(),
    ],
 ),
           ),
           SizedBox(height: height*0.03,),
 Center(
-    child: GestureDetector(
+    child: /* GestureDetector(
+            onTap: (){
+              Navigator.pop(context);
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.3,
+              height: height*0.06,
+              child: Center(
+                child: Text('Go Back', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            ),
+            ), */
+            !widget.creating
+            ?GestureDetector(
+            onTap: (){
+              Navigator.pop(context);
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.3,
+              height: height*0.06,
+              child: Center(
+                child: Text('Go Back', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            ),
+            )
+          :Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+                 GestureDetector(
             onTap: (){
               Navigator.pop(context);
             },
@@ -140,6 +180,81 @@ Center(
               ),
             ),
             ),
+            selectedIndex==null
+            ?Container(
+              decoration: BoxDecoration(
+                color: Color(0xff777777),
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.35,
+              height: height*0.06,
+              child: Center(
+                child: Text('Confirm Lobby', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            )
+            :creating
+            ?Container(
+              decoration: BoxDecoration(
+                color: Color(0xff777777),
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.45,
+              height: height*0.06,
+              child: Center(
+                child: Text('Confirming Lobby', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            )
+            :GestureDetector(
+            onTap: (){
+             print('dammmmn');
+              setState(() {
+                creating = true;
+              });
+              Lobby lobby = Lobby(
+                uid: widget.uid,
+                name: widget.name,
+                rate: double.parse(widget.rate),
+                players: [widget.variables.currentUser.uid],
+                gameType: 0,
+                gameCategory: selectedIndex,
+                creationDate: DateTime.now().millisecondsSinceEpoch,
+                creatorId: widget.variables.currentUser.uid,
+                creatorName: widget.variables.currentUser.userName,
+              );
+              print(widget.variables.currentUser.uid); print(' is the user');
+              _firebaseProvider.addLobbyById(widget.uid, lobby, widget.thisUser).then((value) {
+                widget.variables.setLobby(lobby);
+                
+                
+                Flushbar(
+                  title: 'Created a Lobby',
+                  backgroundColor: Color(0xff00ffff),
+                  titleText: Text('Successfully created the lobby', style: TextStyle(color: Colors.black, fontSize: 16, fontFamily: 'Muli')),
+                );
+
+                 Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                  builder: ((context) => MyApp())),
+                              (Route<dynamic> route) => false,
+                            );
+              });
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Color(0xff23ff89),
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.35,
+              height: height*0.06,
+              child: Center(
+                child: Text('Confirm Lobby', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            ),
+            )
+            
+            ],
+          ),
    )
   
           ],

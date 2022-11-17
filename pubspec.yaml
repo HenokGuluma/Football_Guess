@@ -60,6 +60,9 @@ dependencies:
   infinite_scroll_pagination: 3.0.0
   timeago: 
   dotted_border: 
+  audio:
+
+
   # flutter_audio_player:
 
 

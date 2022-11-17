@@ -3,6 +3,7 @@ import 'dart:math';
 import 'dart:ui';
 import 'package:async/async.dart';
 import 'package:animated_check/animated_check.dart';
+import 'package:audio/audio.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
@@ -107,7 +108,10 @@ class _BlackJackState extends State<BlackJack>
   AnimationController _animationController;
   AnimationController _slideController;
   AnimationController _colorController;
-    AnimationController _bounceController;
+  AnimationController _bounceController;
+  Audio audioPlayer = new Audio(single: true);
+  AudioPlayerState state = AudioPlayerState.STOPPED;
+  StreamSubscription<AudioPlayerState> _playerStateSubscription;
   FirebaseFirestore _firestore = FirebaseFirestore.instance;
   FirebaseProvider _firebaseProvider = FirebaseProvider();
   PageController _pageController;
@@ -155,6 +159,8 @@ class _BlackJackState extends State<BlackJack>
    bool exploded = false;
    bool perfectScore = false;
 
+
+
 void startTimer(var width, var height, Function shatter) {
   
   const oneSec = const Duration(milliseconds: 10);
@@ -162,8 +168,11 @@ void startTimer(var width, var height, Function shatter) {
     oneSec,
     (Timer timer) {
       var added = 0;
-      if(value == 0){
+      if(value == 0 && score<11){
         added = 11;
+      }
+      else if (value ==0){
+        added = 1;
       }
       else if(value <9){
         added = value+1;
@@ -175,12 +184,21 @@ void startTimer(var width, var height, Function shatter) {
         timer.cancel();
         cards.add(value);
         cardValues.add({'value': value, 'type': type});
+           if (cardValues.length<2){
+            // print('dauuuwerwm');
+            randomize(width, height,shatter);
+            setState(() {
+              score = score+added;
+            });
+          }
+          else{
           setState(() {
             showRandomizing = false;
             addedScore = added;
+             score = score+added;
           });
           Future.delayed(Duration(milliseconds: 500)).then((value) {
-            if (score+added ==21){
+            if (score ==21){
               setState(() {
               perfectScore = true;
               });
@@ -191,8 +209,9 @@ void startTimer(var width, var height, Function shatter) {
             });
             });
             }
-            else if (score+added > 21){
+            else if (score > 21){
             shatter();
+            onPlay();
             Future.delayed(Duration(seconds: 1)).then((value) {
               setState(() {
                 
@@ -206,14 +225,15 @@ void startTimer(var width, var height, Function shatter) {
              setState(() {
             randomizing = false;
             showRandomizing = true;
-            score = score+added;
+           
           });
           }
 
          
           });
+      }
       } else {
-        print(_start);
+        // print(_start);
         setState(() {
           _start--;
           value = rng.nextInt(12);
@@ -223,6 +243,15 @@ void startTimer(var width, var height, Function shatter) {
     },
   );
 }
+ onPlay()
+    {
+        audioPlayer.play('assets/glass.mp3');
+    }
+
+    onPause()
+    {
+        audioPlayer.pause();
+    }
 
  @override
   void dispose() {
@@ -232,6 +261,9 @@ void startTimer(var width, var height, Function shatter) {
     _bounceController.dispose();
     // startTimer();
     _timer.cancel();
+
+     _playerStateSubscription.cancel();
+    audioPlayer.release();
    
     super.dispose();
   }
@@ -243,72 +275,20 @@ void startTimer(var width, var height, Function shatter) {
     value = rng.nextInt(12);
     color = rng.nextInt(2);
     type = rng.nextInt(3);
-   /*  _navigator = Navigator.of(context);
-    _pageController = PageController(initialPage: currentPage, viewportFraction: 1);
-    _animationController = AnimationController(vsync: this, duration: Duration(milliseconds: 500));
-    _colorController = AnimationController(duration: Duration(seconds: 13), vsync: this);
-     _slideController = AnimationController(
-      /// [AnimationController]s can be created with `vsync: this` because of
-      /// [TickerProviderStateMixin].
-      vsync: this,
-      duration: Duration(seconds: second),
-      // value: timeLeft.toDouble(),
-    )..addListener(() {
-        setState(() {});
-      });
-      // _slideController.reset(); _colorController.reset();
-    _slideController.repeat(reverse: false); */
+  
+
+    _playerStateSubscription = audioPlayer.onPlayerStateChanged.listen((AudioPlayerState state)
+        {
+            print("onPlayerStateChanged: ${audioPlayer.uid} $state");
+
+            if (mounted)
+                setState(() => this.state = state);
+        });
+
+    audioPlayer.preload('assets/glass.mp3');
 
     super.initState();
 
-    /* _colorController.repeat(reverse: false);
-    
-    _animationController.repeat(reverse: true);
-    // _animationController.reset();
-    _animation = Tween(begin: 2.0, end: 15.0).animate(_animationController)..addListener(() {
-      setState(() {
-        
-      });
-    });
-
-    colorAnimation = ColorTween(begin: Color(0xff63ff00), end: Color(0xffff2389)).animate(_colorController)
-          ..addListener(() {
-            setState(() {
-              // The state that has changed here is the animation object’s value.
-            });
-          });
-
-      _bounceController = AnimationController(
-
-      duration: Duration(milliseconds: 500),
-
-      vsync: this,
-
-      upperBound: 1.2,
-      lowerBound: 1
-
-    );
-     _colorController.forward();
-_bounceController.forward();
-_bounceController.repeat(reverse: true);
-_bounceController.addListener(() {
-
-      setState(() {
-           size = _bounceController.value;
-      });
-
-     });
-     
-     if(widget.solo){
-        setState(() {
-          startDown = true;
-        });
-      } */
-   /*  
-   startCountDown();
-   startGamePlayCountDown();
-    startSecondCountDown(); */
-    // scheduleTimeout(second * 1000);
     
   }
 
@@ -334,7 +314,7 @@ _bounceController.addListener(() {
   }
 
  void randomize(var width, var height, Function shatter){
-    print('daaum');
+    // print('daaum');
     setState(() {
       _start = 100;
       randomizing = true;
@@ -500,7 +480,7 @@ _bounceController.addListener(() {
       // print(timeLeft/resetValue); print (' is the timer');
 
        if(!gotWinner && playerAmount<1){
-        print('baaaam');
+        // print('baaaam');
         getWinner().then((value) {
           setState(() {
             gotWinner = true;
@@ -598,7 +578,7 @@ void handleTimeout() {  // callback function
                   )
                  ,
           SizedBox(height: height*0.1,),
-            Text('Score: 12', style: TextStyle(color: Color(0xffffffff), fontSize: 30, fontFamily: 'Muli', fontWeight: FontWeight.w900))
+            Text('Score: 21', style: TextStyle(color: Color(0xffffffff), fontSize: 30, fontFamily: 'Muli', fontWeight: FontWeight.w900))
                  ,
           SizedBox(height: height*0.1,),
             GestureDetector(
@@ -620,6 +600,24 @@ void handleTimeout() {  // callback function
               height: height*0.06,
               child: Center(
                 child: Text('Try Again', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            ),
+            ),
+            SizedBox(height: height*0.05,),
+            GestureDetector(
+            onTap: (){
+              Navigator.pop(context);
+             
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Color(0xffff2389),
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.3,
+              height: height*0.06,
+              child: Center(
+                child: Text('Leave', style: TextStyle(color: Colors.white, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
               ),
             ),
             ),
@@ -661,10 +659,10 @@ void handleTimeout() {  // callback function
                   Text('You Just Exploded', style: TextStyle(color: Color(0xff00ffff), fontSize: 40, fontFamily: 'Muli', fontWeight: FontWeight.w900))
                  ,
           SizedBox(height: height*0.1,),
-          Text('The total was: '+ (score + addedScore).toString(), style: TextStyle(color: Color(0xffff2389), fontSize: 25, fontFamily: 'Muli', fontWeight: FontWeight.w900))
+          Text('The total was: '+ score.toString(), style: TextStyle(color: Color(0xffff2389), fontSize: 25, fontFamily: 'Muli', fontWeight: FontWeight.w900))
                  ,
                  SizedBox(height: height*0.1,),
-            Text('Score: '+ score.toString(), style: TextStyle(color: Color(0xffffffff), fontSize: 30, fontFamily: 'Muli', fontWeight: FontWeight.w900))
+            Text('Score: '+ (score - addedScore).toString(), style: TextStyle(color: Color(0xffffffff), fontSize: 30, fontFamily: 'Muli', fontWeight: FontWeight.w900))
                  ,
           SizedBox(height: height*0.1,),
             GestureDetector(
@@ -688,6 +686,25 @@ void handleTimeout() {  // callback function
               ),
             ),
             ),
+             SizedBox(height: height*0.05,),
+            GestureDetector(
+            onTap: (){
+              Navigator.pop(context);
+             
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Color(0xffff2389),
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.3,
+              height: height*0.06,
+              child: Center(
+                child: Text('Leave', style: TextStyle(color: Colors.white, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            ),
+            ),
+
            
             
             ])
@@ -884,7 +901,7 @@ void handleTimeout() {  // callback function
    }
 
    Widget symbolLetter(String value, Color color, int type, var width, var height){
-    print(typeMap[type]);
+    // print(typeMap[type]);
     return Container(
       width: width*0.1,
       height: width*0.12,
@@ -908,9 +925,6 @@ void handleTimeout() {  // callback function
     else{
       cardValue = (value+1).toString();
     }
-
-
-    print(typeMap[type]); print('babbby');
 
     return GestureDetector(
          onTap: (){
@@ -1038,8 +1052,6 @@ void handleTimeout() {  // callback function
       cardValue = (value+1).toString();
     }
 
-
-    print(typeMap[type]); print('babbby');
 
     Color cardColor = Colors.black;
 

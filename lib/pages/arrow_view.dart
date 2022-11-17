@@ -15,7 +15,7 @@ class ArrowView extends StatelessWidget {
             clipper: _ArrowClipper(),
             child: Container(
               decoration: BoxDecoration(
-                 color: Color(0xffff2389)),
+                 color: Color(0xff23ff49)),
               height: 40,
               width: 40,
             ),

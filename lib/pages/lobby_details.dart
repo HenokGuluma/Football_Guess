@@ -94,6 +94,7 @@ class _LobbyDetailsState extends State<LobbyDetails>
   int gamePlayDuration = 0;
   double size = 1;
   bool joining = false;
+  bool editing = false;
   
   
   @override
@@ -183,7 +184,7 @@ void handleTimeout() {  // callback function
               children: [
                 
            Padding(
-            padding: EdgeInsets.only(top: height*0.02, left: width*0.08),
+            padding: EdgeInsets.only(top: height*0.0, left: width*0.08),
             child: Center(
               child: Text(
                 widget.lobby.name.toUpperCase(), style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 30, fontWeight: FontWeight.w900, fontStyle: FontStyle.normal),
@@ -191,12 +192,12 @@ void handleTimeout() {  // callback function
             )
            ),
 
-           widget.variables.currentUser.userName == widget.lobby.creatorId
+           widget.variables.currentUser.userName == widget.lobby.creatorName
            ?GestureDetector(
             onTap: (){
               FocusScope.of(context).unfocus();
               setState(() {
-                joining = true;
+                editing = true;
               });
             _firebaseProvider.getLobbyById(widget.variables.currentUser.lobbyId).then((lobby){
                Navigator.push(context, MaterialPageRoute( 
@@ -204,22 +205,24 @@ void handleTimeout() {  // callback function
                           // return SelectLobby();
                           return  EditLobby(variables: widget.variables, lobby: lobby,);
                         },
-                        ));
-                 setState(() {
-                joining = false;
+                        )).then((value) {
+                           setState(() {
+                editing = false;
               });
+                        });
+                
             });
               
             },
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20)
+                color: editing?Colors.grey:Colors.white,
+                borderRadius: BorderRadius.circular(15)
               ),
-              width: width*0.35,
-              height: height*0.06,
+              width: width*0.25,
+              height: height*0.05,
               child: Center(
-                child: Text('Edit', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                child: Text(editing?'Editing...':'Edit', style: TextStyle(color: Colors.black, fontSize: 16, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
               ),
             ),
             ):Center()
@@ -307,15 +310,17 @@ void handleTimeout() {  // callback function
                 joining = true;
               });
               _firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobby.uid).then((value) {
-                setState(() {
-                  joining = false;
-                });
+                
                  Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           // return LobbyDetails();
                           return Footballers(category: categoryId[widget.lobby.gameCategory], lobbyId: widget.lobby.uid, solo: false, creatorId: widget.lobby.creatorId, variables: widget.variables, categoryNo: widget.lobby.gameCategory,);
                         },
-                        ));
+                        )).then((value) {
+                          setState(() {
+                  joining = false;
+                });
+                        });
               });
             },
             child: Container(
