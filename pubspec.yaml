@@ -239,6 +239,14 @@ flutter:
     - assets/docs/footballers.json
     - assets/docs/asset-map.json
     - assets/docs/height-easy.txt
+    - assets/docs/goals-easy.txt
+    - assets/docs/age-easy.txt
+    - assets/docs/height-medium.txt
+    - assets/docs/goals-medium.txt
+    - assets/docs/age-medium.txt
+    - assets/docs/height-hard.txt
+    - assets/docs/goals-hard.txt
+    - assets/docs/age-hard.txt
 
 
 

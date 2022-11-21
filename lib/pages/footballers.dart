@@ -126,7 +126,18 @@ class _FootballersState extends State<Footballers>
   Map<String, dynamic> footballerData;
   Map<String, dynamic> assetData;
   List<List<String>> footballerPairs = [];
-  
+  List<List<String>> height_easy_pairs = [];
+  List<List<String>> height_medium_pairs = [];
+  List<List<String>> height_hard_pairs = [];
+  List<List<String>> goals_easy_pairs = [];
+  List<List<String>> goals_medium_pairs = [];
+  List<List<String>> goals_hard_pairs = [];
+  List<List<String>> age_medium_pairs = [];
+  List<List<String>> age_hard_pairs = [];
+  List<List<String>> age_easy_pairs = [];
+  List<List<String>> age_pairs = [];
+  List<List<String>> goals_pairs = [];
+  List<List<String>> height_pairs = [];
   
   
 
@@ -146,7 +157,26 @@ class _FootballersState extends State<Footballers>
 
   @override
   void initState() {
-    readJson();
+    readJson().then((value) {
+      List<List<String>> age_pairs_temp = [];
+      List<List<String>> goals_pairs_temp = [];
+      List<List<String>> height_pairs_temp = []; 
+      age_pairs_temp.addAll(age_easy_pairs.take(15).toList());
+      age_pairs_temp.addAll(age_medium_pairs.take(20));
+      age_pairs_temp.addAll(age_hard_pairs.take(30));
+      goals_pairs_temp.addAll(goals_easy_pairs.take(15));
+      goals_pairs_temp.addAll(goals_medium_pairs.take(20));
+      goals_pairs_temp.addAll(goals_hard_pairs.take(30));
+      height_pairs_temp.addAll(height_easy_pairs.take(15).toList());
+      height_pairs_temp.addAll(height_medium_pairs.take(20));
+      height_pairs_temp.addAll(height_hard_pairs.take(30));
+      print('shaklooos'); print(height_pairs_temp);
+      setState(() {
+        age_pairs = age_pairs_temp;
+        goals_pairs = goals_pairs_temp;
+        height_pairs = height_pairs_temp;
+      });
+    });
     _navigator = Navigator.of(context);
     _pageController = PageController(initialPage: currentPage, viewportFraction: 1);
     _animationController = AnimationController(vsync: this, duration: Duration(milliseconds: 500));
@@ -221,27 +251,98 @@ final String footballersResponse = await rootBundle.loadString('assets/docs/foot
 final String assetResponse = await rootBundle.loadString('assets/docs/asset-map.json');
 final data = await json.decode(footballersResponse);
 final data2 = await json.decode(assetResponse);
+// print(data["52"]["name"]); print('is the data');
 setState(() {
   footballerData = data;
   assetData = data2;
 });
-String feed = await rootBundle.loadString('assets/docs/height-easy.txt');
-splitText(feed);
+String height_easy = await rootBundle.loadString('assets/docs/height-easy.txt');
+String height_medium = await rootBundle.loadString('assets/docs/height-medium.txt');
+String height_hard = await rootBundle.loadString('assets/docs/height-hard.txt');
+String goals_easy = await rootBundle.loadString('assets/docs/goals-easy.txt');
+String goals_medium = await rootBundle.loadString('assets/docs/goals-medium.txt');
+String goals_hard = await rootBundle.loadString('assets/docs/goals-hard.txt');
+String age_easy = await rootBundle.loadString('assets/docs/height-easy.txt');
+String age_medium = await rootBundle.loadString('assets/docs/height-easy.txt');
+String age_hard = await rootBundle.loadString('assets/docs/height-easy.txt');
+splitText(height_easy, 'height_easy');
+splitText(height_medium, 'height_medium');
+splitText(height_hard, 'height_hard');
+splitText(goals_easy, 'goals_easy');
+splitText(goals_medium, 'goals_medium');
+splitText(goals_hard, 'goals_hard');
+splitText(age_easy, 'age_easy');
+splitText(age_medium, 'age_medium');
+splitText(age_hard, 'age_hard');
+
 // ... 
 }
 
-splitText(String text){
+Future<void>splitText(String text, String type){
+  // print(text);
   List<List<String>> finalResult = [];
-  List<String> pairs = text.split(",");
+  List<String> pairs = text.split("],");
   for (int i = 0; i<pairs.length; i++){
     String clean = pairs[i].replaceAll("[", "");
-    String cleaner = clean.replaceAll("]", "");
-    List<String> indices = cleaner.split(",");
+    List<String> indices = clean.split(",");
     finalResult.add(indices);
+    // print(indices);
   }
-  setState(() {
-    footballerPairs = finalResult;
+ if(type == 'height-easy'){
+   setState(() {
+    height_easy_pairs = finalResult;
+    height_easy_pairs.shuffle();
   });
+ }
+ else if(type == 'height-medium'){
+   setState(() {
+    height_medium_pairs = finalResult;
+    height_medium_pairs.shuffle();
+  });
+ }
+ else if(type == 'height-hard'){
+   setState(() {
+    height_hard_pairs = finalResult;
+    height_hard_pairs.shuffle();
+  });
+ }
+ else if(type == 'age-easy'){
+   setState(() {
+    age_easy_pairs = finalResult;
+    age_easy_pairs.shuffle();
+  });
+ }
+ else if(type == 'age-medium'){
+   setState(() {
+    age_medium_pairs = finalResult;
+    age_medium_pairs.shuffle();
+  });
+ }
+ else if(type == 'age-hard'){
+   setState(() {
+    age_hard_pairs = finalResult;
+    age_hard_pairs.shuffle();
+  });
+ }
+ else if(type == 'goals-easy'){
+   setState(() {
+    goals_easy_pairs = finalResult;
+    goals_easy_pairs.shuffle();
+  });
+ }
+ else if(type == 'goals-medium'){
+   setState(() {
+    height_easy_pairs = finalResult;
+    height_easy_pairs.shuffle();
+  });
+ }
+ else{
+  setState(() {
+    goals_hard_pairs = finalResult;
+    goals_hard_pairs.shuffle();
+  });
+ }
+ return null;
 }
 
   Future<void> getWinner() async{
@@ -1124,7 +1225,7 @@ void handleTimeout() {  // callback function
             child:  LinearProgressIndicator(
              /*  color: Color(0xff00ffff),
               backgroundColor: Color(0xff005555), */
-              minHeight: timeLeft/(divider-1) <0.3?size*5:5, 
+              minHeight: timeLeft/(divider-1) <0.3?size*10:5, 
               backgroundColor: Colors.transparent,
               value: timeLeft == divider?1:(timeLeft/(divider-1)).toDouble(),
               // value: _slideController.value,
@@ -1185,11 +1286,21 @@ void handleTimeout() {  // callback function
               :Center(
                 child: PageView.builder(
                   allowImplicitScrolling: false,
-                  itemCount: (footballerPairs.length)*10,
+                  itemCount: (footballerPairs.length),
                 itemBuilder: (context, index){
                   var item = footballers[index%5];
+                  List<dynamic> builderList = [];
+                  if(widget.category == "height"){
+                    builderList = height_pairs;
+                  }
+                  else if(widget.category == "goals"){
+                    builderList = goals_pairs;
+                  }
+                  else{
+                    builderList = age_pairs;
+                  }
                   return Center(
-                    child: playerSelecting(width, height, index, snapshot),
+                    child: playerSelecting(width, height, index, footballerPairs, snapshot),
                   );
                 },
                 controller: _pageController,
@@ -1385,11 +1496,20 @@ void handleTimeout() {  // callback function
               :Center(
                 child: PageView.builder(
                   allowImplicitScrolling: false,
-                  itemCount: (footballerPairs.length)*10,
+                  itemCount: (footballerPairs.length),
                 itemBuilder: (context, index){
-                  var item = footballers[index%5];
+                  List<dynamic> builderList = [];
+                  if(widget.category == "height"){
+                    builderList = height_pairs;
+                  }
+                  else if(widget.category == "goals"){
+                    builderList = goals_pairs;
+                  }
+                  else{
+                    builderList = age_pairs;
+                  }
                   return Center(
-                    child: playerSelecting(width, height, index, snapshot),
+                    child: playerSelecting(width, height, index, footballerPairs, snapshot),
                   );
                 },
                 controller: _pageController,
@@ -2013,6 +2133,7 @@ void handleTimeout() {  // callback function
                   currentPage = 0;
                   _animationController.reset();
                   _slideController.reset(); 
+                  footballerPairs.shuffle();
                   _slideController.repeat(reverse: false);
                 });
               },
@@ -2178,7 +2299,7 @@ void handleTimeout() {  // callback function
                               ),
                               new TextButton(
                                 onPressed: () {
-                                  _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
+                                  // _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
                                   Navigator.pop(context);
                                  _bounceController.reset();
                   _animationController.reset();
@@ -2308,11 +2429,20 @@ void handleTimeout() {  // callback function
               :Center(
                 child: PageView.builder(
                   allowImplicitScrolling: false,
-                  itemCount: (footballerPairs.length)*10,
+                  itemCount: (footballerPairs.length),
                 itemBuilder: (context, index){
-                  var item = footballers[index%5];
+                  List<dynamic> builderList = [];
+                  if(widget.category == "height"){
+                    builderList = height_pairs;
+                  }
+                  else if(widget.category == "goals"){
+                    builderList = goals_pairs;
+                  }
+                  else{
+                    builderList = age_pairs;
+                  }
                   return Center(
-                    child: playerSelecting(width, height, index, null),
+                    child: playerSelecting(width, height, index, footballerPairs, null),
                   );
                 },
                 controller: _pageController,
@@ -2412,11 +2542,20 @@ void handleTimeout() {  // callback function
               :Center(
                 child: PageView.builder(
                   allowImplicitScrolling: false,
-                  itemCount: (footballerPairs.length)*10,
+                  itemCount: (footballerPairs.length),
                 itemBuilder: (context, index){
-                  var item = footballers[index%5];
+                  List<dynamic> builderList = [];
+                  if(widget.category == "height"){
+                    builderList = height_pairs;
+                  }
+                  else if(widget.category == "goals"){
+                    builderList = goals_pairs;
+                  }
+                  else{
+                    builderList = age_pairs;
+                  }
                   return Center(
-                    child: playerSelecting(width, height, index, null),
+                    child: playerSelecting(width, height, index, footballerPairs, null),
                   );
                 },
                 controller: _pageController,
@@ -2572,28 +2711,31 @@ void handleTimeout() {  // callback function
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                playerCard(width, height, compare(footballer[0][widget.category], footballer[1][widget.category]), 0, footballer[0]['image'], footballer[0]['name'], snapshot),
+                playerCard(width, height, compare((footballer[0][widget.category]), footballer[1][widget.category]),0, 0, footballer[0]['image'], footballer[0]['name'], snapshot),
                 SizedBox(width: 20,),
-                playerCard(width, height,  compare(footballer[1][widget.category], footballer[0][widget.category]), 1, footballer[1]['image'], footballer[1]['name'], snapshot)
+                playerCard(width, height,  compare(footballer[1][widget.category], footballer[0][widget.category]),0,1, footballer[1]['image'], footballer[1]['name'], snapshot)
               ],
             );
    }
 
-   Widget playerSelecting(var width, var height, int index,  AsyncSnapshot<DocumentSnapshot> snapshot){
+   Widget playerSelecting(var width, var height, int index, List<List<String>> pageViewList,  AsyncSnapshot<DocumentSnapshot> snapshot){
     return  Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                playerCard(width, height, compare(footballerData[footballerPairs[index][0]][widget.category], footballerData[footballerPairs[index][1]][widget.category]), 0, assetData[footballerPairs[index][0]]["id"], footballerData[footballerPairs[index][0]]["name"], snapshot),
+                playerCard(width, height, compare(int.parse(footballerData[pageViewList[index][0]][widget.category]), int.parse(footballerData[pageViewList[index][1]][widget.category])),index, 0, assetData[pageViewList[index][0].toString()], footballerData[pageViewList[index][0]]["name"], snapshot),
                 SizedBox(width: 20,),
-                playerCard(width, height,  compare(footballerData[footballerPairs[index][1]][widget.category], footballerData[footballerPairs[index][0]][widget.category]), 1, assetData[footballerPairs[index][1]]["id"], footballerData[footballerPairs[index][0]]["name"], snapshot)
+                playerCard(width, height,  compare(int.parse(footballerData[pageViewList[index][1]][widget.category]), int.parse(footballerData[pageViewList[index][0]][widget.category])),index, 1,  assetData[pageViewList[index][1].toString()], footballerData[pageViewList[index][1]]["name"], snapshot)
               ],
             );
    }
 
-   Widget playerCard(var width, var height, bool correct, int index, String image, String name, AsyncSnapshot<DocumentSnapshot> snapshot){
+   Widget playerCard(var width, var height, bool correct, int index1, int index, String image, String name, AsyncSnapshot<DocumentSnapshot> snapshot){
+    //  print(footballerData[footballerPairs[index1][index]]["name"]);
     return GestureDetector(
       onTap: (){
+        print(footballerData[footballerPairs[index1][index]][widget.category]);
+         print(footballerData[footballerPairs[index1][index]]["name"]);
         if(wrongClick){
           print('wrong click');
         }
