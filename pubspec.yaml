@@ -236,6 +236,9 @@ flutter:
     - assets/Footballers/Vinicius-Jr.jpg
     - assets/Footballers/Virgil-VanDijk.jpg
     - assets/Footballers/Zlatan-Ibrahimovic.jpg
+    - assets/docs/footballers.json
+    - assets/docs/asset-map.json
+    - assets/docs/height-easy.txt
 
 
 

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math';
 import 'dart:ui';
 import 'package:async/async.dart';
@@ -8,6 +9,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_countdown_timer/flutter_countdown_timer.dart';
 import 'package:flutter_spinning_wheel/src/utils.dart';
 import 'package:flutter_countdown_timer/countdown.dart';
@@ -120,7 +122,12 @@ class _FootballersState extends State<Footballers>
   dynamic playerInfotemp;
   bool resetColor = true;
   List<dynamic> playerList = [];
-   List<dynamic> playerListOnline = [];
+  List<dynamic> playerListOnline = [];
+  Map<String, dynamic> footballerData;
+  Map<String, dynamic> assetData;
+  List<List<String>> footballerPairs = [];
+  
+  
   
 
  @override
@@ -139,7 +146,7 @@ class _FootballersState extends State<Footballers>
 
   @override
   void initState() {
-    
+    readJson();
     _navigator = Navigator.of(context);
     _pageController = PageController(initialPage: currentPage, viewportFraction: 1);
     _animationController = AnimationController(vsync: this, duration: Duration(milliseconds: 500));
@@ -208,6 +215,34 @@ _bounceController.addListener(() {
     // scheduleTimeout(second * 1000);
     
   }
+
+  Future<void> readJson() async {
+final String footballersResponse = await rootBundle.loadString('assets/docs/footballers.json');
+final String assetResponse = await rootBundle.loadString('assets/docs/asset-map.json');
+final data = await json.decode(footballersResponse);
+final data2 = await json.decode(assetResponse);
+setState(() {
+  footballerData = data;
+  assetData = data2;
+});
+String feed = await rootBundle.loadString('assets/docs/height-easy.txt');
+splitText(feed);
+// ... 
+}
+
+splitText(String text){
+  List<List<String>> finalResult = [];
+  List<String> pairs = text.split(",");
+  for (int i = 0; i<pairs.length; i++){
+    String clean = pairs[i].replaceAll("[", "");
+    String cleaner = clean.replaceAll("]", "");
+    List<String> indices = cleaner.split(",");
+    finalResult.add(indices);
+  }
+  setState(() {
+    footballerPairs = finalResult;
+  });
+}
 
   Future<void> getWinner() async{
     if(!widget.solo){
@@ -1089,8 +1124,7 @@ void handleTimeout() {  // callback function
             child:  LinearProgressIndicator(
              /*  color: Color(0xff00ffff),
               backgroundColor: Color(0xff005555), */
-              minHeight: 5,
-              
+              minHeight: timeLeft/(divider-1) <0.3?size*5:5, 
               backgroundColor: Colors.transparent,
               value: timeLeft == divider?1:(timeLeft/(divider-1)).toDouble(),
               // value: _slideController.value,
@@ -1151,11 +1185,11 @@ void handleTimeout() {  // callback function
               :Center(
                 child: PageView.builder(
                   allowImplicitScrolling: false,
-                  itemCount: (footballers.length)*10,
+                  itemCount: (footballerPairs.length)*10,
                 itemBuilder: (context, index){
                   var item = footballers[index%5];
                   return Center(
-                    child: playerSelect(width, height, index, item, snapshot),
+                    child: playerSelecting(width, height, index, snapshot),
                   );
                 },
                 controller: _pageController,
@@ -1351,11 +1385,11 @@ void handleTimeout() {  // callback function
               :Center(
                 child: PageView.builder(
                   allowImplicitScrolling: false,
-                  itemCount: (footballers.length)*10,
+                  itemCount: (footballerPairs.length)*10,
                 itemBuilder: (context, index){
                   var item = footballers[index%5];
                   return Center(
-                    child: playerSelect(width, height, index, item, snapshot),
+                    child: playerSelecting(width, height, index, snapshot),
                   );
                 },
                 controller: _pageController,
@@ -2274,11 +2308,11 @@ void handleTimeout() {  // callback function
               :Center(
                 child: PageView.builder(
                   allowImplicitScrolling: false,
-                  itemCount: (footballers.length)*10,
+                  itemCount: (footballerPairs.length)*10,
                 itemBuilder: (context, index){
                   var item = footballers[index%5];
                   return Center(
-                    child: playerSelect(width, height, index, item, null),
+                    child: playerSelecting(width, height, index, null),
                   );
                 },
                 controller: _pageController,
@@ -2378,11 +2412,11 @@ void handleTimeout() {  // callback function
               :Center(
                 child: PageView.builder(
                   allowImplicitScrolling: false,
-                  itemCount: (footballers.length)*10,
+                  itemCount: (footballerPairs.length)*10,
                 itemBuilder: (context, index){
                   var item = footballers[index%5];
                   return Center(
-                    child: playerSelect(width, height, index, item, null),
+                    child: playerSelecting(width, height, index, null),
                   );
                 },
                 controller: _pageController,
@@ -2545,6 +2579,18 @@ void handleTimeout() {  // callback function
             );
    }
 
+   Widget playerSelecting(var width, var height, int index,  AsyncSnapshot<DocumentSnapshot> snapshot){
+    return  Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                playerCard(width, height, compare(footballerData[footballerPairs[index][0]][widget.category], footballerData[footballerPairs[index][1]][widget.category]), 0, assetData[footballerPairs[index][0]]["id"], footballerData[footballerPairs[index][0]]["name"], snapshot),
+                SizedBox(width: 20,),
+                playerCard(width, height,  compare(footballerData[footballerPairs[index][1]][widget.category], footballerData[footballerPairs[index][0]][widget.category]), 1, assetData[footballerPairs[index][1]]["id"], footballerData[footballerPairs[index][0]]["name"], snapshot)
+              ],
+            );
+   }
+
    Widget playerCard(var width, var height, bool correct, int index, String image, String name, AsyncSnapshot<DocumentSnapshot> snapshot){
     return GestureDetector(
       onTap: (){
@@ -2595,6 +2641,7 @@ void handleTimeout() {  // callback function
           setState(() {
           animate = true;
           wrongClick = true;
+          _colorController.reset();
           _animationController.repeat(reverse: true);
            _animation = Tween(begin: 2.0, end: 15.0).animate(_animationController)..addListener(() {
       setState(() {
