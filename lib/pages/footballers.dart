@@ -126,6 +126,9 @@ class _FootballersState extends State<Footballers>
   Map<String, dynamic> footballerData;
   Map<String, dynamic> assetData;
   List<List<String>> footballerPairs = [];
+   List<List<String>> easyPairs = [];
+    List<List<String>> mediumPairs = [];
+     List<List<String>> hardPairs = [];
   List<List<String>> height_easy_pairs = [];
   List<List<String>> height_medium_pairs = [];
   List<List<String>> height_hard_pairs = [];
@@ -135,9 +138,13 @@ class _FootballersState extends State<Footballers>
   List<List<String>> age_medium_pairs = [];
   List<List<String>> age_hard_pairs = [];
   List<List<String>> age_easy_pairs = [];
+   List<List<String>> jersey_medium_pairs = [];
+  List<List<String>> jersey_hard_pairs = [];
+  List<List<String>> jersey_easy_pairs = [];
   List<List<String>> age_pairs = [];
   List<List<String>> goals_pairs = [];
   List<List<String>> height_pairs = [];
+  List<List<String>> jersey_pairs = [];
   
   
 
@@ -160,21 +167,58 @@ class _FootballersState extends State<Footballers>
     readJson().then((value) {
       List<List<String>> age_pairs_temp = [];
       List<List<String>> goals_pairs_temp = [];
-      List<List<String>> height_pairs_temp = []; 
-      age_pairs_temp.addAll(age_easy_pairs.take(15).toList());
+      List<List<String>> height_pairs_temp = [];
+      List<List<String>> jersey_pairs_temp = []; 
+      age_pairs_temp.addAll(age_easy_pairs.take(15));
       age_pairs_temp.addAll(age_medium_pairs.take(20));
       age_pairs_temp.addAll(age_hard_pairs.take(30));
       goals_pairs_temp.addAll(goals_easy_pairs.take(15));
       goals_pairs_temp.addAll(goals_medium_pairs.take(20));
       goals_pairs_temp.addAll(goals_hard_pairs.take(30));
-      height_pairs_temp.addAll(height_easy_pairs.take(15).toList());
+      height_pairs_temp.addAll(height_easy_pairs.take(15));
       height_pairs_temp.addAll(height_medium_pairs.take(20));
       height_pairs_temp.addAll(height_hard_pairs.take(30));
+      jersey_pairs_temp.addAll(jersey_easy_pairs.take(45));
+      // jersey_pairs_temp.addAll(jersey_medium_pairs.take(20));
+      // jersey_pairs_temp.addAll(jersey_hard_pairs.take(30));
       print('shaklooos'); print(height_pairs_temp);
+      if(widget.category == "height"){
+        setState(() {
+          footballerPairs = height_pairs_temp;
+          easyPairs = height_easy_pairs.take(15).toList();
+          mediumPairs = height_medium_pairs.take(20).toList();
+          hardPairs = height_hard_pairs.take(30).toList();
+        });
+      }
+      else if(widget.category == "goals"){
+        setState(() {
+          footballerPairs = goals_pairs_temp;
+          easyPairs = goals_easy_pairs.take(15).toList();
+          mediumPairs = goals_medium_pairs.take(20).toList();
+          hardPairs = goals_hard_pairs.take(30).toList();
+        });
+      }
+      else if(widget.category == "age"){
+        setState(() {
+          footballerPairs = age_pairs_temp;
+          easyPairs = age_easy_pairs.take(15).toList();
+          mediumPairs = age_medium_pairs.take(20).toList();
+          hardPairs = age_hard_pairs.take(30).toList();
+        });
+      }
+        else if(widget.category == "jersey"){
+        setState(() {
+          footballerPairs = jersey_pairs_temp;
+          easyPairs = jersey_easy_pairs.take(15).toList();
+          mediumPairs = jersey_medium_pairs.take(20).toList();
+          hardPairs = jersey_hard_pairs.take(30).toList();
+        });
+      }
       setState(() {
         age_pairs = age_pairs_temp;
         goals_pairs = goals_pairs_temp;
         height_pairs = height_pairs_temp;
+        jersey_pairs = jersey_pairs_temp;
       });
     });
     _navigator = Navigator.of(context);
@@ -263,8 +307,11 @@ String goals_easy = await rootBundle.loadString('assets/docs/goals-easy.txt');
 String goals_medium = await rootBundle.loadString('assets/docs/goals-medium.txt');
 String goals_hard = await rootBundle.loadString('assets/docs/goals-hard.txt');
 String age_easy = await rootBundle.loadString('assets/docs/height-easy.txt');
-String age_medium = await rootBundle.loadString('assets/docs/height-easy.txt');
-String age_hard = await rootBundle.loadString('assets/docs/height-easy.txt');
+String age_medium = await rootBundle.loadString('assets/docs/height-medium.txt');
+String age_hard = await rootBundle.loadString('assets/docs/height-hard.txt');
+String jersey_easy = await rootBundle.loadString('assets/docs/jersey-easy.txt');
+String jersey_medium = await rootBundle.loadString('assets/docs/jersey-medium.txt');
+String jersey_hard = await rootBundle.loadString('assets/docs/jersey-hard.txt');
 splitText(height_easy, 'height_easy');
 splitText(height_medium, 'height_medium');
 splitText(height_hard, 'height_hard');
@@ -274,6 +321,9 @@ splitText(goals_hard, 'goals_hard');
 splitText(age_easy, 'age_easy');
 splitText(age_medium, 'age_medium');
 splitText(age_hard, 'age_hard');
+splitText(age_easy, 'jersey_easy');
+splitText(age_medium, 'jersey_medium');
+splitText(age_hard, 'jersey_hard');
 
 // ... 
 }
@@ -288,58 +338,76 @@ Future<void>splitText(String text, String type){
     finalResult.add(indices);
     // print(indices);
   }
- if(type == 'height-easy'){
+ if(type == 'height_easy'){
    setState(() {
     height_easy_pairs = finalResult;
     height_easy_pairs.shuffle();
   });
  }
- else if(type == 'height-medium'){
+ else if(type == 'height_medium'){
    setState(() {
     height_medium_pairs = finalResult;
     height_medium_pairs.shuffle();
   });
  }
- else if(type == 'height-hard'){
+ else if(type == 'height_hard'){
    setState(() {
     height_hard_pairs = finalResult;
     height_hard_pairs.shuffle();
   });
  }
- else if(type == 'age-easy'){
+ else if(type == 'age_easy'){
    setState(() {
     age_easy_pairs = finalResult;
     age_easy_pairs.shuffle();
   });
  }
- else if(type == 'age-medium'){
+ else if(type == 'age_medium'){
    setState(() {
     age_medium_pairs = finalResult;
     age_medium_pairs.shuffle();
   });
  }
- else if(type == 'age-hard'){
+ else if(type == 'age_hard'){
    setState(() {
     age_hard_pairs = finalResult;
     age_hard_pairs.shuffle();
   });
  }
- else if(type == 'goals-easy'){
+ else if(type == 'goals_easy'){
    setState(() {
     goals_easy_pairs = finalResult;
     goals_easy_pairs.shuffle();
   });
  }
- else if(type == 'goals-medium'){
+ else if(type == 'goals_medium'){
    setState(() {
     height_easy_pairs = finalResult;
     height_easy_pairs.shuffle();
   });
  }
- else{
+ else if(type == 'goals_hard'){
   setState(() {
     goals_hard_pairs = finalResult;
     goals_hard_pairs.shuffle();
+  });
+ }
+ else if(type == 'jersey_easy'){
+  setState(() {
+    jersey_easy_pairs = finalResult;
+    jersey_easy_pairs.shuffle();
+  });
+ }
+ else if(type == 'jersey_medium'){
+  setState(() {
+    jersey_medium_pairs = finalResult;
+    jersey_medium_pairs.shuffle();
+  });
+ }
+ else if(type == 'jersey_hard'){
+  setState(() {
+    jersey_hard_pairs = finalResult;
+    jersey_hard_pairs.shuffle();
   });
  }
  return null;
@@ -816,11 +884,19 @@ void handleTimeout() {  // callback function
                   gameStarted = false;
                   gamePlayTimeLeft = 3;
                   correctPicked = false;
+                   easyPairs.shuffle();
+                  mediumPairs.shuffle();
+                  hardPairs.shuffle();
                   animate = false;
                   currentPage = 0;
                   _animationController.reset();
                   _slideController.reset();
                   _slideController.repeat(reverse: false);
+                });
+                setState(() {
+                   footballerPairs.addAll(easyPairs);
+                  footballerPairs.addAll(mediumPairs);
+                  footballerPairs.addAll(hardPairs);
                 });
               },
               child: Container(
@@ -970,11 +1046,19 @@ void handleTimeout() {  // callback function
                   gameStarted = false;
                   gamePlayTimeLeft = 3;
                   correctPicked = false;
+                    easyPairs.shuffle();
+                  mediumPairs.shuffle();
+                  hardPairs.shuffle();
                   animate = false;
                   currentPage = 0;
                   _animationController.reset();
                   _slideController.reset(); 
                   _slideController.repeat(reverse: false);
+                });
+                setState(() {
+                   footballerPairs.addAll(easyPairs);
+                  footballerPairs.addAll(mediumPairs);
+                  footballerPairs.addAll(hardPairs);
                 });
               },
               child: Container(
@@ -1289,16 +1373,6 @@ void handleTimeout() {  // callback function
                   itemCount: (footballerPairs.length),
                 itemBuilder: (context, index){
                   var item = footballers[index%5];
-                  List<dynamic> builderList = [];
-                  if(widget.category == "height"){
-                    builderList = height_pairs;
-                  }
-                  else if(widget.category == "goals"){
-                    builderList = goals_pairs;
-                  }
-                  else{
-                    builderList = age_pairs;
-                  }
                   return Center(
                     child: playerSelecting(width, height, index, footballerPairs, snapshot),
                   );
@@ -1498,16 +1572,7 @@ void handleTimeout() {  // callback function
                   allowImplicitScrolling: false,
                   itemCount: (footballerPairs.length),
                 itemBuilder: (context, index){
-                  List<dynamic> builderList = [];
-                  if(widget.category == "height"){
-                    builderList = height_pairs;
-                  }
-                  else if(widget.category == "goals"){
-                    builderList = goals_pairs;
-                  }
-                  else{
-                    builderList = age_pairs;
-                  }
+                  var item = footballers[index%5];
                   return Center(
                     child: playerSelecting(width, height, index, footballerPairs, snapshot),
                   );
@@ -2133,8 +2198,15 @@ void handleTimeout() {  // callback function
                   currentPage = 0;
                   _animationController.reset();
                   _slideController.reset(); 
-                  footballerPairs.shuffle();
+                  easyPairs.shuffle();
+                  mediumPairs.shuffle();
+                  hardPairs.shuffle();
                   _slideController.repeat(reverse: false);
+                });
+                setState(() {
+                   footballerPairs.addAll(easyPairs);
+                  footballerPairs.addAll(mediumPairs);
+                  footballerPairs.addAll(hardPairs);
                 });
               },
               child: Container(
@@ -2431,16 +2503,7 @@ void handleTimeout() {  // callback function
                   allowImplicitScrolling: false,
                   itemCount: (footballerPairs.length),
                 itemBuilder: (context, index){
-                  List<dynamic> builderList = [];
-                  if(widget.category == "height"){
-                    builderList = height_pairs;
-                  }
-                  else if(widget.category == "goals"){
-                    builderList = goals_pairs;
-                  }
-                  else{
-                    builderList = age_pairs;
-                  }
+                  var item = footballers[index%5];
                   return Center(
                     child: playerSelecting(width, height, index, footballerPairs, null),
                   );
@@ -2544,16 +2607,7 @@ void handleTimeout() {  // callback function
                   allowImplicitScrolling: false,
                   itemCount: (footballerPairs.length),
                 itemBuilder: (context, index){
-                  List<dynamic> builderList = [];
-                  if(widget.category == "height"){
-                    builderList = height_pairs;
-                  }
-                  else if(widget.category == "goals"){
-                    builderList = goals_pairs;
-                  }
-                  else{
-                    builderList = age_pairs;
-                  }
+                 var item = footballers[index%5];
                   return Center(
                     child: playerSelecting(width, height, index, footballerPairs, null),
                   );
@@ -2625,7 +2679,7 @@ void handleTimeout() {  // callback function
    }
 
    bool compare(var first, var second){
-    return first>second;
+    return first>=second;
    }
 
    Widget winnerWidget(var width, var height, DocumentSnapshot winner){
@@ -2711,9 +2765,9 @@ void handleTimeout() {  // callback function
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                playerCard(width, height, compare((footballer[0][widget.category]), footballer[1][widget.category]),0, 0, footballer[0]['image'], footballer[0]['name'], snapshot),
+                playerCard(width, height, compare((footballer[0][widget.category]), footballer[1][widget.category]),0, 0, footballer[0]['image'], footballer[0]['name'], snapshot, []),
                 SizedBox(width: 20,),
-                playerCard(width, height,  compare(footballer[1][widget.category], footballer[0][widget.category]),0,1, footballer[1]['image'], footballer[1]['name'], snapshot)
+                playerCard(width, height,  compare(footballer[1][widget.category], footballer[0][widget.category]),0,1, footballer[1]['image'], footballer[1]['name'], snapshot, [])
               ],
             );
    }
@@ -2723,19 +2777,20 @@ void handleTimeout() {  // callback function
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                playerCard(width, height, compare(int.parse(footballerData[pageViewList[index][0]][widget.category]), int.parse(footballerData[pageViewList[index][1]][widget.category])),index, 0, assetData[pageViewList[index][0].toString()], footballerData[pageViewList[index][0]]["name"], snapshot),
+                playerCard(width, height, compare(int.parse(footballerData[pageViewList[index][0]][widget.category]), int.parse(footballerData[pageViewList[index][1]][widget.category])),index, 0, assetData[pageViewList[index][0].toString()], footballerData[pageViewList[index][0]]["name"], snapshot, pageViewList),
                 SizedBox(width: 20,),
-                playerCard(width, height,  compare(int.parse(footballerData[pageViewList[index][1]][widget.category]), int.parse(footballerData[pageViewList[index][0]][widget.category])),index, 1,  assetData[pageViewList[index][1].toString()], footballerData[pageViewList[index][1]]["name"], snapshot)
+                playerCard(width, height,  compare(int.parse(footballerData[pageViewList[index][1]][widget.category]), int.parse(footballerData[pageViewList[index][0]][widget.category])),index, 1,  assetData[pageViewList[index][1].toString()], footballerData[pageViewList[index][1]]["name"], snapshot, pageViewList)
               ],
             );
    }
 
-   Widget playerCard(var width, var height, bool correct, int index1, int index, String image, String name, AsyncSnapshot<DocumentSnapshot> snapshot){
+   Widget playerCard(var width, var height, bool correct, int index1, int index, String image, String name, AsyncSnapshot<DocumentSnapshot> snapshot, List<List<String>> pageViewList){
     //  print(footballerData[footballerPairs[index1][index]]["name"]);
     return GestureDetector(
       onTap: (){
-        print(footballerData[footballerPairs[index1][index]][widget.category]);
-         print(footballerData[footballerPairs[index1][index]]["name"]);
+        print(footballerData[pageViewList[index1][index]][widget.category]);
+        print(widget.category);
+         print(footballerData[pageViewList[index1][index]]["name"]);
         if(wrongClick){
           print('wrong click');
         }
@@ -2869,9 +2924,14 @@ void handleTimeout() {  // callback function
             ],
           ),
           SizedBox(height: 10,),
-      Text(
-                name, style: TextStyle(color: Colors.white, fontFamily: 'Muli', fontSize: 22, fontWeight: FontWeight.w900),
+      Container(
+        width: width*0.45,
+        child: Center(
+          child:  Text(
+                name, style: TextStyle(color: Colors.white, fontFamily: 'Muli', fontSize: 20, fontWeight: FontWeight.w900), overflow: TextOverflow.ellipsis,
               ),
+        )
+      )
         ],
       )
     );

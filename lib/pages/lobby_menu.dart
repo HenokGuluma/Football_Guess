@@ -301,7 +301,7 @@ void handleTimeout() {  // callback function
 
   Widget lobbyItem(var width, var height, int index){
     return Padding(
-      padding: EdgeInsets.only(top: height*0.03, bottom: height*0.03),
+      padding: EdgeInsets.only(top: width*0.03, bottom: width*0.03),
       child: GestureDetector(
       onTap: (){
          Navigator.push(context, MaterialPageRoute( 
@@ -312,7 +312,7 @@ void handleTimeout() {  // callback function
       },
       child: Container(
         width: width*0.3,
-        height: height*0.25,
+        height: width*0.45,
         child: Column(
           children: [
             SizedBox(
@@ -340,7 +340,7 @@ void handleTimeout() {  // callback function
               )
             ),
             SizedBox(
-              height: height*0.03,
+              height: width*0.03,
             ),
             Container(
               width: width*0.45,

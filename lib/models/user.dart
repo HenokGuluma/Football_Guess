@@ -18,10 +18,11 @@ class User {
    bool hasLobby;
    String lobbyId;
    int coins;
+   int tokens;
    int dailyTimer;
    int recentActivity;
 
-   User({this.uid, this.email, this.photoUrl, this.userName, this.lobbyId, this.hasLobby, this.followers, this.following, this.bio, this.posts, this.phone, this.trending, this.coins, this.dailyTimer, this.recentActivity});
+   User({this.uid, this.email, this.photoUrl, this.userName, this.lobbyId, this.hasLobby, this.followers, this.following, this.bio, this.posts, this.phone, this.trending, this.coins, this.tokens, this.dailyTimer, this.recentActivity});
 
     Map toMap(User user) {
     var data = Map<String, dynamic>();
@@ -40,6 +41,7 @@ class User {
     data['dailyTimer'] = user.dailyTimer;
     data['recentActivity'] = user.recentActivity;
     data['coins'] = user.coins;
+     data['tokens'] = user.tokens;
     return data;
   }
 
@@ -59,6 +61,7 @@ class User {
     this.recentActivity = mapData['recentActivity'];
     this.coins = mapData['coins'];
     this.hasLobby = mapData['hasLobby'];
+    this.tokens = mapData['coins'];
   }
 
   User.fromDoc(DocumentSnapshot doc){
@@ -77,6 +80,7 @@ class User {
       this.recentActivity = doc['recentActivity'];
       this.coins = doc['coins'];
       this.hasLobby = doc['hasLobby'];
+      this.tokens = doc['tokens'];
   }
 }
 

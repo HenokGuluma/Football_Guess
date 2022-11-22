@@ -247,6 +247,9 @@ flutter:
     - assets/docs/height-hard.txt
     - assets/docs/goals-hard.txt
     - assets/docs/age-hard.txt
+    - assets/docs/jersey-hard.txt
+    - assets/docs/jersey-medium.txt
+    - assets/docs/jersey-easy.txt
 
 
 

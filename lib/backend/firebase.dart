@@ -33,6 +33,7 @@ class FirebaseProvider {
         phone: '',
         trending: 100,
         coins: 0,
+        tokens: 0,
         dailyTimer: DateTime.now().millisecondsSinceEpoch);
 
     //  Map<String, String> mapdata = Map<String, dynamic>();
@@ -307,7 +308,7 @@ Future<User> fetchUserDetailsById(String uid) async {
     Map<String, dynamic> map = Map();
     map['userName'] = name;
     map['bio'] = bio;
-    map['email'] = email;
+    // map['email'] = email;
     map['phone'] = phone;
     _firestore.collection('phones').doc(phone).set({'phone': phone, 'userId': uid});
     return _firestore.collection("users").doc(uid).update(map);
