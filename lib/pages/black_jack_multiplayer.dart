@@ -215,13 +215,16 @@ void startTimer(var width, var height, Function shatter) {
             onPlay();
             Future.delayed(Duration(seconds: 1)).then((value) {
               setState(() {
-                
+              
               exploded = true;
                randomizing = false;
               showRandomizing = true;
             });
+             _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId).then((value) {
+             _firebaseProvider.submitUserScore(widget.variables.currentUser, widget.lobbyId, score-addedScore);
             });
-          }
+            });
+            }
           else{
              setState(() {
             randomizing = false;
@@ -277,6 +280,7 @@ void startTimer(var width, var height, Function shatter) {
     color = rng.nextInt(2);
     type = rng.nextInt(3);
   
+     _navigator = Navigator.of(context);
 
     _playerStateSubscription = audioPlayer.onPlayerStateChanged.listen((AudioPlayerState state)
         {
@@ -302,7 +306,7 @@ void startTimer(var width, var height, Function shatter) {
       setState(() {
       retrievingWinner = true;
     });
-   Future.delayed(Duration(seconds: 10)).then((value) {
+   Future.delayed(Duration(seconds: 5)).then((value) {
      _firebaseProvider.getLobbyWinner(widget.lobbyId).then((lobbyWinner) {
       if(lobbyWinner!=null){
         setState(() {
@@ -497,7 +501,7 @@ void startTimer(var width, var height, Function shatter) {
       if(setupPlayers && playerInfotemp!=null){
         List<dynamic> list =  playerInfotemp.entries.map( (entry) => entry.value).toList();
         setState(() {
-          playerList = list;
+          playerList = playerListOnline;
           playerInfos = playerInfotemp;
           setupPlayers = false;
         });
@@ -552,8 +556,9 @@ void handleTimeout() {  // callback function
       stream: _firestore
           .collection("lobbies").doc(widget.lobbyId).snapshots(),
       builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-        
+        // print('hooray');
         if(snapshot.hasData){
+          // print('hooray');
           playerAmount = snapshot.data['players'].length;
           playerListOnline = snapshot.data['players'];
           playerInfotemp = snapshot.data['playerInfo'];
@@ -576,7 +581,7 @@ void handleTimeout() {  // callback function
           }
         }
         else{
-         
+         print('bowwwnce');
         }
         return gameScreen(width, height, snapshot);})
         );
@@ -622,9 +627,12 @@ void handleTimeout() {  // callback function
               setState(() {
                 exploded = false;
                 perfectScore = false;
+                gotWinner = false;
+                winner = null;
                 cardValues = [];
                 score = 0;
               });
+              _firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId);_firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId);
             },
             child: Container(
               decoration: BoxDecoration(
@@ -641,8 +649,68 @@ void handleTimeout() {  // callback function
             SizedBox(height: height*0.05,),
             GestureDetector(
             onTap: (){
-              Navigator.pop(context);
-             
+              showDialog(
+                        context: context,
+                        builder: ((context) {
+                          return new AlertDialog(
+                            backgroundColor: Color(0xff240044),
+                            title: new Text(
+                              'Leaving the game',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Muli',
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w900),
+                            ),
+                            content: new Text(
+                              'Are you sure you want to leave the game? All progresses and bets will be lost.',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Muli',
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.normal),
+                            ),
+                            actions: <Widget>[
+                              new TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                  setState(() {
+                                    paused = false;
+                                  });
+                                }, // Closes the dialog
+                                child: new Text(
+                                  'No',
+                                  style: TextStyle(
+                                      color: Color(0xffff2389),
+                                      fontSize: 16,
+                                      fontFamily: 'Muli',
+                                      fontWeight: FontWeight.w900),
+                                ),
+                              ),
+                              new TextButton(
+                                onPressed: () {
+                                  _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
+                                  Navigator.pop(context);
+                                //  _bounceController.reset();
+                  // _animationController.reset();
+                  setState(() {
+                    disposed = true;
+                  });
+                  // handleTimeout();
+                  _navigator.pop(context);
+                                },
+                                child: new Text(
+                                  'Yes',
+                                  style: TextStyle(
+                                      color: Color(0xff23ff89),
+                                      fontSize: 16,
+                                      fontFamily: 'Muli',
+                                      fontWeight: FontWeight.w900),
+                                ),
+                              ),
+                            ],
+                          );
+                        }));
             },
             child: Container(
               decoration: BoxDecoration(
@@ -666,7 +734,7 @@ void handleTimeout() {  // callback function
  
    }
 
-   Widget explodedView(var width, var height){
+   Widget explodedView(var width, var height, AsyncSnapshot snapshot){
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
@@ -688,26 +756,110 @@ void handleTimeout() {  // callback function
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                    SizedBox(
-            height: height*0.3,
+            height: height*0.1,
+          ),
+           Container(
+              height: height*0.15,
+              child: ListView.builder(
+                itemBuilder: (BuildContext context, int index) { 
+                    return profileCircle(width, height, index, playerInfos[playerList[index]], snapshot);
+                    //return CircularProgressIndicator();
+                  },
+                scrollDirection: Axis.horizontal,
+                itemCount: playerList.length,
+                ),
+            ),
+        SizedBox(
+            height: height*0.05,
           ),
                
-                  Text('You Just Exploded', style: TextStyle(color: Color(0xff00ffff), fontSize: 40, fontFamily: 'Muli', fontWeight: FontWeight.w900))
+                 snapshot.data['active'] || (!retrievingWinner && !gotWinner)
+                 ?Column(
+                  children: [
+                     Text('You Just Exploded', style: TextStyle(color: Color(0xff00ffff), fontSize: 40, fontFamily: 'Muli', fontWeight: FontWeight.w900))
                  ,
           SizedBox(height: height*0.1,),
           Text('The total was: '+ score.toString(), style: TextStyle(color: Color(0xffff2389), fontSize: 25, fontFamily: 'Muli', fontWeight: FontWeight.w900))
                  ,
-                 SizedBox(height: height*0.1,),
+                 SizedBox(height: height*0.05,),
             Text('Score: '+ (score - addedScore).toString(), style: TextStyle(color: Color(0xffffffff), fontSize: 30, fontFamily: 'Muli', fontWeight: FontWeight.w900))
                  ,
-          SizedBox(height: height*0.1,),
-            GestureDetector(
+         
+                  ],
+                 )
+                 : Center(),
+          snapshot.data['active']
+          ?Text('Waiting for others to finish...', style: TextStyle(color: Color(0xffffffff), fontSize: 25, fontFamily: 'Muli', fontWeight: FontWeight.w900, fontStyle: FontStyle.italic))
+                : retrievingWinner
+            ?Center(
+              child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+                'Game Over', style: TextStyle(color: Color(0xffffffff), fontFamily: 'Muli', fontSize: 45, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
+              ),
+            SizedBox(
+              height: height*0.1,
+            ),
+            
+             Center(
+            child: Text(
+                'Calculating Results', style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 35, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
+              ),
+          ),]))
+          :winner!=null
+          ?widget.variables.currentUser.userName != winner.data()['userName']
+              ?Center(
+              child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+                'The Winner is: ', style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 25, fontWeight: FontWeight.w900, fontStyle: FontStyle.normal),
+              ),
+            SizedBox(
+              height: height*0.02,
+            ),
+            winnerWidget(width, height, winner),
+           
+              SizedBox(
+              height: height*0.1,
+            ),]))
+          :Center(
+              child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+             Text(
+                'Congratulations', style: TextStyle(color: Color(0xff63ff00), fontFamily: 'Muli', fontSize: 50, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
+              ),
+            SizedBox(
+              height: height*0.15,
+            ),
+           Text(
+                'You have won with score ' + (exploded?score-addedScore:score).toString(), style: TextStyle(color: Color(0xffffffff), fontFamily: 'Muli', fontSize: 25, fontWeight: FontWeight.w900, fontStyle: FontStyle.normal),
+              ),
+            
+              SizedBox(
+              height: height*0.1,
+            ),]))
+          :Center(),
+            SizedBox(height: height*0.15,),   
+           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+               GestureDetector(
             onTap: (){
               // Navigator.pop(context);
               setState(() {
                 exploded = false;
                 cardValues = [];
+                gotWinner = false;
+                winner = null;
                 score = 0;
               });
+              _firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId);
             },
             child: Container(
               decoration: BoxDecoration(
@@ -721,10 +873,73 @@ void handleTimeout() {  // callback function
               ),
             ),
             ),
-             SizedBox(height: height*0.05,),
+            
             GestureDetector(
             onTap: (){
-              Navigator.pop(context);
+               showDialog(
+                        context: context,
+                        builder: ((context) {
+                          return new AlertDialog(
+                            backgroundColor: Color(0xff240044),
+                            title: new Text(
+                              'Leaving the game',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Muli',
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w900),
+                            ),
+                            content: new Text(
+                              'Are you sure you want to leave the game? All progresses and bets will be lost.',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Muli',
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.normal),
+                            ),
+                            actions: <Widget>[
+                              new TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                  setState(() {
+                                    paused = false;
+                                  });
+                                }, // Closes the dialog
+                                child: new Text(
+                                  'No',
+                                  style: TextStyle(
+                                      color: Color(0xffff2389),
+                                      fontSize: 16,
+                                      fontFamily: 'Muli',
+                                      fontWeight: FontWeight.w900),
+                                ),
+                              ),
+                              new TextButton(
+                                onPressed: () {
+                                  _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
+                                  Navigator.pop(context);
+                                //  _bounceController.reset();
+                  // _animationController.reset();
+                  setState(() {
+                    disposed = true;
+                  });
+                  // handleTimeout();
+                  _navigator.pop(context);
+                                },
+                                child: new Text(
+                                  'Yes',
+                                  style: TextStyle(
+                                      color: Color(0xff23ff89),
+                                      fontSize: 16,
+                                      fontFamily: 'Muli',
+                                      fontWeight: FontWeight.w900),
+                                ),
+                              ),
+                            ],
+                          );
+                        }));
+
+
              
             },
             child: Container(
@@ -740,6 +955,8 @@ void handleTimeout() {  // callback function
             ),
             ),
 
+            ],
+           )
            
             
             ])
@@ -752,7 +969,7 @@ void handleTimeout() {  // callback function
 
    Widget gameScreen(var width, var height, AsyncSnapshot snapshot){
     return exploded
-    ?explodedView(width, height)
+    ?explodedView(width, height, snapshot)
     :perfectScore
     ?perfectScoreWidget(width, height)
     :ShatteringWidget(
@@ -777,7 +994,7 @@ void handleTimeout() {  // callback function
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                     SizedBox(
-                height: height*0.02,
+                height: height*0.05,
               ),
              Container(
               height: height*0.15,
@@ -790,9 +1007,7 @@ void handleTimeout() {  // callback function
                 itemCount: playerList.length,
                 ),
             ),
-                 SizedBox(
-                  height: height*0.08,
-                ),
+                
                 Center(
                   child: Container(
                     height: height*0.3,
@@ -821,12 +1036,78 @@ void handleTimeout() {  // callback function
           ,
               )
             ), 
+            SizedBox(
+              height: height*0.03,
+            ),
             Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                      GestureDetector(
             onTap: (){
-              Navigator.pop(context);
+              showDialog(
+                        context: context,
+                        builder: ((context) {
+                          return new AlertDialog(
+                            backgroundColor: Color(0xff240044),
+                            title: new Text(
+                              'Leaving the game',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Muli',
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w900),
+                            ),
+                            content: new Text(
+                              'Are you sure you want to leave the game? All progresses and bets will be lost.',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Muli',
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.normal),
+                            ),
+                            actions: <Widget>[
+                              new TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                  setState(() {
+                                    paused = false;
+                                  });
+                                }, // Closes the dialog
+                                child: new Text(
+                                  'No',
+                                  style: TextStyle(
+                                      color: Color(0xffff2389),
+                                      fontSize: 16,
+                                      fontFamily: 'Muli',
+                                      fontWeight: FontWeight.w900),
+                                ),
+                              ),
+                              new TextButton(
+                                onPressed: () {
+                                  _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
+                                  Navigator.pop(context);
+                                //  _bounceController.reset();
+                  // _animationController.reset();
+                  setState(() {
+                    disposed = true;
+                  });
+                  // handleTimeout();
+                  _navigator.pop(context);
+                                },
+                                child: new Text(
+                                  'Yes',
+                                  style: TextStyle(
+                                      color: Color(0xff23ff89),
+                                      fontSize: 16,
+                                      fontFamily: 'Muli',
+                                      fontWeight: FontWeight.w900),
+                                ),
+                              ),
+                            ],
+                          );
+                        }));
+
+
             },
             child: Container(
               decoration: BoxDecoration(
@@ -836,7 +1117,7 @@ void handleTimeout() {  // callback function
               width: width*0.3,
               height: height*0.06,
               child: Center(
-                child: Text('Go Back', style: TextStyle(color: Colors.white, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                child: Text('Leave', style: TextStyle(color: Colors.white, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
               ),
             ),
             ),
@@ -963,6 +1244,7 @@ void handleTimeout() {  // callback function
     );
    }
 
+  
    Widget cardBack(var width, var height, Function shatter){
     String cardValue = '';
     Map<int, String> map;
@@ -1002,7 +1284,7 @@ void handleTimeout() {  // callback function
           SizedBox(
             height: width*0.01,
           ),
-         Row(
+         /* Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Padding(
@@ -1032,20 +1314,20 @@ void handleTimeout() {  // callback function
               ),
               ),
           ],
-         ),
+         ), */
           Center(
             child: Container(
-                width: width*0.2,
-                height: width*0.2,
+                width: width*0.3,
+                height: width*0.3,
                 decoration: BoxDecoration(
                   image: DecorationImage(
-                    image: AssetImage('assets/banker-removed.png'),
+                    image: AssetImage('assets/bankeru-new.png'),
                     fit: BoxFit.cover
                   )
                 ),
               ),
           ),
-          Row(
+          /* Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Padding(
@@ -1076,6 +1358,7 @@ void handleTimeout() {  // callback function
               ),
           ],
          ),
+           */
           SizedBox(
             height: width*0.01,
           )
@@ -1190,8 +1473,10 @@ void handleTimeout() {  // callback function
    }
 
    Widget profileCircle(var width, var height, int index, dynamic data, AsyncSnapshot snapshot){
+   
     List<dynamic> theList = snapshot.data['players'];
     bool active = theList.contains(data['uid']);
+
     return Padding(
       padding: EdgeInsets.only(left: 10, right: 10),
       child: Container(

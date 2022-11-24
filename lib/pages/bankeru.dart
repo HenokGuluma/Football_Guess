@@ -745,6 +745,7 @@ void handleTimeout() {  // callback function
     );
    }
 
+ 
    Widget cardBack(var width, var height){
     String cardValue = '';
     Map<int, String> map;
@@ -755,14 +756,8 @@ void handleTimeout() {  // callback function
       cardValue = (value+1).toString();
     }
 
-
-    // print(typeMap[type]); print('babbby');
-
     return GestureDetector(
          onTap: (){
-          setState(() {
-            middleCardDrawn = true;
-          });
         randomize();
       },
       child: Container(
@@ -782,7 +777,7 @@ void handleTimeout() {  // callback function
             blurRadius: 3,
             spreadRadius: 3
           )],
-          borderRadius: BorderRadius.circular(20)
+          borderRadius: BorderRadius.circular(15)
               ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -790,7 +785,7 @@ void handleTimeout() {  // callback function
           SizedBox(
             height: width*0.01,
           ),
-         Row(
+         /* Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Padding(
@@ -820,20 +815,20 @@ void handleTimeout() {  // callback function
               ),
               ),
           ],
-         ),
+         ), */
           Center(
             child: Container(
-                width: width*0.2,
-                height: width*0.2,
+                width: width*0.3,
+                height: width*0.3,
                 decoration: BoxDecoration(
                   image: DecorationImage(
-                    image: AssetImage('assets/banker-removed.png'),
+                    image: AssetImage('assets/bankeru-new.png'),
                     fit: BoxFit.cover
                   )
                 ),
               ),
           ),
-          Row(
+          /* Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Padding(
@@ -864,6 +859,7 @@ void handleTimeout() {  // callback function
               ),
           ],
          ),
+           */
           SizedBox(
             height: width*0.01,
           )

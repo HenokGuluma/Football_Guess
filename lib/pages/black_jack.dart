@@ -955,7 +955,7 @@ void handleTimeout() {  // callback function
           SizedBox(
             height: width*0.01,
           ),
-         Row(
+         /* Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Padding(
@@ -985,20 +985,20 @@ void handleTimeout() {  // callback function
               ),
               ),
           ],
-         ),
+         ), */
           Center(
             child: Container(
-                width: width*0.2,
-                height: width*0.2,
+                width: width*0.3,
+                height: width*0.3,
                 decoration: BoxDecoration(
                   image: DecorationImage(
-                    image: AssetImage('assets/banker-removed.png'),
+                    image: AssetImage('assets/bankeru-new.png'),
                     fit: BoxFit.cover
                   )
                 ),
               ),
           ),
-          Row(
+          /* Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Padding(
@@ -1029,6 +1029,7 @@ void handleTimeout() {  // callback function
               ),
           ],
          ),
+           */
           SizedBox(
             height: width*0.01,
           )

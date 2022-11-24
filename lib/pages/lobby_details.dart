@@ -14,10 +14,13 @@ import 'package:instagram_clone/backend/firebase.dart';
 import 'package:instagram_clone/main.dart';
 import 'package:instagram_clone/models/lobby.dart';
 import 'package:instagram_clone/pages/add_lobby.dart';
+import 'package:instagram_clone/pages/bankeru_multiplayer.dart';
+import 'package:instagram_clone/pages/black_jack_multiplayer.dart';
 import 'package:instagram_clone/pages/edit_lobby.dart';
 import 'package:instagram_clone/pages/football_menu.dart';
 import 'package:instagram_clone/pages/footballers.dart';
 import 'package:instagram_clone/pages/insta_profile_screen.dart';
+import 'package:instagram_clone/pages/spinning_wheel.dart';
 
 class LobbyDetails extends StatefulWidget {
  
@@ -50,6 +53,9 @@ class _LobbyDetailsState extends State<LobbyDetails>
   List<String> categoryId = ['jersey', 'goals', 'age', 'height'];
 
   List<String> menuImages = ['assets/football2.jpg', 'assets/football3.jpg','assets/football4.jpg',  'assets/football1.png'];
+
+  List<String> modes = ['assets/rapidBall.png', 'assets/blackjack-option.png', 'assets/bank_vault.png', 'assets/roulette.png'];
+  List<String> options = ['RapidBall', 'Black Jack', 'Bankeru', 'Spinner'];
 
   List<List<Map<String, dynamic>>> LobbyDetails = 
   [
@@ -277,11 +283,13 @@ void handleTimeout() {  // callback function
               ),
             )
            ),
-           menuOption(width, height, widget.lobby.gameCategory, menuImages)
+           widget.lobby.gameType == 0
+           ?menuOption(width, height, widget.lobby.gameCategory, menuImages)
+           :gameOption(width, height, widget.lobby.gameType)
               ],
             ),
             SizedBox(
-              height: height*0.05,
+              height: widget.lobby.gameType == 0?height*0.05:height*0.15,
             ),
             Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -313,9 +321,17 @@ void handleTimeout() {  // callback function
                 
                  Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
-                          // return LobbyDetails();
-                          return Footballers(category: categoryId[widget.lobby.gameCategory], lobbyId: widget.lobby.uid, solo: false, creatorId: widget.lobby.creatorId, variables: widget.variables, categoryNo: widget.lobby.gameCategory,);
-                        },
+                          if(widget.lobby.gameType == 0){
+                            return Footballers(category: categoryId[widget.lobby.gameCategory], lobbyId: widget.lobby.uid, solo: false, creatorId: widget.lobby.creatorId, variables: widget.variables, categoryNo: widget.lobby.gameCategory,);
+                          }
+                          else if (widget.lobby.gameType ==1){
+                            return BlackJackMultiplayer(category: '0', lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId,);
+                          }
+                          else if (widget.lobby.gameType ==2){
+                            return BankeruMultiplayer(category: '0', lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId,);
+                          }
+                          return SpinningBaby();
+                          },
                         )).then((value) {
                           setState(() {
                   joining = false;
@@ -357,6 +373,49 @@ void handleTimeout() {  // callback function
         ],
       ));
    
+   }
+
+   Widget gameOption (var width, var height, int index,){
+    return Stack(
+        alignment: Alignment.bottomCenter,
+        children: [
+          Container(
+        width: width*0.4,
+        height: width*0.3,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(15),
+          image: DecorationImage(
+            image: AssetImage(modes[index]),
+            fit: BoxFit.cover
+          )
+        ),
+      ),
+      Container(
+        width: width*0.4,
+        height: width*0.3,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(15),
+          gradient: LinearGradient(
+            begin: Alignment.topCenter, end: Alignment.bottomCenter,
+            stops: [0.4, 1.0],
+            colors: [Colors.transparent, Colors.white]
+          )
+        ),
+      ),
+      Container(
+        width: width*0.4,
+        height: width*0.1,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(15),
+         
+        ),
+        child: Center(
+          child: Text(options[index], style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900),)
+        ),
+      ),
+     
+        ],
+      );
    }
 
     Widget menuOption(var width, var height, int index, List<String> images){
