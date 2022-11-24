@@ -758,6 +758,9 @@ void handleTimeout() {  // callback function
 
     return GestureDetector(
          onTap: (){
+          setState(() {
+            middleCardDrawn = true;
+          });
         randomize();
       },
       child: Container(

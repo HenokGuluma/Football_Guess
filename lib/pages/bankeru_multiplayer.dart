@@ -111,6 +111,7 @@ class BankeruMultiplayerState extends State<BankeruMultiplayer>
   Animation _animation;
   Animation colorAnimation;
   bool animate = false;
+  int bankerWallet = 0;
   bool correctPicked = false;
   int currentPage = 0;
   bool finished = false;
@@ -790,6 +791,9 @@ void handleTimeout() {  // callback function
 
     return GestureDetector(
          onTap: (){
+          setState(() {
+            middleCardDrawn = true;
+          });
         randomize();
       },
       child: Container(
