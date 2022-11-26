@@ -3,7 +3,6 @@ import 'dart:math';
 import 'dart:ui';
 import 'package:async/async.dart';
 import 'package:animated_check/animated_check.dart';
-import 'package:audio/audio.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
@@ -17,6 +16,7 @@ import 'package:instagram_clone/backend/firebase.dart';
 import 'package:instagram_clone/main.dart';
 import 'package:instagram_clone/models/exploding_widget.dart';
 import 'package:progress_indicators/progress_indicators.dart';
+import 'package:just_audio/just_audio.dart';
 
 class BlackJack extends StatefulWidget {
 
@@ -104,14 +104,11 @@ class _BlackJackState extends State<BlackJack>
   int value;
   int color;
   int type;
-
+  final player = AudioPlayer(); 
   AnimationController _animationController;
   AnimationController _slideController;
   AnimationController _colorController;
   AnimationController _bounceController;
-  Audio audioPlayer = new Audio(single: true);
-  AudioPlayerState state = AudioPlayerState.STOPPED;
-  StreamSubscription<AudioPlayerState> _playerStateSubscription;
   FirebaseFirestore _firestore = FirebaseFirestore.instance;
   FirebaseProvider _firebaseProvider = FirebaseProvider();
   PageController _pageController;
@@ -158,6 +155,7 @@ class _BlackJackState extends State<BlackJack>
    int addedScore = 0;
    bool exploded = false;
    bool perfectScore = false;
+
 
 
 
@@ -210,14 +208,18 @@ void startTimer(var width, var height, Function shatter) {
             });
             }
             else if (score > 21){
-            shatter();
-            onPlay();
+            player.play();
+            Future.delayed(Duration(milliseconds: 300)).then((value) {
+              shatter();
+            });
+            
             Future.delayed(Duration(seconds: 1)).then((value) {
               setState(() {
                 
               exploded = true;
                randomizing = false;
               showRandomizing = true;
+              // player.stop();
             });
             });
           }
@@ -243,15 +245,6 @@ void startTimer(var width, var height, Function shatter) {
     },
   );
 }
- onPlay()
-    {
-        audioPlayer.play('assets/glass.mp3');
-    }
-
-    onPause()
-    {
-        audioPlayer.pause();
-    }
 
  @override
   void dispose() {
@@ -261,9 +254,6 @@ void startTimer(var width, var height, Function shatter) {
     _bounceController.dispose();
     // startTimer();
     _timer.cancel();
-
-     _playerStateSubscription.cancel();
-    audioPlayer.release();
    
     super.dispose();
   }
@@ -277,19 +267,14 @@ void startTimer(var width, var height, Function shatter) {
     type = rng.nextInt(3);
   
 
-    _playerStateSubscription = audioPlayer.onPlayerStateChanged.listen((AudioPlayerState state)
-        {
-            print("onPlayerStateChanged: ${audioPlayer.uid} $state");
-
-            if (mounted)
-                setState(() => this.state = state);
-        });
-
-    audioPlayer.preload('assets/glass.mp3');
-
+    setupSound();
     super.initState();
 
     
+  }
+
+  Future<void> setupSound() async{
+    final duration = await player.setAsset('assets/glass.mp3');
   }
 
   Future<void> getWinner() async{
@@ -589,6 +574,7 @@ void handleTimeout() {  // callback function
                 perfectScore = false;
                 cardValues = [];
                 score = 0;
+                player.stop();
               });
             },
             child: Container(
@@ -672,6 +658,7 @@ void handleTimeout() {  // callback function
                 exploded = false;
                 cardValues = [];
                 score = 0;
+                player.stop();
               });
             },
             child: Container(

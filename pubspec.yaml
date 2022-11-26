@@ -60,7 +60,7 @@ dependencies:
   infinite_scroll_pagination: 3.0.0
   timeago: 
   dotted_border: 
-  audio:
+  just_audio:
 
 
   # flutter_audio_player:
@@ -251,6 +251,18 @@ flutter:
     - assets/docs/jersey-medium.txt
     - assets/docs/jersey-easy.txt
     - assets/bankeru-new.png
+    - assets/sound-effects/adderall.mp3
+    - assets/sound-effects/just-a-lil-bit.mp3
+    - assets/sound-effects/middle.mp3
+    - assets/sound-effects/on&on.mp3
+    - assets/sound-effects/option-click.wav
+    - assets/sound-effects/option-click-confirm.wav
+    - assets/sound-effects/roses.mp3
+    - assets/sound-effects/runaway.mp3
+    - assets/sound-effects/spectre.mp3
+    - assets/sound-effects/sugar.mp3
+    - assets/sound-effects/this-girl.mp3
+    - assets/sound-effects/you-like-it.mp3
 
 
 

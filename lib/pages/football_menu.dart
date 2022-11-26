@@ -14,6 +14,7 @@ import 'package:instagram_clone/main.dart';
 import 'package:instagram_clone/models/lobby.dart';
 import 'package:instagram_clone/models/user.dart';
 import 'package:instagram_clone/pages/footballers.dart';
+import 'package:just_audio/just_audio.dart';
 
 class FootBallMenu extends StatefulWidget {
  
@@ -24,9 +25,11 @@ class FootBallMenu extends StatefulWidget {
   User thisUser;
   int gameCategory;
   UserVariables variables;
+  Function pauseBackground;
+  Function startBackground;
 
 
-  FootBallMenu({this.creating, this.uid, this.name, this.rate, this.gameCategory, this.thisUser, this.variables});
+  FootBallMenu({this.creating, this.uid, this.name, this.rate, this.gameCategory, this.thisUser, this.variables, this.pauseBackground, this.startBackground});
   @override
   _FootBallMenuState createState() => _FootBallMenuState();
 }
@@ -75,9 +78,8 @@ class _FootBallMenuState extends State<FootBallMenu>
       {'name': 'Mohammed Salah', 'age': 30, 'image':'assets/Mohammed-Salah.png' },
     ]
   ];
-  AnimationController _animationController;
-  AnimationController _slideController;
-  PageController _pageController;
+  AnimationController _fadeController;
+  final player = AudioPlayer(); 
   Animation _animation;
   bool animate = false;
   bool correctPicked = false;
@@ -99,6 +101,9 @@ class _FootBallMenuState extends State<FootBallMenu>
     if(widget.gameCategory!=null){
       selectedIndex = widget.gameCategory;
     }
+    _fadeController = AnimationController(vsync: this, duration: Duration(milliseconds: 700));
+    _animation = Tween(begin: 1.0, end: 0.0).animate(_fadeController);
+    setupSound();
   }
 
   
@@ -110,6 +115,18 @@ void handleTimeout() {  // callback function
     defeated = true;
   });
 }
+
+ Future<void> setupSound() async{
+    final duration = await player.setAsset('assets/sound-effects/option-click-confirm.wav');
+    await player.setVolume(0.1);
+  }
+
+@override
+  void dispose() {
+    // TODO: implement dispose
+    _fadeController.dispose();
+    super.dispose();
+  }
    
 
   @override
@@ -295,7 +312,6 @@ void handleTimeout() {  // callback function
     
         ],
       ));
-   
    }
 
    bool compare(int first, int second){
@@ -311,11 +327,21 @@ void handleTimeout() {  // callback function
           });
         }
         else{
-          Navigator.push(context, MaterialPageRoute( 
+          // _fadeController.forward();
+          player.play();
+          widget.pauseBackground();
+          Future.delayed(Duration(milliseconds: 300)).then((value) {
+              Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
-                          return Footballers(category: categoryId[index], solo: true, categoryNo: index,);
+                          return Footballers(category: categoryId[index], solo: true, categoryNo: index, startBackground: widget.startBackground, pauseBackground: widget.pauseBackground,);
                         },
                         ));
+          });
+
+          Future.delayed(Duration(seconds: 1)).then((value) {
+            player.stop();
+          });
+        
         }
       },
       child: Stack(

@@ -15,6 +15,7 @@ import 'package:flutter_spinning_wheel/src/utils.dart';
 import 'package:flutter_countdown_timer/countdown.dart';
 import 'package:instagram_clone/backend/firebase.dart';
 import 'package:instagram_clone/main.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:progress_indicators/progress_indicators.dart';
 
 class Footballers extends StatefulWidget {
@@ -25,9 +26,11 @@ class Footballers extends StatefulWidget {
   int categoryNo;
   bool solo;
   UserVariables variables;
+   Function pauseBackground;
+  Function startBackground;
  
   Footballers({
-    this.category, this.lobbyId, this.solo, this.variables, this.creatorId, this.categoryNo,
+    this.category, this.lobbyId, this.solo, this.variables, this.creatorId, this.categoryNo, this.pauseBackground, this.startBackground
   });
 
   @override
@@ -80,6 +83,10 @@ class _FootballersState extends State<Footballers>
       {'name': 'Sadio Mane', 'age': 31, 'image':'assets/Sadio-Mane.png', 'height': 1.78, 'jersey': 19, 'goals': 276 },
       {'name': 'Mohammed Salah', 'age': 30, 'image':'assets/Mohammed-Salah.png', 'height': 1.77, 'jersey': 10, 'goals': 306 },
     ]
+  ];
+  List<String> backgroundTracks = [
+    'assets/sound-effects/sugar.mp3', 'assets/sound-effects/on&on.mp3', 'assets/sound-effects/runaway.mp3',
+    'assets/sound-effects/this-girl.mp3', 'assets/sound-effects/spectre.mp3',
   ];
 
   List<String> menuImages = ['assets/football2.jpg', 'assets/football3.jpg','assets/football4.jpg',  'assets/football1.png'];
@@ -145,6 +152,9 @@ class _FootballersState extends State<Footballers>
   List<List<String>> goals_pairs = [];
   List<List<String>> height_pairs = [];
   List<List<String>> jersey_pairs = [];
+  Color finalColor;
+  final player = AudioPlayer(); 
+
   
   
 
@@ -157,7 +167,7 @@ class _FootballersState extends State<Footballers>
     _colorController.dispose();
     _animation = null;
     colorAnimation = null;
-   
+   player.stop();
     super.dispose();
   }
 
@@ -166,52 +176,55 @@ class _FootballersState extends State<Footballers>
   void initState() {
     readJson().then((value) {
       List<List<String>> age_pairs_temp = [];
+      
       List<List<String>> goals_pairs_temp = [];
       List<List<String>> height_pairs_temp = [];
       List<List<String>> jersey_pairs_temp = []; 
-      age_pairs_temp.addAll(age_easy_pairs.take(15));
-      age_pairs_temp.addAll(age_medium_pairs.take(20));
-      age_pairs_temp.addAll(age_hard_pairs.take(30));
-      goals_pairs_temp.addAll(goals_easy_pairs.take(15));
-      goals_pairs_temp.addAll(goals_medium_pairs.take(20));
-      goals_pairs_temp.addAll(goals_hard_pairs.take(30));
-      height_pairs_temp.addAll(height_easy_pairs.take(15));
-      height_pairs_temp.addAll(height_medium_pairs.take(20));
-      height_pairs_temp.addAll(height_hard_pairs.take(30));
-      jersey_pairs_temp.addAll(jersey_easy_pairs.take(45));
-      // jersey_pairs_temp.addAll(jersey_medium_pairs.take(20));
-      // jersey_pairs_temp.addAll(jersey_hard_pairs.take(30));
-      print('shaklooos'); print(height_pairs_temp);
+      age_pairs_temp = concatenateList(goals_pairs_temp,  age_easy_pairs.take(15).toList());
+      age_pairs_temp = concatenateList(goals_pairs_temp,  age_medium_pairs.take(15).toList());
+      age_pairs_temp = concatenateList(goals_pairs_temp,  age_hard_pairs.take(15).toList());
+      goals_pairs_temp = concatenateList(goals_pairs_temp,  goals_easy_pairs.take(15).toList());
+      goals_pairs_temp = concatenateList(goals_pairs_temp,  goals_medium_pairs.take(20).toList());
+      goals_pairs_temp = concatenateList(goals_pairs_temp,  goals_hard_pairs.take(30).toList());
+      height_pairs_temp = concatenateList(height_pairs_temp,  height_easy_pairs.take(15).toList());
+      height_pairs_temp = concatenateList(height_pairs_temp,  height_medium_pairs.take(20).toList());
+      height_pairs_temp = concatenateList(height_pairs_temp,  height_hard_pairs.take(30).toList());
+      jersey_pairs_temp = concatenateList(jersey_pairs_temp,  jersey_easy_pairs.take(15).toList());
+      jersey_pairs_temp = concatenateList(jersey_pairs_temp,  jersey_medium_pairs.take(20).toList());
+      jersey_pairs_temp = concatenateList(jersey_pairs_temp,  jersey_hard_pairs.take(30).toList());
+      print('shaklooos'); print(height_pairs_temp);print(height_medium_pairs);
       if(widget.category == "height"){
+        print('height indeed');
         setState(() {
           footballerPairs = height_pairs_temp;
-          easyPairs = height_easy_pairs.take(15).toList();
-          mediumPairs = height_medium_pairs.take(20).toList();
-          hardPairs = height_hard_pairs.take(30).toList();
+          easyPairs = height_easy_pairs;
+          mediumPairs = height_medium_pairs;
+          hardPairs = height_hard_pairs;
         });
       }
       else if(widget.category == "goals"){
+        print('major accident');
         setState(() {
           footballerPairs = goals_pairs_temp;
-          easyPairs = goals_easy_pairs.take(15).toList();
-          mediumPairs = goals_medium_pairs.take(20).toList();
-          hardPairs = goals_hard_pairs.take(30).toList();
+          easyPairs = goals_easy_pairs;
+          mediumPairs = goals_medium_pairs;
+          hardPairs = goals_hard_pairs;
         });
       }
       else if(widget.category == "age"){
         setState(() {
           footballerPairs = age_pairs_temp;
-          easyPairs = age_easy_pairs.take(15).toList();
-          mediumPairs = age_medium_pairs.take(20).toList();
-          hardPairs = age_hard_pairs.take(30).toList();
+          easyPairs = age_easy_pairs;
+          mediumPairs = age_medium_pairs;
+          hardPairs = age_hard_pairs;
         });
       }
         else if(widget.category == "jersey"){
         setState(() {
           footballerPairs = jersey_pairs_temp;
-          easyPairs = jersey_easy_pairs.take(15).toList();
-          mediumPairs = jersey_medium_pairs.take(20).toList();
-          hardPairs = jersey_hard_pairs.take(30).toList();
+          easyPairs = jersey_easy_pairs;
+          mediumPairs = jersey_medium_pairs;
+          hardPairs = jersey_hard_pairs;
         });
       }
       setState(() {
@@ -286,8 +299,24 @@ _bounceController.addListener(() {
    startCountDown();
    startGamePlayCountDown();
     startSecondCountDown();
+    setupSound().then((value) {
+      player.play();
+    });
     // scheduleTimeout(second * 1000);
     
+  }
+
+   Future<void> setupSound() async{
+    final duration = await player.setAsset('assets/sound-effects/middle.mp3');
+    player.setVolume(0.25);
+  }
+
+  List<dynamic> concatenateList(List<dynamic> mainList, List<dynamic> addedList){
+    List<dynamic> returnedList = mainList;
+    for(int i = 0; i<addedList.length; i++){
+      returnedList.add(addedList[i]);
+    }
+    return returnedList;
   }
 
   Future<void> readJson() async {
@@ -321,9 +350,9 @@ splitText(goals_hard, 'goals_hard');
 splitText(age_easy, 'age_easy');
 splitText(age_medium, 'age_medium');
 splitText(age_hard, 'age_hard');
-splitText(age_easy, 'jersey_easy');
-splitText(age_medium, 'jersey_medium');
-splitText(age_hard, 'jersey_hard');
+splitText(jersey_easy, 'jersey_easy');
+splitText(jersey_medium, 'jersey_medium');
+splitText(jersey_hard, 'jersey_hard');
 
 // ... 
 }
@@ -332,9 +361,16 @@ Future<void>splitText(String text, String type){
   // print(text);
   List<List<String>> finalResult = [];
   List<String> pairs = text.split("],");
+  for (int i = 0; i<3; i++){
+    // print(pairs[i]);
+    String clean = pairs[i].replaceAll("[", "");
+    List<String> indices = clean.split("-");
+    print(indices);
+  }
+  print(type);
   for (int i = 0; i<pairs.length; i++){
     String clean = pairs[i].replaceAll("[", "");
-    List<String> indices = clean.split(",");
+    List<String> indices = clean.split("-");
     finalResult.add(indices);
     // print(indices);
   }
@@ -343,6 +379,7 @@ Future<void>splitText(String text, String type){
     height_easy_pairs = finalResult;
     height_easy_pairs.shuffle();
   });
+  print(finalResult); print(' is result'); print(height_easy_pairs);
  }
  else if(type == 'height_medium'){
    setState(() {
@@ -382,8 +419,8 @@ Future<void>splitText(String text, String type){
  }
  else if(type == 'goals_medium'){
    setState(() {
-    height_easy_pairs = finalResult;
-    height_easy_pairs.shuffle();
+    goals_medium_pairs = finalResult;
+    goals_medium_pairs.shuffle();
   });
  }
  else if(type == 'goals_hard'){
@@ -410,6 +447,7 @@ Future<void>splitText(String text, String type){
     jersey_hard_pairs.shuffle();
   });
  }
+//  print(finalResult); print(' is final result');
  return null;
 }
 
@@ -802,7 +840,7 @@ void handleTimeout() {  // callback function
                     disposed = true;
                   });
                   // handleTimeout();
-                  _navigator.pop(context);
+                  _navigator.pop(context); player.stop(); widget.startBackground();
                                 },
                                 child: new Text(
                                   'Yes',
@@ -860,7 +898,14 @@ void handleTimeout() {  // callback function
             children: [
                MaterialButton(
               onPressed: (){
+                print('sdfasdf');
                 _firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId);
+                setState(() {
+                  footballerPairs = [];
+                  footballerPairs = concatenateList(footballerPairs, randomElements(easyPairs, 15));
+                  footballerPairs = concatenateList(footballerPairs,  randomElements(mediumPairs, 20));
+                  footballerPairs = concatenateList(footballerPairs,  randomElements(hardPairs, 30));
+                });
                 setState(() {
                     _colorController = AnimationController(duration: Duration(seconds: resetValue.toInt()), vsync: this);
            colorAnimation = ColorTween(begin: Color(0xff63ff00), end: Color(0xffff2389)).animate(_colorController)
@@ -884,7 +929,7 @@ void handleTimeout() {  // callback function
                   gameStarted = false;
                   gamePlayTimeLeft = 3;
                   correctPicked = false;
-                   easyPairs.shuffle();
+                  easyPairs.shuffle();
                   mediumPairs.shuffle();
                   hardPairs.shuffle();
                   animate = false;
@@ -893,11 +938,7 @@ void handleTimeout() {  // callback function
                   _slideController.reset();
                   _slideController.repeat(reverse: false);
                 });
-                setState(() {
-                   footballerPairs.addAll(easyPairs);
-                  footballerPairs.addAll(mediumPairs);
-                  footballerPairs.addAll(hardPairs);
-                });
+                
               },
               child: Container(
                 decoration: BoxDecoration(
@@ -964,7 +1005,7 @@ void handleTimeout() {  // callback function
                     disposed = true;
                   });
                   // handleTimeout();
-                  _navigator.pop(context);
+                  _navigator.pop(context); player.stop(); widget.startBackground();
                                 },
                                 child: new Text(
                                   'Yes',
@@ -1022,9 +1063,18 @@ void handleTimeout() {  // callback function
             children: [
                MaterialButton(
               onPressed: (){
+                print('asdfasdf');
+                setState(() {
+                  footballerPairs = [];
+                  footballerPairs = concatenateList(footballerPairs, randomElements(easyPairs, 15));
+                  footballerPairs = concatenateList(footballerPairs,  randomElements(mediumPairs, 20));
+                  footballerPairs = concatenateList(footballerPairs,  randomElements(hardPairs, 30));
+                  // footballerPairs.shuffle();
+                });
                   _colorController = AnimationController(duration: Duration(seconds: resetValue.toInt()), vsync: this);
            colorAnimation = ColorTween(begin: Color(0xff63ff00), end: Color(0xffff2389)).animate(_colorController)
           ..addListener(() {
+            
             setState(() {
               // The state that has changed here is the animation object’s value.
             });
@@ -1046,7 +1096,7 @@ void handleTimeout() {  // callback function
                   gameStarted = false;
                   gamePlayTimeLeft = 3;
                   correctPicked = false;
-                    easyPairs.shuffle();
+                  easyPairs.shuffle();
                   mediumPairs.shuffle();
                   hardPairs.shuffle();
                   animate = false;
@@ -1055,11 +1105,7 @@ void handleTimeout() {  // callback function
                   _slideController.reset(); 
                   _slideController.repeat(reverse: false);
                 });
-                setState(() {
-                   footballerPairs.addAll(easyPairs);
-                  footballerPairs.addAll(mediumPairs);
-                  footballerPairs.addAll(hardPairs);
-                });
+                
               },
               child: Container(
                 decoration: BoxDecoration(
@@ -1126,7 +1172,7 @@ void handleTimeout() {  // callback function
                     disposed = true;
                   });
                   // handleTimeout();
-                  _navigator.pop(context);
+                  _navigator.pop(context); player.stop(); widget.startBackground();
                                 },
                                 child: new Text(
                                   'Yes',
@@ -1236,7 +1282,7 @@ void handleTimeout() {  // callback function
                     disposed = true;
                   });
                   // handleTimeout();
-                  _navigator.pop(context);
+                  _navigator.pop(context); player.stop(); widget.startBackground();
                                 },
                                 child: new Text(
                                   'Yes',
@@ -1309,11 +1355,11 @@ void handleTimeout() {  // callback function
             child:  LinearProgressIndicator(
              /*  color: Color(0xff00ffff),
               backgroundColor: Color(0xff005555), */
-              minHeight: timeLeft/(divider-1) <0.3?size*10:5, 
+              minHeight: 5, 
               backgroundColor: Colors.transparent,
               value: timeLeft == divider?1:(timeLeft/(divider-1)).toDouble(),
               // value: _slideController.value,
-              valueColor: AlwaysStoppedAnimation(colorAnimation.value),
+              valueColor: AlwaysStoppedAnimation(wrongClick?finalColor:colorAnimation.value),
             ),
            ),
              SizedBox(
@@ -1449,7 +1495,7 @@ void handleTimeout() {  // callback function
                     disposed = true;
                   });
                   // handleTimeout();
-                  _navigator.pop(context);
+                  _navigator.pop(context); player.stop(); widget.startBackground();
                                 },
                                 child: new Text(
                                   'Yes',
@@ -1513,7 +1559,7 @@ void handleTimeout() {  // callback function
               backgroundColor: Colors.transparent,
               value: timeLeft == divider?1:(timeLeft/(divider-1)).toDouble(),
               // value: _slideController.value,
-              valueColor: AlwaysStoppedAnimation(colorAnimation.value),
+             valueColor: AlwaysStoppedAnimation(wrongClick?finalColor:colorAnimation.value),
             ),
            ),
              SizedBox(
@@ -1649,7 +1695,7 @@ void handleTimeout() {  // callback function
                     disposed = true;
                   });
                   // handleTimeout();
-                  _navigator.pop(context);
+                  _navigator.pop(context); player.stop(); widget.startBackground();
                                 },
                                 child: new Text(
                                   'Yes',
@@ -1831,7 +1877,7 @@ void handleTimeout() {  // callback function
                     disposed = true;
                   });
                   // handleTimeout();
-                  _navigator.pop(context);
+                  _navigator.pop(context); player.stop(); widget.startBackground();
                                 },
                                 child: new Text(
                                   'Yes',
@@ -1929,7 +1975,7 @@ void handleTimeout() {  // callback function
                     disposed = true;
                   });
                   // handleTimeout();
-                  _navigator.pop(context);
+                  _navigator.pop(context); player.stop(); widget.startBackground();
                                 },
                                 child: new Text(
                                   'Yes',
@@ -2017,6 +2063,13 @@ void handleTimeout() {  // callback function
       )
     );
    }
+
+
+   List<dynamic> randomElements(List<dynamic> list, int amount) {
+    List<dynamic> returnedList;
+    returnedList = new List.generate(10, (_) => list[Random().nextInt(list.length)]);
+    return returnedList;
+  }
 
 
    
@@ -2118,7 +2171,7 @@ void handleTimeout() {  // callback function
                     disposed = true;
                   });
                   // handleTimeout();
-                  _navigator.pop(context);
+                  _navigator.pop(context); player.stop(); widget.startBackground();
                                 },
                                 child: new Text(
                                   'Yes',
@@ -2175,6 +2228,14 @@ void handleTimeout() {  // callback function
                 if(!widget.solo){
                   _firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId);
                 }
+                print('bounchd');
+                setState(() {
+                  easyPairs.shuffle();
+                  mediumPairs.shuffle();
+                  hardPairs.shuffle();
+                  
+                  // footballerPairs.shuffle();
+                });
                 setState(() {
                     _colorController = AnimationController(duration: Duration(seconds: resetValue.toInt()), vsync: this);
            colorAnimation = ColorTween(begin: Color(0xff63ff00), end: Color(0xffff2389)).animate(_colorController)
@@ -2184,6 +2245,10 @@ void handleTimeout() {  // callback function
             });
           });
           _colorController.forward();
+          footballerPairs = [];
+           footballerPairs = concatenateList(footballerPairs, randomElements(easyPairs, 1));
+                  footballerPairs = concatenateList(footballerPairs,  randomElements(mediumPairs, 1));
+                  footballerPairs = concatenateList(footballerPairs,  randomElements(hardPairs, 1));
                   timeLeft = 5.5;
                   // _slideController.value = 5.5;
                   defeated = false;
@@ -2198,16 +2263,10 @@ void handleTimeout() {  // callback function
                   currentPage = 0;
                   _animationController.reset();
                   _slideController.reset(); 
-                  easyPairs.shuffle();
-                  mediumPairs.shuffle();
-                  hardPairs.shuffle();
                   _slideController.repeat(reverse: false);
+                 
                 });
-                setState(() {
-                   footballerPairs.addAll(easyPairs);
-                  footballerPairs.addAll(mediumPairs);
-                  footballerPairs.addAll(hardPairs);
-                });
+                
               },
               child: Container(
                 decoration: BoxDecoration(
@@ -2274,7 +2333,7 @@ void handleTimeout() {  // callback function
                     disposed = true;
                   });
                   // handleTimeout();
-                  _navigator.pop(context);
+                  _navigator.pop(context); player.stop(); widget.startBackground();
                                 },
                                 child: new Text(
                                   'Yes',
@@ -2379,7 +2438,7 @@ void handleTimeout() {  // callback function
                     disposed = true;
                   });
                   // handleTimeout();
-                  _navigator.pop(context);
+                  _navigator.pop(context); player.stop(); widget.startBackground();
                                 },
                                 child: new Text(
                                   'Yes',
@@ -2435,7 +2494,12 @@ void handleTimeout() {  // callback function
               height: height*0.03,
             ),
            Container(
+            height: height*0.03,
+            child: Column(
+              children: [
+                Container(
             width: width*0.9,
+            constraints: BoxConstraints(maxHeight: height*0.05),
             child:  LinearProgressIndicator(
              /*  color: Color(0xff00ffff),
               backgroundColor: Color(0xff005555), */
@@ -2444,8 +2508,11 @@ void handleTimeout() {  // callback function
               backgroundColor: Colors.transparent,
               value: timeLeft == divider?1:(timeLeft/(divider-1)).toDouble(),
               // value: _slideController.value,
-              valueColor: AlwaysStoppedAnimation(colorAnimation.value),
+             valueColor: AlwaysStoppedAnimation(wrongClick?finalColor:colorAnimation.value),
             ),
+           ),
+              ],
+            )
            ),
              SizedBox(
               height: height*0.02,
@@ -2548,7 +2615,7 @@ void handleTimeout() {  // callback function
               backgroundColor: Colors.transparent,
               value: timeLeft == divider?1:(timeLeft/(divider-1)).toDouble(),
               // value: _slideController.value,
-              valueColor: AlwaysStoppedAnimation(colorAnimation.value),
+             valueColor: AlwaysStoppedAnimation(wrongClick?finalColor:colorAnimation.value),
             ),
            ),
              SizedBox(
@@ -2678,7 +2745,10 @@ void handleTimeout() {  // callback function
       ));
    }
 
-   bool compare(var first, var second){
+   bool compare(var first, var second, bool reverse){
+    if(reverse){
+      return second>= first;
+    }
     return first>=second;
    }
 
@@ -2765,21 +2835,22 @@ void handleTimeout() {  // callback function
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                playerCard(width, height, compare((footballer[0][widget.category]), footballer[1][widget.category]),0, 0, footballer[0]['image'], footballer[0]['name'], snapshot, []),
+                playerCard(width, height, compare((footballer[0][widget.category]), footballer[1][widget.category], false),0, 0, footballer[0]['image'], footballer[0]['name'], snapshot, []),
                 SizedBox(width: 20,),
-                playerCard(width, height,  compare(footballer[1][widget.category], footballer[0][widget.category]),0,1, footballer[1]['image'], footballer[1]['name'], snapshot, [])
+                playerCard(width, height,  compare(footballer[1][widget.category], footballer[0][widget.category], false),0,1, footballer[1]['image'], footballer[1]['name'], snapshot, [])
               ],
             );
    }
 
    Widget playerSelecting(var width, var height, int index, List<List<String>> pageViewList,  AsyncSnapshot<DocumentSnapshot> snapshot){
+    bool reversed = widget.category == "age";
     return  Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                playerCard(width, height, compare(int.parse(footballerData[pageViewList[index][0]][widget.category]), int.parse(footballerData[pageViewList[index][1]][widget.category])),index, 0, assetData[pageViewList[index][0].toString()], footballerData[pageViewList[index][0]]["name"], snapshot, pageViewList),
+                playerCard(width, height, compare(int.parse(footballerData[pageViewList[index][0]][widget.category]), int.parse(footballerData[pageViewList[index][1]][widget.category]), reversed),index, 0, assetData[pageViewList[index][0].toString()], footballerData[pageViewList[index][0]]["name"], snapshot, pageViewList),
                 SizedBox(width: 20,),
-                playerCard(width, height,  compare(int.parse(footballerData[pageViewList[index][1]][widget.category]), int.parse(footballerData[pageViewList[index][0]][widget.category])),index, 1,  assetData[pageViewList[index][1].toString()], footballerData[pageViewList[index][1]]["name"], snapshot, pageViewList)
+                playerCard(width, height,  compare(int.parse(footballerData[pageViewList[index][1]][widget.category]), int.parse(footballerData[pageViewList[index][0]][widget.category]), reversed),index, 1,  assetData[pageViewList[index][1].toString()], footballerData[pageViewList[index][1]]["name"], snapshot, pageViewList)
               ],
             );
    }
@@ -2836,6 +2907,7 @@ void handleTimeout() {  // callback function
         }
         else{
           setState(() {
+            finalColor = colorAnimation.value;
           animate = true;
           wrongClick = true;
           _colorController.reset();

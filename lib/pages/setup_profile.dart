@@ -24,8 +24,10 @@ class SetupProfile extends StatefulWidget {
   final String name;
   Function finishNavigation;
   UserVariables variables;
+  Function pauseBackground;
+  Function startBackground;
 
-  SetupProfile({this.userId, this.emailAddress, this.name, this.finishNavigation, this.variables});
+  SetupProfile({this.userId, this.emailAddress, this.name, this.finishNavigation, this.variables, this.pauseBackground, this.startBackground});
 
   @override
   _SetupProfileState createState() => _SetupProfileState();

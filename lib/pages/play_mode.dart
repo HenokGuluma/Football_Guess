@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'dart:ui';
 import 'package:async/async.dart';
 import 'package:animated_check/animated_check.dart';
@@ -20,6 +21,7 @@ import 'package:instagram_clone/pages/login_screen.dart';
 import 'package:instagram_clone/pages/main_menu.dart';
 import 'package:instagram_clone/pages/select_lobby.dart';
 import 'package:instagram_clone/pages/setup_profile.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:progress_indicators/progress_indicators.dart';
 import 'package:provider/provider.dart';
 
@@ -36,7 +38,7 @@ class PlayMode extends StatefulWidget {
 }
 
 class _PlayModeState extends State<PlayMode>
-    with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
+    with TickerProviderStateMixin, AutomaticKeepAliveClientMixin, WidgetsBindingObserver {
   List<String> modes = ['assets/group.jpg', 'assets/solo.jpg'];
   List<String> options = ['Squad-Mode', 'Solo-Mode'];
   FirebaseProvider _firebaseProvider = FirebaseProvider();
@@ -45,6 +47,8 @@ class _PlayModeState extends State<PlayMode>
   PageController _pageController;
   FirebaseFirestore _firestore = FirebaseFirestore.instance;
   Animation _animation;
+  var selectPlayer = AudioPlayer();
+  var player = AudioPlayer();
   bool loggedIn;
   bool animate = false;
   bool correctPicked = false;
@@ -60,14 +64,36 @@ class _PlayModeState extends State<PlayMode>
   User currentUser = User();
   bool loading = true;
   List<String> phoneList = [];
+  List<String> backgroundTracks = [
+    'assets/sound-effects/adderall.mp3', 'assets/sound-effects/just-a-lil-bit.mp3', 'assets/sound-effects/middle.mp3',
+    'assets/sound-effects/roses.mp3', 'assets/sound-effects/you-like-it.mp3',
+  ];
   
 
   @override
   bool get wantKeepAlive => true;
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused) {
+     //stop your audio player
+     player.pause();
+    }
+    else if (state == AppLifecycleState.resumed){
+      player.play();
+    }
+    else if (state == AppLifecycleState.inactive){
+      player.stop();
+    }
+    else{
+      print(state.toString());
+    }
+  }
   
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
      loggedIn = widget.loggedIn;
      getCurrentUser().then((value) {
       setState(() {
@@ -82,9 +108,29 @@ class _PlayModeState extends State<PlayMode>
     });
     print('nope');
    } */
+   setupSound().then((value) {
+    player.play();
+   });
   }
 
-  
+  pauseBackgroundMusic(){
+    player.stop();
+  }
+
+  startBackgroundMusic() async{
+    int index = Random().nextInt(4);
+    await player.setAsset(backgroundTracks[index]);
+    player.play();
+  }
+
+     Future<void> setupSound() async{
+    int index = Random().nextInt(4);
+    await selectPlayer.setAsset('assets/sound-effects/option-click-confirm.wav');
+    await player.setAsset(backgroundTracks[index]);
+    player.setVolume(0.25);
+    selectPlayer.setVolume(0.1);
+  }
+
   Timer scheduleTimeout(milliseconds) =>
     Timer(Duration(milliseconds: milliseconds), handleTimeout);
 
@@ -342,11 +388,13 @@ void handleTimeout() {  // callback function
    Widget menuOption(var width, var height, int index, List<String> images, UserVariables variables){
     return GestureDetector(
       onTap: (){
-        if (index == 1){
+        selectPlayer.play();
+        Future.delayed(Duration(milliseconds: 200)).then((value) {
+           if (index == 1){
             Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           // return LobbyMenu();
-                          return GameMenu(variables: variables, creating: false,);
+                          return GameMenu(variables: variables, creating: false, pauseBackground: pauseBackgroundMusic, startBackground: startBackgroundMusic,);
                         },
                         ));
         }
@@ -356,7 +404,7 @@ void handleTimeout() {  // callback function
           Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           // return LobbyMenu();
-                          return  LoginScreen(finishStage: finishNavigation, variables: variables,);
+                          return  LoginScreen(finishStage: finishNavigation, variables: variables, pauseBackground: pauseBackgroundMusic, startBackground: startBackgroundMusic,);
                         },
                         ));
         }
@@ -367,7 +415,7 @@ void handleTimeout() {  // callback function
           builder: (BuildContext context) {
                           // return LobbyMenu();
                           return  SetupProfile(userId: widget.uid, emailAddress: widget.email,
-                          name: variables.currentUser.userName, finishNavigation: finishNavigation, variables: variables,
+                          name: variables.currentUser.userName, finishNavigation: finishNavigation, variables: variables,pauseBackground: pauseBackgroundMusic, startBackground: startBackgroundMusic,
                           );
                         },
                         ));
@@ -379,10 +427,14 @@ void handleTimeout() {  // callback function
           Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           // return LobbyMenu();
-                          return SelectLobby(variables: variables,);
+                          return SelectLobby(variables: variables, pauseBackground: pauseBackgroundMusic, startBackground: startBackgroundMusic,);
                         },
                         ));
         }
+        });
+        Future.delayed(Duration(seconds: 1)).then((value) {
+          selectPlayer.stop();
+        });
       },
       child: Stack(
         alignment: Alignment.bottomCenter,

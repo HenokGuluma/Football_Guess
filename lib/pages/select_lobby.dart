@@ -27,8 +27,10 @@ import 'package:progress_indicators/progress_indicators.dart';
 class SelectLobby extends StatefulWidget {
  
  UserVariables variables;
+ Function pauseBackground;
+ Function startBackground;
 
- SelectLobby({this.variables});
+ SelectLobby({this.variables, this.pauseBackground, this.startBackground});
   @override
   _SelectLobbyState createState() => _SelectLobbyState();
 }

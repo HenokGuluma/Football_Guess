@@ -19,6 +19,7 @@ import 'package:instagram_clone/pages/pay_for_coins.dart';
 import 'package:instagram_clone/pages/select_lobby.dart';
 import 'package:instagram_clone/pages/send_coins.dart';
 import 'package:instagram_clone/pages/spinning_wheel.dart';
+import 'package:just_audio/just_audio.dart';
 
 
 class GameMenu extends StatefulWidget {
@@ -28,10 +29,12 @@ class GameMenu extends StatefulWidget {
   String rate;
   User thisUser;
   UserVariables variables;
+  Function pauseBackground;
+  Function startBackground;
   
 
 
-  GameMenu({this.creating, this.uid, this.name, this.rate, this.thisUser, this.variables});
+  GameMenu({this.creating, this.uid, this.name, this.rate, this.thisUser, this.variables, this.pauseBackground, this.startBackground});
 
   @override
   GameMenuState createState() => GameMenuState();
@@ -42,6 +45,7 @@ class GameMenuState extends State<GameMenu> {
   File imageFile;
   bool creating = false;
   final picker = ImagePicker();
+  var selectPlayer = AudioPlayer();
   FirebaseProvider _firebaseProvider = FirebaseProvider();
   bool like;
   int counter = 0;
@@ -57,12 +61,18 @@ class GameMenuState extends State<GameMenu> {
   @override
   void initState() {
     super.initState();
+    setupSound();
   }
 
   @override
   void dispose() {
     super.dispose();
     
+  }
+
+  Future<void> setupSound() async{
+    await selectPlayer.setAsset('assets/sound-effects/option-click-confirm.wav');
+    selectPlayer.setVolume(0.1);
   }
 
   @override
@@ -269,6 +279,7 @@ Center(
      Widget menuOption(var width, var height, int index, List<String> images, UserVariables variables){
     return GestureDetector(
       onTap: (){
+        selectPlayer.play();
         if (index == 1){
             if(widget.creating){
               setState(() {
@@ -326,10 +337,15 @@ Center(
                             rate: widget.rate,
                             thisUser: widget.variables.currentUser,
                             variables: widget.variables,
+                            pauseBackground: widget.pauseBackground,
+                            startBackground: widget.startBackground,
                           );
                         },
                         ));
         }
+        Future.delayed(Duration(seconds: 1)).then((value){
+          selectPlayer.stop();
+        });
       },
       child: Stack(
         alignment: Alignment.bottomCenter,

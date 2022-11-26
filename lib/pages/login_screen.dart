@@ -12,8 +12,10 @@ class LoginScreen extends StatefulWidget {
   String nextStage;
   Function finishStage;
   UserVariables variables;
+  Function pauseBackground;
+  Function startBackground;
 
-  LoginScreen({this.nextStage, this.finishStage, this.variables});
+  LoginScreen({this.nextStage, this.finishStage, this.variables, this.pauseBackground, this.startBackground});
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }

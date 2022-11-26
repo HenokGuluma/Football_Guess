@@ -3,7 +3,6 @@ import 'dart:math';
 import 'dart:ui';
 import 'package:async/async.dart';
 import 'package:animated_check/animated_check.dart';
-import 'package:audio/audio.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
@@ -109,9 +108,6 @@ class BlackJackMultiplayerState extends State<BlackJackMultiplayer>
   AnimationController _slideController;
   AnimationController _colorController;
   AnimationController _bounceController;
-  Audio audioPlayer = new Audio(single: true);
-  AudioPlayerState state = AudioPlayerState.STOPPED;
-  StreamSubscription<AudioPlayerState> _playerStateSubscription;
   FirebaseFirestore _firestore = FirebaseFirestore.instance;
   FirebaseProvider _firebaseProvider = FirebaseProvider();
   PageController _pageController;
@@ -212,7 +208,7 @@ void startTimer(var width, var height, Function shatter) {
             }
             else if (score > 21){
             shatter();
-            onPlay();
+            
             Future.delayed(Duration(seconds: 1)).then((value) {
               setState(() {
               
@@ -247,15 +243,6 @@ void startTimer(var width, var height, Function shatter) {
     },
   );
 }
- onPlay()
-    {
-        audioPlayer.play('assets/glass.mp3');
-    }
-
-    onPause()
-    {
-        audioPlayer.pause();
-    }
 
  @override
   void dispose() {
@@ -266,8 +253,6 @@ void startTimer(var width, var height, Function shatter) {
     // startTimer();
     _timer.cancel();
 
-     _playerStateSubscription.cancel();
-    audioPlayer.release();
    
     super.dispose();
   }
@@ -281,16 +266,6 @@ void startTimer(var width, var height, Function shatter) {
     type = rng.nextInt(3);
   
      _navigator = Navigator.of(context);
-
-    _playerStateSubscription = audioPlayer.onPlayerStateChanged.listen((AudioPlayerState state)
-        {
-            print("onPlayerStateChanged: ${audioPlayer.uid} $state");
-
-            if (mounted)
-                setState(() => this.state = state);
-        });
-
-    audioPlayer.preload('assets/glass.mp3');
 
      startCountDown();
    startGamePlayCountDown();
