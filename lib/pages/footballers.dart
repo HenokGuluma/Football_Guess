@@ -307,7 +307,8 @@ _bounceController.addListener(() {
   }
 
    Future<void> setupSound() async{
-    final duration = await player.setAsset('assets/sound-effects/middle.mp3');
+    var index = Random().nextInt(4);
+    await player.setAsset(backgroundTracks[index]);
     player.setVolume(0.25);
   }
 
