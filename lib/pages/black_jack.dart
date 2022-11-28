@@ -105,6 +105,8 @@ class _BlackJackState extends State<BlackJack>
   int color;
   int type;
   final player = AudioPlayer(); 
+  final cancel = AudioPlayer();
+  final selectPlayer = AudioPlayer();
   AnimationController _animationController;
   AnimationController _slideController;
   AnimationController _colorController;
@@ -274,7 +276,13 @@ void startTimer(var width, var height, Function shatter) {
   }
 
   Future<void> setupSound() async{
-    final duration = await player.setAsset('assets/glass.mp3');
+    await player.setAsset('assets/glass.mp3');
+    await selectPlayer.setAsset('assets/sound-effects/option-click-confirm.wav');
+    await cancel.setAsset('assets/sound-effects/option-click.wav');
+    selectPlayer.setVolume(0.1);
+    cancel.setVolume(0.1);
+    cancel.play();
+    cancel.stop();
   }
 
   Future<void> getWinner() async{
@@ -736,7 +744,11 @@ void handleTimeout() {  // callback function
                   children: [
                      GestureDetector(
             onTap: (){
+              cancel.play();
               Navigator.pop(context);
+              Future.delayed(Duration(seconds: 1)).then((value) {
+                cancel.stop();
+                });
             },
             child: Container(
               decoration: BoxDecoration(

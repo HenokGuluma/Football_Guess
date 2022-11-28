@@ -28,6 +28,7 @@ class FirebaseProvider {
         photoUrl: currentUser.photoURL,
         followers: '0',
         following: '0',
+        admin: false,
         bio: '',
         posts: 0,
         phone: '',
@@ -209,9 +210,16 @@ Future<User> fetchUserDetailsById(String uid) async {
     print(creatorId); print('stage2');
     await _firestore.collection('users').doc(creatorId.uid).update({'hasLobby': true, 'lobbyId': lobby.uid});
     print(creatorId); print('stage3');
-    
     setMap['creator'] = creatorId.toMap(creatorId);
     return _firestore.collection("lobbies").doc(id).set(setMap);
+  }
+
+  Future<void> addPublicLobby(Lobby lobby) async{
+    Map<String, dynamic> setMap = lobby.toMap(lobby);
+    setMap['active'] = false;
+    setMap['creationTime'] = DateTime.now().microsecondsSinceEpoch;
+    print(setMap);
+    return _firestore.collection("publicLobbies").add(setMap);
   }
 
   Future<void> addUserToLobby (User user, String lobbyId) async{
@@ -220,11 +228,15 @@ Future<User> fetchUserDetailsById(String uid) async {
     Map<String, dynamic> playerInfo = snap.data()['playerInfo'];
     if(!playerList.contains(user.uid)){
       playerList.add(user.uid);
-      playerInfo[user.uid] = user.toMap(user);
+      Map<String, dynamic> userMap = user.toMap(user);
+      userMap['active'] = true;
+      userMap['idle'] = true;
+      playerInfo[user.uid] = userMap;
     }
     Map<String, dynamic> updateMap = {'players': playerList, 'playerInfo': playerInfo};
     await _firestore.collection('lobbies').doc(lobbyId).update(updateMap);
   }
+
 
   Future<void> submitUserScore(User user, String lobbyId, int score) async{
     var currentTime = DateTime.now().millisecondsSinceEpoch;

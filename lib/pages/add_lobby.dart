@@ -16,12 +16,14 @@ import 'package:instagram_clone/main.dart';
 import 'package:instagram_clone/models/lobby.dart';
 import 'package:instagram_clone/pages/football_menu.dart';
 import 'package:instagram_clone/pages/footballers.dart';
+import 'package:instagram_clone/pages/main_menu.dart';
 
 class AddLobby extends StatefulWidget {
   
   UserVariables variables;
+  bool public;
 
-  AddLobby({this.variables});
+  AddLobby({this.variables, this.public});
 
   @override
   _AddLobbyState createState() => _AddLobbyState();
@@ -367,7 +369,8 @@ void handleTimeout() {  // callback function
                Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           // return SelectLobby();
-                          return FootBallMenu(
+                          return GameMenu(
+                            public: widget.public,
                             creating: true,
                             uid: _uidController.text,
                             name: _nameController.text,

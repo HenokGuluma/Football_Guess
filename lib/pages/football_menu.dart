@@ -80,6 +80,7 @@ class _FootBallMenuState extends State<FootBallMenu>
   ];
   AnimationController _fadeController;
   final player = AudioPlayer(); 
+  var cancel = AudioPlayer();
   Animation _animation;
   bool animate = false;
   bool correctPicked = false;
@@ -117,8 +118,11 @@ void handleTimeout() {  // callback function
 }
 
  Future<void> setupSound() async{
-    final duration = await player.setAsset('assets/sound-effects/option-click-confirm.wav');
-    await player.setVolume(0.1);
+    await player.setAsset('assets/sound-effects/option-click-confirm.wav');
+    await cancel.setAsset('assets/sound-effects/option-click.wav');
+    player.setVolume(0.1);
+    cancel.setVolume(0.1);
+
   }
 
 @override
@@ -195,7 +199,11 @@ void handleTimeout() {  // callback function
            !widget.creating
             ?GestureDetector(
             onTap: (){
+               cancel.play();
               Navigator.pop(context);
+              Future.delayed(Duration(seconds: 1)).then((value) {
+                cancel.stop();
+                });
             },
             child: Container(
               decoration: BoxDecoration(
@@ -214,7 +222,11 @@ void handleTimeout() {  // callback function
             children: [
                  GestureDetector(
             onTap: (){
+               cancel.play();
               Navigator.pop(context);
+              Future.delayed(Duration(seconds: 1)).then((value) {
+                cancel.stop();
+                });
             },
             child: Container(
               decoration: BoxDecoration(

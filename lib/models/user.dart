@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class User {
 
    String uid;
+   bool admin;
    String email;
    String photoUrl;
    String userName;
@@ -22,11 +23,12 @@ class User {
    int dailyTimer;
    int recentActivity;
 
-   User({this.uid, this.email, this.photoUrl, this.userName, this.lobbyId, this.hasLobby, this.followers, this.following, this.bio, this.posts, this.phone, this.trending, this.coins, this.tokens, this.dailyTimer, this.recentActivity});
+   User({this.uid, this.email, this.photoUrl, this.admin, this.userName, this.lobbyId, this.hasLobby, this.followers, this.following, this.bio, this.posts, this.phone, this.trending, this.coins, this.tokens, this.dailyTimer, this.recentActivity});
 
     Map toMap(User user) {
     var data = Map<String, dynamic>();
     data['uid'] = user.uid;
+    data['admin'] = user.admin;
     data['email'] = user.email;
     data['photoUrl'] = user.photoUrl;
     data['userName'] = user.userName;
@@ -48,6 +50,7 @@ class User {
   User.fromMap(Map<String, dynamic> mapData) {
     this.uid = mapData['uid'];
     this.email = mapData['email'];
+    this.admin = mapData['admin'];
     this.photoUrl = mapData['photoUrl'];
     this.userName = mapData['userName'];
     this.followers = mapData['followers'];
@@ -66,6 +69,7 @@ class User {
 
   User.fromDoc(DocumentSnapshot doc){
       this.uid = doc['uid'];
+      this.admin = doc['admin'];
       this.userName=  doc['userName'];
       this.photoUrl = doc['photoUrl'];
       this.email = doc['email'];

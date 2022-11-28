@@ -17,6 +17,7 @@ import 'package:instagram_clone/pages/buy_coins.dart';
 import 'package:instagram_clone/pages/coin_wallet.dart';
 import 'package:instagram_clone/pages/edit_profile_screen.dart';
 import 'package:instagram_clone/pages/spinning_wheel.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:progress_indicators/progress_indicators.dart';
 import 'package:progressive_image/progressive_image.dart';
 import 'package:provider/provider.dart';
@@ -40,6 +41,8 @@ class _InstaProfileScreenState extends State<InstaProfileScreen>
   bool loading = true;
   bool logging_out = false;
   NavigatorState _navigator;
+  var selectPlayer = AudioPlayer();
+  var cancel = AudioPlayer();
 
   @override
   bool get wantKeepAlive => true;
@@ -53,6 +56,7 @@ class _InstaProfileScreenState extends State<InstaProfileScreen>
         loading = false;
       });
     }); */
+    setupSound();
   }
 
   String adjustNumbers(int num) {
@@ -78,6 +82,17 @@ class _InstaProfileScreenState extends State<InstaProfileScreen>
     });
   }
 
+   Future<void> setupSound() async{
+    await selectPlayer.setAsset('assets/sound-effects/option-click-confirm.wav');
+    await cancel.setAsset('assets/sound-effects/option-click.wav');
+    selectPlayer.setVolume(0.1);
+    selectPlayer.play();
+    selectPlayer.stop();
+    cancel.setVolume(0.1);
+    cancel.play();
+    cancel.stop();
+  }
+
   @override
   Widget build(BuildContext context) {
    
@@ -89,7 +104,16 @@ class _InstaProfileScreenState extends State<InstaProfileScreen>
         brightness: Brightness.dark,
         backgroundColor: Colors.black,
         toolbarHeight: 50,
-        // elevation: 1,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.white, ),
+          onPressed: (){
+              cancel.play();
+              Navigator.pop(context);
+              Future.delayed(Duration(seconds: 1)).then((value) {
+                cancel.stop();
+                });
+          },
+        ),
         centerTitle: true,
         title: Text(widget.variables.currentUser.userName!=null?widget.variables.currentUser.userName.isEmpty?'Profile':'@'+widget.variables.currentUser.userName:'Profile',
             style: TextStyle(
@@ -207,6 +231,7 @@ class _InstaProfileScreenState extends State<InstaProfileScreen>
               GestureDetector(
                 child: ProfileButtons('Edit Profile', width, height),
                 onTap: () {
+                  selectPlayer.play();
                   Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -221,15 +246,23 @@ class _InstaProfileScreenState extends State<InstaProfileScreen>
                               bio: widget.variables.currentUser.bio,
                               name: widget.variables.currentUser.userName,
                               phone: widget.variables.currentUser.phone))));
+
+                               Future.delayed(Duration(seconds: 1)).then((value) {
+                          selectPlayer.stop();
+                        });
                 },
               ),
              GestureDetector(
             child: ProfileButtons('Coin Wallet', width, height),
             onTap: () {
+              selectPlayer.play();
               Navigator.push(
                   context,
                   MaterialPageRoute(
                       builder: ((context) => CoinWallet(variables: widget.variables))));
+                       Future.delayed(Duration(seconds: 1)).then((value) {
+                          selectPlayer.stop();
+                        });
             },
           ),
            GestureDetector(
@@ -257,6 +290,7 @@ class _InstaProfileScreenState extends State<InstaProfileScreen>
               GestureDetector(
                   child: ProfileButtons('Log Out', width, height),
                   onTap: () async {
+                    selectPlayer.play();
                     showDialog(
                         context: context,
                         builder: ((context) {
@@ -281,7 +315,11 @@ class _InstaProfileScreenState extends State<InstaProfileScreen>
                             actions: <Widget>[
                               new TextButton(
                                 onPressed: () {
-                                  Navigator.pop(context);
+                                   cancel.play();
+                              Navigator.pop(context);
+                              Future.delayed(Duration(seconds: 1)).then((value) {
+                                cancel.stop();
+                                });
                                 }, // Closes the dialog
                                 child: new Text(
                                   'No',
@@ -294,17 +332,25 @@ class _InstaProfileScreenState extends State<InstaProfileScreen>
                               ),
                               new TextButton(
                                 onPressed: () {
-                                  Navigator.pop(context);
+                                    cancel.play();
+                              Navigator.pop(context);
+                              Future.delayed(Duration(seconds: 1)).then((value) {
+                                cancel.stop();
+                                });
                                 //  loggingOutDialog();
                                 setState(() {
                                   logging_out = true;
                                 });
+                                selectPlayer.play();
                                   _firebaseProvider.signOut().then((v) {
                                     widget.variables.reset();
                                     _navigator.pushReplacement(
                                         MaterialPageRoute(builder: (context) {
                                       return MyApp();
                                     }));
+                                     Future.delayed(Duration(seconds: 1)).then((value) {
+                          selectPlayer.stop();
+                        });
                                   });
                                   return print('pressedOK');
                                   // Closes the dialog
@@ -321,6 +367,10 @@ class _InstaProfileScreenState extends State<InstaProfileScreen>
                             ],
                           );
                         }));
+
+                         Future.delayed(Duration(milliseconds: 500)).then((value) {
+                          selectPlayer.stop();
+                        });
 
                     }),
               Divider(

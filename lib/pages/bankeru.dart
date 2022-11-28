@@ -14,6 +14,7 @@ import 'package:flutter_countdown_timer/countdown.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:instagram_clone/backend/firebase.dart';
 import 'package:instagram_clone/main.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:progress_indicators/progress_indicators.dart';
 
 class Bankeru extends StatefulWidget {
@@ -109,6 +110,9 @@ class _BankeruState extends State<Bankeru>
   FirebaseProvider _firebaseProvider = FirebaseProvider();
   PageController _pageController;
   Animation _animation;
+  final player = AudioPlayer(); 
+  final cancel = AudioPlayer();
+  final selectPlayer = AudioPlayer();
   Animation colorAnimation;
   bool animate = false;
   bool correctPicked = false;
@@ -133,7 +137,7 @@ class _BankeruState extends State<Bankeru>
   bool retrievingWinner = false;
   bool shouldGetWinner = false;
   bool gotWinner = false;
-    var rng = Random();
+  var rng = Random();
   int playerAmount = 0;
   bool setupPlayers = true;
   dynamic playerInfos;
@@ -166,6 +170,7 @@ class _BankeruState extends State<Bankeru>
       randomize();
     });
 
+    setupSound();
     
   }
 
@@ -179,6 +184,16 @@ class _BankeruState extends State<Bankeru>
     _timer.cancel();
    
     super.dispose();
+  }
+
+  Future<void> setupSound() async{
+    await player.setAsset('assets/glass.mp3');
+    await selectPlayer.setAsset('assets/sound-effects/option-click-confirm.wav');
+    await cancel.setAsset('assets/sound-effects/option-click.wav');
+    selectPlayer.setVolume(0.1);
+    cancel.setVolume(0.1);
+    cancel.play();
+    cancel.stop();
   }
 
   void startTimer() {
@@ -544,7 +559,11 @@ void handleTimeout() {  // callback function
                   children: [
                      GestureDetector(
             onTap: (){
+               cancel.play();
               Navigator.pop(context);
+              Future.delayed(Duration(seconds: 1)).then((value) {
+                cancel.stop();
+                });
             },
             child: Container(
               decoration: BoxDecoration(

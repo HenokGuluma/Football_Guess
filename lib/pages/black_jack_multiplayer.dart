@@ -15,6 +15,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:instagram_clone/backend/firebase.dart';
 import 'package:instagram_clone/main.dart';
 import 'package:instagram_clone/models/exploding_widget.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:progress_indicators/progress_indicators.dart';
 
 class BlackJackMultiplayer extends StatefulWidget {
@@ -25,9 +26,10 @@ class BlackJackMultiplayer extends StatefulWidget {
   int categoryNo;
   bool solo;
   UserVariables variables;
+  Function startBackground;
  
   BlackJackMultiplayer({
-    this.category, this.lobbyId, this.solo, this.variables, this.creatorId, this.categoryNo,
+    this.category, this.lobbyId, this.solo, this.variables, this.startBackground, this.creatorId, this.categoryNo,
   });
 
   @override
@@ -48,6 +50,10 @@ class BlackJackMultiplayerState extends State<BlackJackMultiplayer>
   List<String> profilePics = ['assets/profile_pic1.png', 'assets/profile_pic2.png',
     'assets/profile_pic3.png', 'assets/profile_pic4.png'
   ];
+
+  final player = AudioPlayer(); 
+  final cancel = AudioPlayer();
+  final selectPlayer = AudioPlayer();
 
    List<String> profileNames = ['ashley123', 'joe_rogan',
     'willSmith', 'ruthaBG89'
@@ -157,6 +163,15 @@ class BlackJackMultiplayerState extends State<BlackJackMultiplayer>
    bool perfectScore = false;
 
 
+Future<void> setupSound() async{
+    await player.setAsset('assets/glass.mp3');
+    await selectPlayer.setAsset('assets/sound-effects/option-click-confirm.wav');
+    await cancel.setAsset('assets/sound-effects/option-click.wav');
+    selectPlayer.setVolume(0.1);
+    cancel.setVolume(0.1);
+    cancel.play();
+    cancel.stop();
+  }
 
 void startTimer(var width, var height, Function shatter) {
   
@@ -270,6 +285,7 @@ void startTimer(var width, var height, Function shatter) {
      startCountDown();
    startGamePlayCountDown();
     startSecondCountDown();
+    setupSound();
 
     super.initState();
 
@@ -463,7 +479,7 @@ void startTimer(var width, var height, Function shatter) {
 
       // print(timeLeft/resetValue); print (' is the timer');
 
-       if(!gotWinner && playerAmount<1){
+       if(!gotWinner && playerAmount<1 && !disposed){
         // print('baaaam');
         getWinner().then((value) {
           setState(() {
@@ -624,6 +640,7 @@ void handleTimeout() {  // callback function
             SizedBox(height: height*0.05,),
             GestureDetector(
             onTap: (){
+               cancel.play();
               showDialog(
                         context: context,
                         builder: ((context) {
@@ -664,6 +681,7 @@ void handleTimeout() {  // callback function
                               ),
                               new TextButton(
                                 onPressed: () {
+                                  cancel.play();
                                   _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
                                   Navigator.pop(context);
                                 //  _bounceController.reset();
@@ -673,6 +691,9 @@ void handleTimeout() {  // callback function
                   });
                   // handleTimeout();
                   _navigator.pop(context);
+                  Future.delayed(Duration(seconds: 1)).then((value) {
+                cancel.stop();
+                });
                                 },
                                 child: new Text(
                                   'Yes',
@@ -686,6 +707,9 @@ void handleTimeout() {  // callback function
                             ],
                           );
                         }));
+                        Future.delayed(Duration(seconds: 1)).then((value) {
+                cancel.stop();
+                });
             },
             child: Container(
               decoration: BoxDecoration(
@@ -1098,6 +1122,9 @@ void handleTimeout() {  // callback function
             ),
             GestureDetector(
             onTap: (){
+              setState(() {
+                disposed = true;
+              });
               Navigator.pop(context);
             },
             child: Container(

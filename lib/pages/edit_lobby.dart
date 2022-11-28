@@ -22,8 +22,9 @@ class EditLobby extends StatefulWidget {
   
   UserVariables variables;
   Lobby lobby;
+  bool public;
 
-  EditLobby({this.variables, this.lobby});
+  EditLobby({this.variables, this.lobby, this.public});
 
   @override
   _EditLobbyState createState() => _EditLobbyState();
@@ -376,7 +377,7 @@ void handleTimeout() {  // callback function
           builder: (BuildContext context) {
                           // return SelectLobby();
                           return GameMenu(
-
+                            public: widget.public,
                             creating: true,
                             uid: _uidController.text,
                             name: _nameController.text,

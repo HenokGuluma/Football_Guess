@@ -21,13 +21,16 @@ import 'package:instagram_clone/pages/football_menu.dart';
 import 'package:instagram_clone/pages/footballers.dart';
 import 'package:instagram_clone/pages/insta_profile_screen.dart';
 import 'package:instagram_clone/pages/spinning_wheel.dart';
+import 'package:just_audio/just_audio.dart';
 
 class LobbyDetails extends StatefulWidget {
  
  UserVariables variables;
  Lobby lobby;
+ Function startBackground;
+ bool public;
 
- LobbyDetails({this.variables, this.lobby});
+ LobbyDetails({this.variables, this.lobby, this.startBackground, this.public});
   @override
   _LobbyDetailsState createState() => _LobbyDetailsState();
 }
@@ -86,6 +89,9 @@ class _LobbyDetailsState extends State<LobbyDetails>
   AnimationController _bounceController;
   PageController _pageController;
   Animation _animation;
+  final player = AudioPlayer(); 
+  final cancel = AudioPlayer();
+  final selectPlayer = AudioPlayer();
   FirebaseProvider _firebaseProvider = FirebaseProvider();
   bool animate = false;
   bool correctPicked = false;
@@ -133,8 +139,18 @@ _animationController.addListener(() {
       });
 
      });
+     setupSound();
   }
 
+  Future<void> setupSound() async{
+    await player.setAsset('assets/glass.mp3');
+    await selectPlayer.setAsset('assets/sound-effects/option-click-confirm.wav');
+    await cancel.setAsset('assets/sound-effects/option-click.wav');
+    selectPlayer.setVolume(0.1);
+    cancel.setVolume(0.1);
+    cancel.play();
+    cancel.stop();
+  }
   
   Timer scheduleTimeout(milliseconds) =>
     Timer(Duration(milliseconds: milliseconds), handleTimeout);
@@ -201,6 +217,7 @@ void handleTimeout() {  // callback function
            widget.variables.currentUser.userName == widget.lobby.creatorName
            ?GestureDetector(
             onTap: (){
+              selectPlayer.play();
               FocusScope.of(context).unfocus();
               setState(() {
                 editing = true;
@@ -209,7 +226,7 @@ void handleTimeout() {  // callback function
                Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           // return SelectLobby();
-                          return  EditLobby(variables: widget.variables, lobby: lobby,);
+                          return  EditLobby(variables: widget.variables, lobby: lobby, public: widget.public,);
                         },
                         )).then((value) {
                            setState(() {
@@ -217,6 +234,10 @@ void handleTimeout() {  // callback function
               });
                         });
                 
+            });
+
+            Future.delayed(Duration(seconds: 1)).then((value) {
+              selectPlayer.stop();
             });
               
             },
@@ -296,7 +317,11 @@ void handleTimeout() {  // callback function
           children: [
              GestureDetector(
             onTap: (){
+              cancel.play();
               Navigator.pop(context);
+              Future.delayed(Duration(seconds: 1)).then((value) {
+                cancel.stop();
+              });
             },
             child: Container(
               decoration: BoxDecoration(
@@ -313,6 +338,7 @@ void handleTimeout() {  // callback function
              !joining
              ?GestureDetector(
             onTap: (){
+              selectPlayer.play();
               print(widget.lobby.gameCategory); print(' is the category');
               setState(() {
                 joining = true;
@@ -322,13 +348,13 @@ void handleTimeout() {  // callback function
                  Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           if(widget.lobby.gameType == 0){
-                            return Footballers(category: categoryId[widget.lobby.gameCategory], lobbyId: widget.lobby.uid, solo: false, creatorId: widget.lobby.creatorId, variables: widget.variables, categoryNo: widget.lobby.gameCategory,);
+                            return Footballers(category: categoryId[widget.lobby.gameCategory], lobbyId: widget.lobby.uid, solo: false, creatorId: widget.lobby.creatorId, variables: widget.variables, categoryNo: widget.lobby.gameCategory, startBackground: widget.startBackground,);
                           }
                           else if (widget.lobby.gameType ==1){
-                            return BlackJackMultiplayer(category: '0', lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId,);
+                            return BlackJackMultiplayer(category: '0', lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId, startBackground: widget.startBackground,);
                           }
                           else if (widget.lobby.gameType ==2){
-                            return BankeruMultiplayer(category: '0', lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId,);
+                            return BankeruMultiplayer(category: '0', lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId, startBackground: widget.startBackground,);
                           }
                           return SpinningBaby();
                           },
@@ -337,6 +363,9 @@ void handleTimeout() {  // callback function
                   joining = false;
                 });
                         });
+              });
+              Future.delayed(Duration(seconds: 1)).then((value) {
+                selectPlayer.stop();
               });
             },
             child: Container(
@@ -471,11 +500,15 @@ void handleTimeout() {  // callback function
       padding: EdgeInsets.only(top: height*0.03, bottom: height*0.03),
       child: GestureDetector(
       onTap: (){
+        selectPlayer.play();
          Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           return FootBallMenu(creating: false,);
                         },
                         ));
+        Future.delayed(Duration(seconds: 1)).then((value) {
+          selectPlayer.stop();
+        });
       },
       child: Container(
         width: width*0.3,

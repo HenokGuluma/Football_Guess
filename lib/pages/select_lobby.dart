@@ -22,6 +22,7 @@ import 'package:instagram_clone/pages/footballers.dart';
 import 'package:instagram_clone/pages/insta_profile_screen.dart';
 import 'package:instagram_clone/pages/lobby_details.dart';
 import 'package:instagram_clone/pages/lobby_menu.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:progress_indicators/progress_indicators.dart';
 
 class SelectLobby extends StatefulWidget {
@@ -104,6 +105,8 @@ class _SelectLobbyState extends State<SelectLobby>
   int gamePlayDuration = 0;
   double size = 1;
   bool searching = false;
+   var selectPlayer = AudioPlayer();
+   var cancel = AudioPlayer();
   
   
   @override
@@ -136,6 +139,8 @@ _animationController.addListener(() {
       });
 
      });
+
+     setupSound();
   }
 
   
@@ -147,6 +152,17 @@ void handleTimeout() {  // callback function
     defeated = true;
   });
 }
+
+  Future<void> setupSound() async{
+    await selectPlayer.setAsset('assets/sound-effects/option-click-confirm.wav');
+     await cancel.setAsset('assets/sound-effects/option-click.wav');
+    selectPlayer.setVolume(0.1);
+    selectPlayer.play();
+    selectPlayer.stop();
+    cancel.setVolume(0.1);
+    cancel.play();
+    cancel.stop();
+  }
 
 @override
 
@@ -195,7 +211,11 @@ void handleTimeout() {  // callback function
                   children: [
                      GestureDetector(
             onTap: (){
+              cancel.play();
               Navigator.pop(context);
+              Future.delayed(Duration(seconds: 1)).then((value) {
+                cancel.stop();
+              });
             },
             child: Padding(
               padding: EdgeInsets.only(left: 20),
@@ -219,12 +239,16 @@ void handleTimeout() {  // callback function
                 child: IconButton(
                 onPressed: (){
                   FocusScope.of(context).unfocus();
+                    selectPlayer.play();
                     Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           // return SelectLobby();
                           return InstaProfileScreen(variables: widget.variables,);
                         },
                         ));
+                        Future.delayed(Duration(seconds: 1)).then((value) {
+                          selectPlayer.stop();
+                        });
                 },
                 icon: Container(
                   
@@ -336,6 +360,7 @@ void handleTimeout() {  // callback function
                     controller.text.length>0 && !searching
                     ?GestureDetector(
             onTap: (){
+              selectPlayer.play();
               setState(() {
                 searching = true;
               });
@@ -345,6 +370,9 @@ void handleTimeout() {  // callback function
                   searching = false;
                 });
               });
+               Future.delayed(Duration(seconds: 1)).then((value) {
+                          selectPlayer.stop();
+                        });
             },
             child: Container(
               decoration: BoxDecoration(
@@ -407,6 +435,7 @@ void handleTimeout() {  // callback function
           :searchedLobby==null || controller.text.length ==0
           ?GestureDetector(
             onTap: (){
+              selectPlayer.play();
               FocusScope.of(context).unfocus();
                Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
@@ -414,6 +443,9 @@ void handleTimeout() {  // callback function
                           return  LobbyMenu(variables: widget.variables,);
                         },
                         ));
+                         Future.delayed(Duration(seconds: 1)).then((value) {
+                          selectPlayer.stop();
+                        });
             },
             child:Container(
             width: width*0.45,
@@ -463,6 +495,7 @@ void handleTimeout() {  // callback function
             child: widget.variables.currentUser.hasLobby
             ?GestureDetector(
             onTap: (){
+              selectPlayer.play();
               FocusScope.of(context).unfocus();
               setState(() {
                 joining = true;
@@ -471,9 +504,12 @@ void handleTimeout() {  // callback function
                Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           // return SelectLobby();
-                          return  LobbyDetails(variables: widget.variables, lobby: lobby,);
+                          return  LobbyDetails(variables: widget.variables, lobby: lobby, public: false,);
                         },
                         ));
+                         Future.delayed(Duration(seconds: 1)).then((value) {
+                          selectPlayer.stop();
+                        });
                  setState(() {
                 joining = false;
               });
@@ -494,13 +530,17 @@ void handleTimeout() {  // callback function
             )
             :GestureDetector(
             onTap: (){
+              selectPlayer.play();
               FocusScope.of(context).unfocus();
                Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           // return SelectLobby();
-                          return  AddLobby(variables: widget.variables,);
+                          return  AddLobby(variables: widget.variables, public: false,);
                         },
                         ));
+                         Future.delayed(Duration(seconds: 1)).then((value) {
+                          selectPlayer.stop();
+                        });
             },
             child: Container(
               decoration: BoxDecoration(
@@ -544,12 +584,16 @@ void handleTimeout() {  // callback function
       padding: EdgeInsets.only(top: 0, bottom: 0),
       child: GestureDetector(
       onTap: (){
+        selectPlayer.play();
         FocusScope.of(context).unfocus();
          Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
-                          return LobbyDetails(variables: widget.variables, lobby: snapshot);
+                          return LobbyDetails(variables: widget.variables, lobby: snapshot, public: false,);
                         },
                         ));
+                         Future.delayed(Duration(seconds: 1)).then((value) {
+                          selectPlayer.stop();
+                        });
       },
       child: Container(
         width: width*0.5,

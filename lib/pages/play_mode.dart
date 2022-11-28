@@ -129,6 +129,8 @@ class _PlayModeState extends State<PlayMode>
     await player.setAsset(backgroundTracks[index]);
     player.setVolume(0.25);
     selectPlayer.setVolume(0.1);
+    selectPlayer.play();
+    selectPlayer.stop();
   }
 
   Timer scheduleTimeout(milliseconds) =>
@@ -394,7 +396,7 @@ void handleTimeout() {  // callback function
             Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           // return LobbyMenu();
-                          return GameMenu(variables: variables, creating: false, pauseBackground: pauseBackgroundMusic, startBackground: startBackgroundMusic,);
+                          return GameMenu(variables: variables, public: false, creating: false, pauseBackground: pauseBackgroundMusic, startBackground: startBackgroundMusic,);
                         },
                         ));
         }

@@ -24,6 +24,7 @@ import 'package:just_audio/just_audio.dart';
 
 class GameMenu extends StatefulWidget {
   bool creating;
+  bool public;
   String uid;
   String name;
   String rate;
@@ -34,7 +35,7 @@ class GameMenu extends StatefulWidget {
   
 
 
-  GameMenu({this.creating, this.uid, this.name, this.rate, this.thisUser, this.variables, this.pauseBackground, this.startBackground});
+  GameMenu({this.creating, this.public, this.uid, this.name, this.rate, this.thisUser, this.variables, this.pauseBackground, this.startBackground});
 
   @override
   GameMenuState createState() => GameMenuState();
@@ -46,6 +47,7 @@ class GameMenuState extends State<GameMenu> {
   bool creating = false;
   final picker = ImagePicker();
   var selectPlayer = AudioPlayer();
+  var cancel = AudioPlayer();
   FirebaseProvider _firebaseProvider = FirebaseProvider();
   bool like;
   int counter = 0;
@@ -73,6 +75,12 @@ class GameMenuState extends State<GameMenu> {
   Future<void> setupSound() async{
     await selectPlayer.setAsset('assets/sound-effects/option-click-confirm.wav');
     selectPlayer.setVolume(0.1);
+    selectPlayer.play();
+    selectPlayer.stop();
+     await cancel.setAsset('assets/sound-effects/option-click.wav');
+    cancel.setVolume(0.1);
+    cancel.play();
+    cancel.stop();
   }
 
   @override
@@ -157,7 +165,11 @@ Center(
             !widget.creating
             ?GestureDetector(
             onTap: (){
+               cancel.play();
               Navigator.pop(context);
+              Future.delayed(Duration(seconds: 1)).then((value) {
+                cancel.stop();
+                });
             },
             child: Container(
               decoration: BoxDecoration(
@@ -176,7 +188,11 @@ Center(
             children: [
                  GestureDetector(
             onTap: (){
+               cancel.play();
               Navigator.pop(context);
+              Future.delayed(Duration(seconds: 1)).then((value) {
+                cancel.stop();
+                });
             },
             child: Container(
               decoration: BoxDecoration(
@@ -232,7 +248,25 @@ Center(
                 creatorName: widget.variables.currentUser.userName,
               );
               print(widget.variables.currentUser.uid); print(' is the user');
-              _firebaseProvider.addLobbyById(widget.uid, lobby, widget.thisUser).then((value) {
+              if(widget.public){
+                 _firebaseProvider.addPublicLobby(lobby).then((value) {
+                
+                Flushbar(
+                  title: 'Created a Lobby',
+                  backgroundColor: Color(0xff00ffff),
+                  titleText: Text('Successfully created the lobby', style: TextStyle(color: Colors.black, fontSize: 16, fontFamily: 'Muli')),
+                );
+
+                 Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                  builder: ((context) => MyApp())),
+                              (Route<dynamic> route) => false,
+                            );
+              });
+              }
+              else{
+                 _firebaseProvider.addLobbyById(widget.uid, lobby, widget.thisUser).then((value) {
                 widget.variables.setLobby(lobby);
                 
                 
@@ -249,6 +283,8 @@ Center(
                               (Route<dynamic> route) => false,
                             );
               });
+              }
+             
             },
             child: Container(
               decoration: BoxDecoration(
