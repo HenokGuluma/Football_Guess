@@ -21,6 +21,7 @@ import 'package:progress_indicators/progress_indicators.dart';
 class Footballers extends StatefulWidget {
 
   String category;
+  bool public;
   String lobbyId;
   String creatorId;
   int categoryNo;
@@ -28,9 +29,10 @@ class Footballers extends StatefulWidget {
   UserVariables variables;
    Function pauseBackground;
   Function startBackground;
+
  
   Footballers({
-    this.category, this.lobbyId, this.solo, this.variables, this.creatorId, this.categoryNo, this.pauseBackground, this.startBackground
+    this.category, this.lobbyId, this.solo, this.public, this.variables, this.creatorId, this.categoryNo, this.pauseBackground, this.startBackground
   });
 
   @override
@@ -154,6 +156,7 @@ class _FootballersState extends State<Footballers>
   List<List<String>> jersey_pairs = [];
   Color finalColor;
   final player = AudioPlayer(); 
+  final correctPlayer = AudioPlayer();
 
   
   
@@ -309,7 +312,10 @@ _bounceController.addListener(() {
    Future<void> setupSound() async{
     var index = Random().nextInt(4);
     await player.setAsset(backgroundTracks[index]);
-    player.setVolume(0.25);
+    await correctPlayer.setAsset('assets/sound-effects/correct.mp3');
+    player.setVolume(0.04);
+    correctPlayer.setVolume(0.2);
+    correctPlayer.setSpeed(0.7);
   }
 
   List<dynamic> concatenateList(List<dynamic> mainList, List<dynamic> addedList){
@@ -693,7 +699,8 @@ void handleTimeout() {  // callback function
     onWillPop: () async => false,
     child: !widget.solo
     ?StreamBuilder<DocumentSnapshot>(
-      stream: _firestore
+      stream: widget.public?_firestore
+          .collection("publicLobbies").doc(widget.lobbyId).snapshots():_firestore
           .collection("lobbies").doc(widget.lobbyId).snapshots(),
       builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
         
@@ -1801,7 +1808,7 @@ void handleTimeout() {  // callback function
             )
                           :MaterialButton(
                 onPressed: (){
-                  _firebaseProvider.startLobbyGame(widget.creatorId, widget.lobbyId);
+                  widget.public?_firebaseProvider.startPublicLobbyGame(widget.creatorId, widget.lobbyId):_firebaseProvider.startLobbyGame(widget.creatorId, widget.lobbyId);
                 },
                 child:  Container(
               width: width*0.35*(pow(size, 0.5)),
@@ -2868,6 +2875,7 @@ void handleTimeout() {  // callback function
         }
         
         else if(correct){
+          correctPlayer.play();
           setState(() {
             correctPicked = true;
             currentPage = currentPage+1;
@@ -2893,6 +2901,9 @@ void handleTimeout() {  // callback function
           setState(() {
             finished = true;
           });
+         /*  Future.delayed(Duration(seconds: 1)).then((value) {
+            correctPlayer.stop();
+          }); */
         }
            else{
              setState((){
@@ -2903,7 +2914,11 @@ void handleTimeout() {  // callback function
              _colorController.forward();
              
            }
+           
             }); 
+            Future.delayed(Duration(milliseconds: 200)).then((value) {
+              correctPlayer.stop();
+            });
           });
         }
         else{
@@ -2924,10 +2939,10 @@ void handleTimeout() {  // callback function
     else{
       List<dynamic> players = snapshot.data['players'];
     if(players.length ==1){
-      _firebaseProvider.stopLobbyGame(widget.variables.currentUser.uid, widget.lobbyId);
+      widget.public?_firebaseProvider.stopPublicLobbyGame(widget.variables.currentUser.uid, widget.lobbyId):_firebaseProvider.stopLobbyGame(widget.variables.currentUser.uid, widget.lobbyId);
     }
-    _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId).then((value) {
-      _firebaseProvider.submitUserScore(widget.variables.currentUser, widget.lobbyId, currentPage*10);
+    widget.public?_firebaseProvider.removeUserFromPublicLobby(widget.variables.currentUser, widget.lobbyId):_firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId).then((value) {
+      widget.public?_firebaseProvider.submitPublicUserScore(widget.variables.currentUser, widget.lobbyId, currentPage*10):_firebaseProvider.submitUserScore(widget.variables.currentUser, widget.lobbyId, currentPage*10);
     });
     }
         });

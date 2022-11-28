@@ -127,7 +127,7 @@ class _PlayModeState extends State<PlayMode>
     int index = Random().nextInt(4);
     await selectPlayer.setAsset('assets/sound-effects/option-click-confirm.wav');
     await player.setAsset(backgroundTracks[index]);
-    player.setVolume(0.25);
+    player.setVolume(0.1);
     selectPlayer.setVolume(0.1);
     selectPlayer.play();
     selectPlayer.stop();

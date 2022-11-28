@@ -28,9 +28,10 @@ class LobbyDetails extends StatefulWidget {
  UserVariables variables;
  Lobby lobby;
  Function startBackground;
+ Function stopBackground;
  bool public;
 
- LobbyDetails({this.variables, this.lobby, this.startBackground, this.public});
+ LobbyDetails({this.variables, this.lobby, this.startBackground, this.stopBackground, this.public});
   @override
   _LobbyDetailsState createState() => _LobbyDetailsState();
 }
@@ -246,8 +247,8 @@ void handleTimeout() {  // callback function
                 color: editing?Colors.grey:Colors.white,
                 borderRadius: BorderRadius.circular(15)
               ),
-              width: width*0.25,
-              height: height*0.05,
+              width: editing?width*0.25:width*0.15,
+              height: height*0.04,
               child: Center(
                 child: Text(editing?'Editing...':'Edit', style: TextStyle(color: Colors.black, fontSize: 16, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
               ),
@@ -260,26 +261,30 @@ void handleTimeout() {  // callback function
               height: height*0.03,
             ),
            
-          Padding(
+          !widget.public
+          ?Padding(
             padding: EdgeInsets.only(top: height*0.05, left: width*0.08),
             child: Text(
                 'Lobby Id: '+ widget.lobby.uid, style: TextStyle(color: Color(0xff23ff89), fontFamily: 'Muli', fontSize: 25, fontWeight: FontWeight.w900, fontStyle: FontStyle.normal),
               ),
-           ),
-             SizedBox(
+           ):Center(),
+             !widget.public
+             ?SizedBox(
               height: height*0.01,
-            ),
+            ):Center(),
 
-               Padding(
+               !widget.public
+               ?Padding(
             padding: EdgeInsets.only(top: height*0.02, left: width*0.08),
             child:  Text(
                 'Creator: @' + widget.lobby.creator['userName'], style: TextStyle(color: Colors.white, fontFamily: 'Muli', fontSize: 20, fontWeight: FontWeight.w900, fontStyle: FontStyle.normal),
              
             )
-           ),
-             SizedBox(
+           ):Center(),
+             !widget.public
+             ?SizedBox(
               height: height*0.01,
-            ),
+            ):Center(),
 
             Padding(
             padding: EdgeInsets.only(top: height*0.02, left: width*0.08),
@@ -343,7 +348,31 @@ void handleTimeout() {  // callback function
               setState(() {
                 joining = true;
               });
-              _firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobby.uid).then((value) {
+              if(widget.public){
+                 _firebaseProvider.addUserToPublicLobby(widget.variables.currentUser, widget.lobby.uid).then((value) {
+                widget.stopBackground();
+                 Navigator.push(context, MaterialPageRoute( 
+          builder: (BuildContext context) {
+                          if(widget.lobby.gameType == 0){
+                            return Footballers(public: widget.public, category: categoryId[widget.lobby.gameCategory], lobbyId: widget.lobby.uid, solo: false, creatorId: widget.lobby.creatorId, variables: widget.variables, categoryNo: widget.lobby.gameCategory, startBackground: widget.startBackground,);
+                          }
+                          else if (widget.lobby.gameType ==1){
+                            return BlackJackMultiplayer(public: widget.public, category: '0', lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId, startBackground: widget.startBackground,);
+                          }
+                          else if (widget.lobby.gameType ==2){
+                            return BankeruMultiplayer(public: widget.public, category: '0', lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId, startBackground: widget.startBackground,);
+                          }
+                          return SpinningBaby();
+                          },
+                        )).then((value) {
+                          setState(() {
+                  joining = false;
+                });
+                        });
+              });
+              }
+              else{
+                 _firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobby.uid).then((value) {
                 
                  Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
@@ -364,6 +393,8 @@ void handleTimeout() {  // callback function
                 });
                         });
               });
+              }
+              
               Future.delayed(Duration(seconds: 1)).then((value) {
                 selectPlayer.stop();
               });

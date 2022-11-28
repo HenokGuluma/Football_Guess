@@ -10,18 +10,24 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_countdown_timer/flutter_countdown_timer.dart';
 import 'package:flutter_spinning_wheel/src/utils.dart';
 import 'package:flutter_countdown_timer/countdown.dart';
+import 'package:instagram_clone/backend/firebase.dart';
 import 'package:instagram_clone/main.dart';
 import 'package:instagram_clone/models/lobby.dart';
 import 'package:instagram_clone/pages/add_lobby.dart';
+import 'package:instagram_clone/pages/add_public_lobby.dart';
 import 'package:instagram_clone/pages/football_menu.dart';
 import 'package:instagram_clone/pages/footballers.dart';
 import 'package:instagram_clone/pages/insta_profile_screen.dart';
+import 'package:instagram_clone/pages/lobby_details.dart';
+import 'package:just_audio/just_audio.dart';
+import 'package:progress_indicators/progress_indicators.dart';
 
 class LobbyMenu extends StatefulWidget {
  
  UserVariables variables;
+ Function stopBackground;
 
- LobbyMenu({this.variables});
+ LobbyMenu({this.variables, this.stopBackground});
   @override
   _LobbyMenuState createState() => _LobbyMenuState();
 }
@@ -47,6 +53,7 @@ class _LobbyMenuState extends State<LobbyMenu>
   List<String> categoryId = ['jersey', 'goals', 'age', 'height'];
 
   List<String> menuImages = ['assets/football2.jpg', 'assets/football3.jpg','assets/football4.jpg',  'assets/football1.png'];
+  List<String> modes = ['assets/rapidBall.png', 'assets/blackjack-option.png', 'assets/bank_vault.png', 'assets/roulette.png'];
 
   List<List<Map<String, dynamic>>> LobbyMenu = 
   [
@@ -76,6 +83,9 @@ class _LobbyMenuState extends State<LobbyMenu>
   AnimationController _animationController;
   AnimationController _bounceController;
   PageController _pageController;
+  var _firebaseProvider = FirebaseProvider();
+  var cancel = AudioPlayer();
+   var player = AudioPlayer();
   Animation _animation;
   bool animate = false;
   bool correctPicked = false;
@@ -89,6 +99,8 @@ class _LobbyMenuState extends State<LobbyMenu>
   bool wrongClick = false;
   int gamePlayDuration = 0;
   double size = 1;
+  List<Lobby> publicLobbies = [];
+  bool loading = true;
   
   
   @override
@@ -121,6 +133,8 @@ _animationController.addListener(() {
       });
 
      });
+     getPublicLobbies();
+     setupSound();
   }
 
   
@@ -130,6 +144,25 @@ _animationController.addListener(() {
 void handleTimeout() {  // callback function
   setState(() {
     defeated = true;
+  });
+}
+
+ Future<void> setupSound() async{
+    await player.setAsset('assets/sound-effects/option-click-confirm.wav');
+    await cancel.setAsset('assets/sound-effects/option-click.wav');
+    player.setVolume(0.1);
+    cancel.setVolume(0.1);
+    cancel.play();
+    cancel.stop();
+
+  }
+
+getPublicLobbies(){
+  _firebaseProvider.getPublicLobbies().then((list) {
+    setState(() {
+      publicLobbies = list;
+      loading = false;
+    });
   });
 }
 
@@ -181,12 +214,16 @@ void handleTimeout() {  // callback function
                 padding: EdgeInsets.only(top: 10),
                 child: IconButton(
                 onPressed: (){
+                  player.play();
                     Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           // return LobbyMenu();
                           return InstaProfileScreen(variables: widget.variables,);
                         },
                         ));
+                        Future.delayed(Duration(seconds: 1)).then((value) {
+                          player.stop();
+                        });
                 },
                 icon: Container(
                   
@@ -229,20 +266,37 @@ void handleTimeout() {  // callback function
           Container(
             width: width,
             height: height*0.75,
-            child:  GridView.count(
-  primary: false,
-  padding: const EdgeInsets.all(5),
-  crossAxisSpacing: 0,
-  mainAxisSpacing: 20,
-  crossAxisCount: 2,
-  childAspectRatio: 0.85,
-  children: <Widget>[
-   lobbyItem(width, height, 0),
-   lobbyItem(width, height, 1),
-   lobbyItem(width, height, 2),
-   lobbyItem(width, height, 3),
-  ],
-),
+            child:  loading
+            ?Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                    Center(
+            child: Text(
+                'Getting Public Lobbies', style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 25, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
+              ),
+          ),
+          JumpingDotsProgressIndicator(color: Color(0xff00ffff), fontSize: 70,),
+                ],
+              ),
+            )
+            :Container(
+              height: height*0.75,
+              width: width*0.9,
+              child: Center(
+                child: GridView.builder(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          // A grid view with 3 items per row
+          crossAxisCount: 2,
+          childAspectRatio: 0.9
+        ),
+        itemCount: publicLobbies.length,
+        itemBuilder: (_, index) {
+          return lobbyItem(width, height, index);
+        },
+      ),
+              ),
+            )
           ), 
 
          
@@ -252,7 +306,11 @@ void handleTimeout() {  // callback function
           children: [
              GestureDetector(
             onTap: (){
+              cancel.play();
               Navigator.pop(context);
+              Future.delayed(Duration(seconds: 1)).then((value){
+                cancel.stop();
+              });
             },
             child: Container(
               decoration: BoxDecoration(
@@ -268,12 +326,16 @@ void handleTimeout() {  // callback function
             ),
              GestureDetector(
             onTap: (){
+              player.play();
                Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           // return LobbyMenu();
-                          return  AddLobby(variables: widget.variables,);
+                          return  AddPublicLobby(variables: widget.variables);
                         },
                         ));
+                         Future.delayed(Duration(seconds: 1)).then((value) {
+                          player.stop();
+                        });
             },
             child: Container(
               decoration: BoxDecoration(
@@ -291,7 +353,11 @@ void handleTimeout() {  // callback function
          )
          :GestureDetector(
             onTap: (){
+               cancel.play();
               Navigator.pop(context);
+              Future.delayed(Duration(seconds: 1)).then((value){
+                cancel.stop();
+              });
             },
             child: Container(
               decoration: BoxDecoration(
@@ -317,15 +383,20 @@ void handleTimeout() {  // callback function
    }
 
   Widget lobbyItem(var width, var height, int index){
+    Lobby lobby = publicLobbies[index];
     return Padding(
       padding: EdgeInsets.only(top: width*0.03, bottom: width*0.03),
       child: GestureDetector(
       onTap: (){
+        player.play();
          Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
-                          return FootBallMenu(creating: false,);
+                          return LobbyDetails(variables: widget.variables, lobby: lobby, public: true, stopBackground: widget.stopBackground);
                         },
                         ));
+                         Future.delayed(Duration(seconds: 1)).then((value) {
+                          player.stop();
+                        });
       },
       child: Container(
         width: width*0.3,
@@ -344,7 +415,7 @@ void handleTimeout() {  // callback function
                 shape: BoxShape.circle,
                 color: Colors.black,
                 image: DecorationImage(
-                  image: AssetImage('assets/bankeru-new.png'),
+                  image: AssetImage(lobby.gameType==0?menuImages[lobby.gameCategory]:modes[lobby.gameType]),
                   fit: BoxFit.cover
                 ),
                  boxShadow: [BoxShadow(
@@ -363,7 +434,7 @@ void handleTimeout() {  // callback function
             Container(
               width: width*0.45,
               child: Center(
-                child: Text(lobbies[index]['name'] , style: TextStyle(fontFamily: 'Muli', color: Color(0xffff4399), fontSize: 20, fontWeight: FontWeight.w900), overflow: TextOverflow.ellipsis,),
+                child: Text(lobby.name , style: TextStyle(fontFamily: 'Muli', color: Color(0xffff4399), fontSize: 20, fontWeight: FontWeight.w900), overflow: TextOverflow.ellipsis,),
               ),
             ),
             SizedBox(
@@ -372,7 +443,7 @@ void handleTimeout() {  // callback function
             Container(
               width: width*0.45,
               child: Center(
-                child: Text(lobbies[index]['lobbyId']+ '(' + lobbies[index]['price'].toString() + ' ETB)', style: TextStyle(fontFamily: 'Muli', color: Colors.white, fontSize: 16, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic), overflow: TextOverflow.ellipsis,),
+                child: Text(lobby.rate.toString() + ' ETB', style: TextStyle(fontFamily: 'Muli', color: Colors.white, fontSize: 16, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic), overflow: TextOverflow.ellipsis,),
               ),
             )
           ],

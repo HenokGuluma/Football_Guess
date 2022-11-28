@@ -24,11 +24,12 @@ class BankeruMultiplayer extends StatefulWidget {
   String creatorId;
   int categoryNo;
   bool solo;
+  bool public;
   UserVariables variables;
   Function startBackground;
  
   BankeruMultiplayer({
-    this.category, this.lobbyId, this.startBackground, this.solo, this.variables, this.creatorId, this.categoryNo,
+    this.category, this.lobbyId, this.public, this.startBackground, this.solo, this.variables, this.creatorId, this.categoryNo,
   });
 
   @override

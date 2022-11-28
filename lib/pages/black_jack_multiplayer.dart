@@ -22,6 +22,7 @@ class BlackJackMultiplayer extends StatefulWidget {
 
   String category;
   String lobbyId;
+  bool public;
   String creatorId;
   int categoryNo;
   bool solo;
@@ -29,7 +30,7 @@ class BlackJackMultiplayer extends StatefulWidget {
   Function startBackground;
  
   BlackJackMultiplayer({
-    this.category, this.lobbyId, this.solo, this.variables, this.startBackground, this.creatorId, this.categoryNo,
+    this.category, this.lobbyId, this.public, this.solo, this.variables, this.startBackground, this.creatorId, this.categoryNo,
   });
 
   @override

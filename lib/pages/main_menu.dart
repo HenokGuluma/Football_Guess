@@ -240,7 +240,7 @@ Center(
                 uid: widget.uid,
                 name: widget.name,
                 rate: double.parse(widget.rate),
-                players: [widget.variables.currentUser.uid],
+                players: [],
                 gameType: selectedIndex,
                 gameCategory: 0,
                 creationDate: DateTime.now().millisecondsSinceEpoch,
@@ -367,6 +367,7 @@ Center(
           builder: (BuildContext context) {
                           // return LobbyMenu();
                           return FootBallMenu(
+                            public: widget.public,
                             creating: widget.creating,
                             uid: widget.uid,
                             name: widget.name,

@@ -16,6 +16,7 @@ import 'package:instagram_clone/main.dart';
 import 'package:instagram_clone/models/lobby.dart';
 import 'package:instagram_clone/pages/football_menu.dart';
 import 'package:instagram_clone/pages/footballers.dart';
+import 'package:instagram_clone/pages/main_menu.dart';
 
 class AddPublicLobby extends StatefulWidget {
   
@@ -200,118 +201,6 @@ void handleTimeout() {  // callback function
               ),
               Padding(
                 padding:
-                    const EdgeInsets.only(left: 30.0, top: 10),
-                child: TextField(
-                  inputFormatters: [
-                  FilteringTextInputFormatter.deny(
-                      RegExp(r'\s')),
-              ],
-                    style: TextStyle(fontFamily: 'Muli', color: Colors.white, fontWeight: FontWeight.w900, fontSize: 20),
-                    controller: _uidController,
-                    maxLength: 15,
-                    
-                    decoration: InputDecoration(
-                      
-                        hintText: 'Lobby Identifier',
-                        
-                        hintStyle: TextStyle(
-                            fontFamily: 'Muli',
-                            color: Colors.grey,
-                            fontSize: 20.0),
-                        labelText: 'Lobby Identifier',
-                        labelStyle: TextStyle(
-                            fontFamily: 'Muli',
-                            color: Colors.white,
-                            fontSize: 20.0)),
-                    onChanged: updateText),
-              ),
-               userNameShort
-                ?Container(
-                  decoration: BoxDecoration(
-                    color: Colors.transparent,
-                    borderRadius: BorderRadius.circular(15)
-                  ),
-                  width: width*0.6,
-                  height: height*0.05,
-                  child: Center(
-                    child: Text('Enter at least 7 characters', style: TextStyle(color: Color(0xffff2389), fontSize: 14, fontFamily: 'Muli', fontWeight: FontWeight.w600)),
-                  ),
-                )
-               :checking||!userNameLongEnough
-              ?Container(
-                  decoration: BoxDecoration(
-                    color: Color(0xff777777),
-                    borderRadius: BorderRadius.circular(15)
-                  ),
-                  width: width*0.4,
-                  height: height*0.05,
-                  child: Center(
-                    child: Text(checking?'Checking...':'Check Availability', style: TextStyle(color: Colors.black, fontSize: 16, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
-                  ),
-                )
-                :unavailable
-              ?Container(
-                  decoration: BoxDecoration(
-                    color: Color(0xffff2389),
-                    borderRadius: BorderRadius.circular(15)
-                  ),
-                  width: width*0.4,
-                  height: height*0.05,
-                  child: Center(
-                    child: Text('Identifier unavailable', style: TextStyle(color: Colors.white, fontSize: 16, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
-                  ),
-                )
-               
-              :available
-              ?Container(
-                  decoration: BoxDecoration(
-                    color: Color(0xff23ff89),
-                    borderRadius: BorderRadius.circular(15)
-                  ),
-                  width: width*0.4,
-                  height: height*0.05,
-                  child: Center(
-                    child: Text('Identifier Available', style: TextStyle(color: Colors.black, fontSize: 16, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
-                  ),
-                )
-              :GestureDetector(
-                onTap:(){
-                  setState(() {
-                    checking = true;
-                  });
-                  _firebaseProvider.fetchLobbyById(_uidController.text).then((value) {
-                    if(value!=null){
-                      setState(() {
-                        unavailable = true;
-                        checking = false;
-                      });
-                    }
-                    else{
-                      setState(() {
-                        available = true;
-                        checking = false;
-                      });
-                    }
-                  });
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: checking?Color(0xff777777):Colors.white,
-                    borderRadius: BorderRadius.circular(15)
-                  ),
-                  width: width*0.4,
-                  height: height*0.05,
-                  child: Center(
-                    child: Text(checking?'Checking...':'Check Availability', style: TextStyle(color: Colors.black, fontSize: 16, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
-                  ),
-                ),
-                 ),
-                 SizedBox(
-            height: height*0.08,
-          ),
-             
-              Padding(
-                padding:
                     const EdgeInsets.symmetric(horizontal: 30.0, vertical: 8.0),
                 child: TextFormField(
                   keyboardType: TextInputType.number,
@@ -360,14 +249,15 @@ void handleTimeout() {  // callback function
               ),
             ),
             ),
-             available && _nameController.text.isNotEmpty && _rateController.text.isNotEmpty
+             _nameController.text.isNotEmpty && _rateController.text.isNotEmpty
              ?GestureDetector(
             onTap: (){
               FocusScope.of(context).unfocus();
                Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           // return SelectLobby();
-                          return FootBallMenu(
+                          return GameMenu(
+                            public: true,
                             creating: true,
                             uid: _uidController.text,
                             name: _nameController.text,

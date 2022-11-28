@@ -19,6 +19,7 @@ import 'package:just_audio/just_audio.dart';
 class FootBallMenu extends StatefulWidget {
  
   bool creating;
+  bool public;
   String uid;
   String name;
   String rate;
@@ -29,7 +30,7 @@ class FootBallMenu extends StatefulWidget {
   Function startBackground;
 
 
-  FootBallMenu({this.creating, this.uid, this.name, this.rate, this.gameCategory, this.thisUser, this.variables, this.pauseBackground, this.startBackground});
+  FootBallMenu({this.creating, this.public, this.uid, this.name, this.rate, this.gameCategory, this.thisUser, this.variables, this.pauseBackground, this.startBackground});
   @override
   _FootBallMenuState createState() => _FootBallMenuState();
 }
@@ -274,7 +275,7 @@ void handleTimeout() {  // callback function
                 uid: widget.uid,
                 name: widget.name,
                 rate: double.parse(widget.rate),
-                players: [widget.variables.currentUser.uid],
+                players: [],
                 gameType: 0,
                 gameCategory: selectedIndex,
                 creationDate: DateTime.now().millisecondsSinceEpoch,
@@ -282,7 +283,25 @@ void handleTimeout() {  // callback function
                 creatorName: widget.variables.currentUser.userName,
               );
               print(widget.variables.currentUser.uid); print(' is the user');
-              _firebaseProvider.addLobbyById(widget.uid, lobby, widget.thisUser).then((value) {
+             if(widget.public){
+                 _firebaseProvider.addPublicLobby(lobby).then((value) {
+                
+                Flushbar(
+                  title: 'Created a Lobby',
+                  backgroundColor: Color(0xff00ffff),
+                  titleText: Text('Successfully created the lobby', style: TextStyle(color: Colors.black, fontSize: 16, fontFamily: 'Muli')),
+                );
+
+                 Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                  builder: ((context) => MyApp())),
+                              (Route<dynamic> route) => false,
+                            );
+              });
+              }
+              else{
+                 _firebaseProvider.addLobbyById(widget.uid, lobby, widget.thisUser).then((value) {
                 widget.variables.setLobby(lobby);
                 
                 
@@ -299,6 +318,7 @@ void handleTimeout() {  // callback function
                               (Route<dynamic> route) => false,
                             );
               });
+              }
             },
             child: Container(
               decoration: BoxDecoration(

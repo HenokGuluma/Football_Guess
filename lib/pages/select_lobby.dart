@@ -59,6 +59,7 @@ class _SelectLobbyState extends State<SelectLobby>
   
 
   List<String> menuImages = ['assets/football2.jpg', 'assets/football3.jpg','assets/football4.jpg',  'assets/football1.png'];
+  List<String> modes = ['assets/rapidBall.png', 'assets/blackjack-option.png', 'assets/bank_vault.png', 'assets/roulette.png'];
 
   List<List<Map<String, dynamic>>> SelectLobby = 
   [
@@ -440,7 +441,7 @@ void handleTimeout() {  // callback function
                Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           // return SelectLobby();
-                          return  LobbyMenu(variables: widget.variables,);
+                          return  LobbyMenu(variables: widget.variables, stopBackground: widget.pauseBackground);
                         },
                         ));
                          Future.delayed(Duration(seconds: 1)).then((value) {
@@ -504,7 +505,7 @@ void handleTimeout() {  // callback function
                Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           // return SelectLobby();
-                          return  LobbyDetails(variables: widget.variables, lobby: lobby, public: false,);
+                          return  LobbyDetails(variables: widget.variables, lobby: lobby, public: false, startBackground: widget.pauseBackground,);
                         },
                         ));
                          Future.delayed(Duration(seconds: 1)).then((value) {
@@ -544,7 +545,7 @@ void handleTimeout() {  // callback function
             },
             child: Container(
               decoration: BoxDecoration(
-                color: Color(0xff23ff89),
+                color: Color(0xff23ff29),
                 borderRadius: BorderRadius.circular(20)
               ),
               width: width*0.35,
@@ -613,7 +614,7 @@ void handleTimeout() {  // callback function
                 image: DecorationImage(
                   image: snapshot.gameCategory==null?
                   AssetImage('assets/bankeru_blue.png')
-                  :AssetImage(menuImages[snapshot.gameCategory]),
+                  :AssetImage(snapshot.gameType==0?menuImages[snapshot.gameCategory]:modes[snapshot.gameType]),
                   fit: BoxFit.cover
                 ),
                  boxShadow: [BoxShadow(
