@@ -357,6 +357,7 @@ void handleTimeout() {  // callback function
                             return Footballers(public: widget.public, category: categoryId[widget.lobby.gameCategory], lobbyId: widget.lobby.uid, solo: false, creatorId: widget.lobby.creatorId, variables: widget.variables, categoryNo: widget.lobby.gameCategory, startBackground: widget.startBackground,);
                           }
                           else if (widget.lobby.gameType ==1){
+                            print(widget.public); print(' is the public');
                             return BlackJackMultiplayer(public: widget.public, category: '0', lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId, startBackground: widget.startBackground,);
                           }
                           else if (widget.lobby.gameType ==2){
@@ -377,13 +378,13 @@ void handleTimeout() {  // callback function
                  Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           if(widget.lobby.gameType == 0){
-                            return Footballers(category: categoryId[widget.lobby.gameCategory], lobbyId: widget.lobby.uid, solo: false, creatorId: widget.lobby.creatorId, variables: widget.variables, categoryNo: widget.lobby.gameCategory, startBackground: widget.startBackground,);
+                            return Footballers(category: categoryId[widget.lobby.gameCategory], public: false, lobbyId: widget.lobby.uid, solo: false, creatorId: widget.lobby.creatorId, variables: widget.variables, categoryNo: widget.lobby.gameCategory, startBackground: widget.startBackground,);
                           }
                           else if (widget.lobby.gameType ==1){
-                            return BlackJackMultiplayer(category: '0', lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId, startBackground: widget.startBackground,);
+                            return BlackJackMultiplayer(category: '0', public: false, lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId, startBackground: widget.startBackground,);
                           }
                           else if (widget.lobby.gameType ==2){
-                            return BankeruMultiplayer(category: '0', lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId, startBackground: widget.startBackground,);
+                            return BankeruMultiplayer(category: '0',public: false, lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId, startBackground: widget.startBackground,);
                           }
                           return SpinningBaby();
                           },

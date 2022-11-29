@@ -124,11 +124,13 @@ class BlackJackMultiplayerState extends State<BlackJackMultiplayer>
   bool correctPicked = false;
   int currentPage = 0;
   bool finished = false;
-  int second = 8;
-  double timeLeft = 8;
-  double resetValue = 8;
-  double gamePlayTimeLeft = 5;
-  double divider = 8;
+  int second = 6;
+  bool submitting = false;
+  bool submitted = false;
+  double timeLeft = 6;
+  double resetValue = 6;
+  double gamePlayTimeLeft = 3;
+  double divider = 6;
   bool defeated = false;
   bool wrongClick = false;
   int gamePlayDuration = 0;
@@ -143,6 +145,7 @@ class BlackJackMultiplayerState extends State<BlackJackMultiplayer>
   bool retrievingWinner = false;
   bool shouldGetWinner = false;
   bool gotWinner = false;
+  bool countingSecond = false;
     var rng = Random();
   int playerAmount = 0;
   bool setupPlayers = true;
@@ -162,6 +165,7 @@ class BlackJackMultiplayerState extends State<BlackJackMultiplayer>
    int addedScore = 0;
    bool exploded = false;
    bool perfectScore = false;
+   int automaticCount = 0;
 
 
 Future<void> setupSound() async{
@@ -209,17 +213,50 @@ void startTimer(var width, var height, Function shatter) {
             showRandomizing = false;
             addedScore = added;
              score = score+added;
+             
           });
+          if(!countingSecond){
+            setState(() {
+              timeLeft = 6;
+              countingSecond = true;
+            });
+            startSecondCountDown();
+          }
           Future.delayed(Duration(milliseconds: 500)).then((value) {
             if (score ==21){
               setState(() {
               perfectScore = true;
               });
+              if(!widget.public){
+                _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId).then((value) {
+                if(lastPlayer){
+                                 _firebaseProvider.stopLobbyGame(widget.variables.currentUser.uid, widget.lobbyId);
+                                    
+                                  }
+             _firebaseProvider.submitUserScore(widget.variables.currentUser, widget.lobbyId, score);
+            });
+              }
+              else{
+                 _firebaseProvider.removeUserFromPublicLobby(widget.variables.currentUser, widget.lobbyId).then((value) {
+                if(lastPlayer){
+                                 _firebaseProvider.stopPublicLobbyGame(widget.variables.currentUser.uid, widget.lobbyId);
+                                    
+                                  }
+             _firebaseProvider.submitPublicUserScore(widget.variables.currentUser, widget.lobbyId, score);
+              });
+              }
+              
                Future.delayed(Duration(seconds: 1)).then((value) {
               setState(() {
               randomizing = false;
               showRandomizing = true;
             });
+            });
+
+            Future.delayed(Duration(seconds: 2)).then((value) {
+              setState(() {
+                finished = true;
+              });
             });
             }
             else if (score > 21){
@@ -232,8 +269,28 @@ void startTimer(var width, var height, Function shatter) {
                randomizing = false;
               showRandomizing = true;
             });
-             _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId).then((value) {
+            if(!widget.public){
+                _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId).then((value) {
+                if(lastPlayer){
+                                 _firebaseProvider.stopLobbyGame(widget.variables.currentUser.uid, widget.lobbyId);
+                                    
+                                  }
              _firebaseProvider.submitUserScore(widget.variables.currentUser, widget.lobbyId, score-addedScore);
+            });
+              }
+              else{
+                 _firebaseProvider.removeUserFromPublicLobby(widget.variables.currentUser, widget.lobbyId).then((value) {
+                if(lastPlayer){
+                                 _firebaseProvider.stopPublicLobbyGame(widget.variables.currentUser.uid, widget.lobbyId);
+                                    
+                                  }
+             _firebaseProvider.submitPublicUserScore(widget.variables.currentUser, widget.lobbyId, score-addedScore);
+              });
+              }
+            Future.delayed(Duration(seconds: 5)).then((value) {
+              setState(() {
+                finished = true;
+              });
             });
             });
             }
@@ -259,6 +316,38 @@ void startTimer(var width, var height, Function shatter) {
     },
   );
 }
+
+void startSecondTimer(var width, var height, Function shatter) {
+  
+  const oneSec = const Duration(milliseconds: 100);
+  _timer = new Timer.periodic(
+    oneSec,
+    (Timer timer) {
+      
+      if (timeLeft == 0) {
+        timer.cancel();
+        submitScore();
+        setState(() {
+          finished = true;
+        });
+      } else {
+        setState(() {
+          timeLeft = timeLeft -0.1;
+        });
+      }
+    },
+  );
+}
+
+submitScore(){
+  if(widget.public){
+    _firebaseProvider.submitPublicUserScore(widget.variables.currentUser, widget.lobbyId, score);
+  }
+  else{
+    _firebaseProvider.submitUserScore(widget.variables.currentUser, widget.lobbyId, score);
+  }
+}
+
 
  @override
   void dispose() {
@@ -287,7 +376,29 @@ void startTimer(var width, var height, Function shatter) {
    startGamePlayCountDown();
     startSecondCountDown();
     setupSound();
+    _bounceController = AnimationController(
 
+      duration: Duration(milliseconds: 500),
+
+      vsync: this,
+
+      upperBound: 1.2,
+      lowerBound: 1
+
+    );
+    
+_bounceController.forward();
+_bounceController.repeat(reverse: true);
+_bounceController.addListener(() {
+
+      if(!disposed){
+        setState(() {
+           size = _bounceController.value;
+      });
+      }
+
+     });
+     
     super.initState();
 
     
@@ -350,7 +461,7 @@ void startTimer(var width, var height, Function shatter) {
       }
       
       else{
-        handleTimeout();
+        // handleTimeout();
       }
 
       
@@ -522,6 +633,12 @@ void handleTimeout() {  // callback function
         });
         if(!widget.solo){
           _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId).then((value) {
+            if(lastPlayer && widget.public){
+                                    _firebaseProvider.stopPublicLobbyGame(widget.variables.currentUser.uid, widget.lobbyId);
+                                  }
+                                  else if(lastPlayer){
+                                    _firebaseProvider.stopLobbyGame(widget.variables.currentUser.uid, widget.lobbyId);
+                                  }
       _firebaseProvider.submitUserScore(widget.variables.currentUser, widget.lobbyId, currentPage*10);
     });
        if(lastPlayer){
@@ -535,7 +652,634 @@ void handleTimeout() {  // callback function
           });
         });
 }
+
+Widget finalScreen(var width, var height, AsyncSnapshot snapshot){
+  return Scaffold(
+    body: Stack(
+      children: [
+        Container(
+            width: width,
+            height: height,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/blackjack_wallpaper.png'),
+                fit: BoxFit.cover
+              )
+            ),
+          ),
+          Center(
+            
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                    SizedBox(
+                height: height*0.05,
+              ),
+             Container(
+              height: height*0.15,
+              child: ListView.builder(
+                itemBuilder: (BuildContext context, int index) { 
+                    return profileCircle(width, height, index, playerInfos[playerList[index]], snapshot);
+                    //return CircularProgressIndicator();
+                  },
+                scrollDirection: Axis.horizontal,
+                itemCount: playerList.length,
+                ),
+            ),
+             SizedBox(
+                height: height*0.1,
+              ),
+              gotWinner
+              ?winner!=null
+          ?widget.variables.currentUser.userName != winner.data()['userName']
+              ?Center(
+              child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+                'The Winner is: ', style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 25, fontWeight: FontWeight.w900, fontStyle: FontStyle.normal),
+              ),
+            SizedBox(
+              height: height*0.02,
+            ),
+            winnerWidget(width, height, winner),
+           
+              SizedBox(
+              height: height*0.1,
+            ),]))
+          :Center(
+              child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+             Text(
+                'Congratulations', style: TextStyle(color: Color(0xff63ff00), fontFamily: 'Muli', fontSize: 50, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
+              ),
+            SizedBox(
+              height: height*0.15,
+            ),
+           Text(
+                'You have won with score ' + (exploded?score-addedScore:score).toString(), style: TextStyle(color: Color(0xffffffff), fontFamily: 'Muli', fontSize: 25, fontWeight: FontWeight.w900, fontStyle: FontStyle.normal),
+              ),
+            
+              SizedBox(
+              height: height*0.1,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                GestureDetector(
+            onTap: (){
+              // Navigator.pop(context);
+              setState(() {
+                submitted = false;
+                submitting = false;
+                finished = false;
+                exploded = false;
+                perfectScore = false;
+                gotWinner = false;
+                winner = null;
+                cardValues = [];
+                score = 0;
+                timeLeft = 6;
+              });
+              _firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId);_firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId);
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.3,
+              height: height*0.06,
+              child: Center(
+                child: Text('Try Again', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            ),
+            ),
+            SizedBox(height: height*0.05,),
+            GestureDetector(
+            onTap: (){
+               cancel.play();
+              showDialog(
+                        context: context,
+                        builder: ((context) {
+                          return new AlertDialog(
+                            backgroundColor: Color(0xff240044),
+                            title: new Text(
+                              'Leaving the game',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Muli',
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w900),
+                            ),
+                            content: new Text(
+                              'Are you sure you want to leave the game? All progresses and bets will be lost.',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Muli',
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.normal),
+                            ),
+                            actions: <Widget>[
+                              new TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                  setState(() {
+                                    paused = false;
+                                  });
+                                }, // Closes the dialog
+                                child: new Text(
+                                  'No',
+                                  style: TextStyle(
+                                      color: Color(0xffff2389),
+                                      fontSize: 16,
+                                      fontFamily: 'Muli',
+                                      fontWeight: FontWeight.w900),
+                                ),
+                              ),
+                              new TextButton(
+                                onPressed: () {
+                                  cancel.play();
+                                  _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
+                                  if(lastPlayer && widget.public){
+                                    _firebaseProvider.stopPublicLobbyGame(widget.variables.currentUser.uid, widget.lobbyId);
+                                  }
+                                  else if(lastPlayer){
+                                    _firebaseProvider.stopLobbyGame(widget.variables.currentUser.uid, widget.lobbyId);
+                                  }
+                                  Navigator.pop(context);
+                                //  _bounceController.reset();
+                  // _animationController.reset();
+                  setState(() {
+                    disposed = true;
+                  });
+                  // handleTimeout();
+                  _navigator.pop(context);
+                  Future.delayed(Duration(seconds: 1)).then((value) {
+                cancel.stop();
+                });
+                                },
+                                child: new Text(
+                                  'Yes',
+                                  style: TextStyle(
+                                      color: Color(0xff23ff89),
+                                      fontSize: 16,
+                                      fontFamily: 'Muli',
+                                      fontWeight: FontWeight.w900),
+                                ),
+                              ),
+                            ],
+                          );
+                        }));
+                        Future.delayed(Duration(seconds: 1)).then((value) {
+                cancel.stop();
+                });
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Color(0xffff2389),
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.3,
+              height: height*0.06,
+              child: Center(
+                child: Text('Leave', style: TextStyle(color: Colors.white, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            ),
+            ),
+              ],
+            )
+            ]))
+          :Center(
+            child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+                'Game Over', style: TextStyle(color: Color(0xffffffff), fontFamily: 'Muli', fontSize: 45, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
+              ),
+            SizedBox(
+              height: height*0.1,
+            ),
+            
+             Center(
+            child: Text(
+                'Calculating Results', style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 35, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
+              ),
+              
+          ),
+          JumpingDotsProgressIndicator(color: Color(0xff00ffff), fontSize: 70,),
+          ])
+          )
+          :Container(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('Waiting for others to finish', style: TextStyle(color: Color(0xffffffff), fontSize: 25, fontFamily: 'Muli', fontWeight: FontWeight.w900, fontStyle: FontStyle.italic)),
+            JumpingDotsProgressIndicator(color: Color(0xff00ffff), fontSize: 70,),
+            GestureDetector(
+            onTap: (){
+               cancel.play();
+              showDialog(
+                        context: context,
+                        builder: ((context) {
+                          return new AlertDialog(
+                            backgroundColor: Color(0xff240044),
+                            title: new Text(
+                              'Leaving the game',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Muli',
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w900),
+                            ),
+                            content: new Text(
+                              'Are you sure you want to leave the game? All progresses and bets will be lost.',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Muli',
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.normal),
+                            ),
+                            actions: <Widget>[
+                              new TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                  setState(() {
+                                    paused = false;
+                                  });
+                                }, // Closes the dialog
+                                child: new Text(
+                                  'No',
+                                  style: TextStyle(
+                                      color: Color(0xffff2389),
+                                      fontSize: 16,
+                                      fontFamily: 'Muli',
+                                      fontWeight: FontWeight.w900),
+                                ),
+                              ),
+                              new TextButton(
+                                onPressed: () {
+                                  cancel.play();
+                                  _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
+                                  if(lastPlayer && widget.public){
+                                    _firebaseProvider.stopPublicLobbyGame(widget.variables.currentUser.uid, widget.lobbyId);
+                                  }
+                                  else if(lastPlayer){
+                                    _firebaseProvider.stopLobbyGame(widget.variables.currentUser.uid, widget.lobbyId);
+                                  }
+                                  Navigator.pop(context);
+                                //  _bounceController.reset();
+                  // _animationController.reset();
+                  setState(() {
+                    disposed = true;
+                  });
+                  // handleTimeout();
+                  _navigator.pop(context);
+                  Future.delayed(Duration(seconds: 1)).then((value) {
+                cancel.stop();
+                });
+                                },
+                                child: new Text(
+                                  'Yes',
+                                  style: TextStyle(
+                                      color: Color(0xff23ff89),
+                                      fontSize: 16,
+                                      fontFamily: 'Muli',
+                                      fontWeight: FontWeight.w900),
+                                ),
+                              ),
+                            ],
+                          );
+                        }));
+                        Future.delayed(Duration(seconds: 1)).then((value) {
+                cancel.stop();
+                });
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Color(0xffff2389),
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.3,
+              height: height*0.06,
+              child: Center(
+                child: Text('Leave', style: TextStyle(color: Colors.white, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            ),
+            ),
+              ],
+            ),
+          )
+          ,
+            ])),
+      ],
+    ),
+  );
+}
    
+Widget submittedScreen(var width, var height, AsyncSnapshot snapshot){
+  return Scaffold(
+    body: Stack(
+      children: [
+        Container(
+            width: width,
+            height: height,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/blackjack_wallpaper.png'),
+                fit: BoxFit.cover
+              )
+            ),
+          ),
+          Center(
+            
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                    SizedBox(
+                height: height*0.05,
+              ),
+             Container(
+              height: height*0.15,
+              child: ListView.builder(
+                itemBuilder: (BuildContext context, int index) { 
+                    return profileCircle(width, height, index, playerInfos[playerList[index]], snapshot);
+                    //return CircularProgressIndicator();
+                  },
+                scrollDirection: Axis.horizontal,
+                itemCount: playerList.length,
+                ),
+            ),
+             SizedBox(
+                height: height*0.2,
+              ),
+               Container(
+                width: width*0.9,
+                child: Center(
+                child: Text(
+                'You have submitted your Score', style: TextStyle(color: Color(0xff63ff00), fontFamily: 'Muli', fontSize: 40, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic), textAlign: TextAlign.center
+              ),
+               ),
+               ),
+               SizedBox(
+                height: height*0.1,
+              ),
+              Text(
+                'Final Score: '+ score.toInt().toString(), style: TextStyle(color: Colors.white, fontFamily: 'Muli', fontSize: 30, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
+              ),
+              SizedBox(
+                height: height*0.05,
+              ),
+              GestureDetector(
+            onTap: (){
+              // Navigator.pop(context);
+              setState(() {
+                exploded = false;
+                perfectScore = false;
+                submitted = false;
+                submitting = false;
+                finished = false;
+                gotWinner = false;
+                winner = null;
+                cardValues = [];
+                score = 0;
+                timeLeft = 6;
+              });
+              _firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId);_firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId);
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.3,
+              height: height*0.06,
+              child: Center(
+                child: Text('Try Again', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            ),
+            ),
+            ])),
+      ],
+    ),
+  );
+}
+
+
+Widget startScreen(var width, var height, AsyncSnapshot snapshot){
+  return Scaffold(
+    body: Stack(
+      children: [
+        Container(
+            width: width,
+            height: height,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/blackjack_wallpaper.png'),
+                fit: BoxFit.cover
+              )
+            ),
+          ),
+          Container(
+                      height: height,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                           SizedBox(
+            height: height*0.1,
+          ),
+           Container(
+              height: height*0.15,
+              child: ListView.builder(
+                itemBuilder: (BuildContext context, int index) { 
+                    return profileCircle(width, height, index, playerInfos[playerList[index]], snapshot);
+                    //return CircularProgressIndicator();
+                  },
+                scrollDirection: Axis.horizontal,
+                itemCount: playerList.length,
+                ),
+            ),
+            SizedBox(
+              height: height*0.1,
+            ),
+                          startDown
+                          ?Container(
+              height: height*0.35,
+              width: width,
+              child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                
+                Center(
+            child: Text(
+                'Game Starts in', style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 35, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
+              ),
+          ),
+          SizedBox(
+            height: height*0.03,
+          ),
+           Center(
+            child: Text(
+                widget.public?automaticCount.toInt().toString():gamePlayTimeLeft.toInt().toString(), style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 50, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
+              ),
+          ),
+          
+              ],
+            )
+            ):snapshot.data['players'].length<1
+                          ?Container(
+              width: width*0.35,
+              height: width*0.35,
+              child: Center(
+                child: Text(
+                'Start', style: TextStyle(color: Color(0xff999999), fontFamily: 'Muli', fontSize: 38, fontWeight: FontWeight.w900, fontStyle: FontStyle.normal),
+              ),
+              ),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.black,
+                 boxShadow: [BoxShadow(
+            color: Color(0xff999999),
+            blurRadius: width*0.02,
+            spreadRadius: width*0.02
+          )],
+              ),
+            )
+                          :MaterialButton(
+                onPressed: (){
+                  widget.public?_firebaseProvider.startPublicLobbyGame(widget.creatorId, widget.lobbyId):_firebaseProvider.startLobbyGame(widget.creatorId, widget.lobbyId);
+                },
+                child:  Container(
+                  width: width*0.4,
+                  height: width*0.4,
+                  child: Column(
+                    children: [
+                      Container(
+              width: width*0.35*(pow(size, 0.5)),
+              height: width*0.35*pow(size, 0.5),
+              child: Center(
+                child: Text(
+                'Start', style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 38, fontWeight: FontWeight.w900, fontStyle: FontStyle.normal),
+              ),
+              ),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.black,
+                 boxShadow: [BoxShadow(
+            color: Color(0xff00ffff),
+            blurRadius: pow(size, 5)*2,
+            spreadRadius: pow(size, 5)*2
+          )],
+              ),
+            ),
+                    ],
+                  ),
+                )
+              ),
+              SizedBox(
+                height: height*0.1,
+              ),
+
+              GestureDetector(
+                onTap: (){
+                 showDialog(
+                        context: context,
+                        builder: ((context) {
+                          return new AlertDialog(
+                            backgroundColor: Color(0xff240044),
+                            title: new Text(
+                              'Leaving the game',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Muli',
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w900),
+                            ),
+                            content: new Text(
+                              'Are you sure you want to leave the game? All progresses and bets will be lost.',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Muli',
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.normal),
+                            ),
+                            actions: <Widget>[
+                              new TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                  setState(() {
+                                    paused = false;
+                                  });
+                                }, // Closes the dialog
+                                child: new Text(
+                                  'No',
+                                  style: TextStyle(
+                                      color: Color(0xffff2389),
+                                      fontSize: 16,
+                                      fontFamily: 'Muli',
+                                      fontWeight: FontWeight.w900),
+                                ),
+                              ),
+                              new TextButton(
+                                onPressed: () {
+                                  widget.public?_firebaseProvider.removeUserFromPublicLobby(widget.variables.currentUser, widget.lobbyId):_firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
+                                  if(lastPlayer && widget.public){
+                                    _firebaseProvider.stopPublicLobbyGame(widget.variables.currentUser.uid, widget.lobbyId);
+                                  }
+                                  else if(lastPlayer){
+                                    _firebaseProvider.stopLobbyGame(widget.variables.currentUser.uid, widget.lobbyId);
+                                  }
+                                  Navigator.pop(context);
+                                 _bounceController.reset();
+                  // _animationController.reset();
+                  setState(() {
+                    disposed = true;
+                  });
+                  // handleTimeout();
+                  _navigator.pop(context); player.stop(); widget.startBackground();
+                                },
+                                child: new Text(
+                                  'Yes',
+                                  style: TextStyle(
+                                      color: Color(0xff23ff89),
+                                      fontSize: 16,
+                                      fontFamily: 'Muli',
+                                      fontWeight: FontWeight.w900),
+                                ),
+                              ),
+                            ],
+                          );
+                        }));
+
+
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Color(0xffff2378),
+                    borderRadius: BorderRadius.circular(20)
+                  ),
+                  width: width*0.3,
+                  height: 40,
+                  child: Center(
+                    child: Text('Leave', style: TextStyle(color: Colors.white, fontSize:18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                  ),
+                ),
+              ),
+               
+                        ],
+                      ),
+                    ),
+            ],
+    ),
+  );
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -620,9 +1364,11 @@ void handleTimeout() {  // callback function
                 exploded = false;
                 perfectScore = false;
                 gotWinner = false;
+                finished = false;
                 winner = null;
                 cardValues = [];
                 score = 0;
+                timeLeft = 6;
               });
               _firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId);_firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId);
             },
@@ -683,7 +1429,13 @@ void handleTimeout() {  // callback function
                               new TextButton(
                                 onPressed: () {
                                   cancel.play();
-                                  _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
+                                  widget.public?_firebaseProvider.removeUserFromPublicLobby(widget.variables.currentUser, widget.lobbyId):_firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
+                                  if(lastPlayer && widget.public){
+                                    _firebaseProvider.stopPublicLobbyGame(widget.variables.currentUser.uid, widget.lobbyId);
+                                  }
+                                  else if(lastPlayer){
+                                    _firebaseProvider.stopLobbyGame(widget.variables.currentUser.uid, widget.lobbyId);
+                                  }
                                   Navigator.pop(context);
                                 //  _bounceController.reset();
                   // _animationController.reset();
@@ -773,7 +1525,7 @@ void handleTimeout() {  // callback function
             height: height*0.05,
           ),
                
-                 snapshot.data['active'] || (!retrievingWinner && !gotWinner)
+                 !finished
                  ?Column(
                   children: [
                      Text('You Just Exploded', style: TextStyle(color: Color(0xff00ffff), fontSize: 40, fontFamily: 'Muli', fontWeight: FontWeight.w900))
@@ -788,64 +1540,7 @@ void handleTimeout() {  // callback function
                   ],
                  )
                  : Center(),
-          snapshot.data['active']
-          ?Text('Waiting for others to finish...', style: TextStyle(color: Color(0xffffffff), fontSize: 25, fontFamily: 'Muli', fontWeight: FontWeight.w900, fontStyle: FontStyle.italic))
-                : retrievingWinner
-            ?Center(
-              child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text(
-                'Game Over', style: TextStyle(color: Color(0xffffffff), fontFamily: 'Muli', fontSize: 45, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
-              ),
-            SizedBox(
-              height: height*0.1,
-            ),
-            
-             Center(
-            child: Text(
-                'Calculating Results', style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 35, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
-              ),
-          ),]))
-          :winner!=null
-          ?widget.variables.currentUser.userName != winner.data()['userName']
-              ?Center(
-              child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text(
-                'The Winner is: ', style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 25, fontWeight: FontWeight.w900, fontStyle: FontStyle.normal),
-              ),
-            SizedBox(
-              height: height*0.02,
-            ),
-            winnerWidget(width, height, winner),
-           
-              SizedBox(
-              height: height*0.1,
-            ),]))
-          :Center(
-              child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-             Text(
-                'Congratulations', style: TextStyle(color: Color(0xff63ff00), fontFamily: 'Muli', fontSize: 50, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
-              ),
-            SizedBox(
-              height: height*0.15,
-            ),
-           Text(
-                'You have won with score ' + (exploded?score-addedScore:score).toString(), style: TextStyle(color: Color(0xffffffff), fontFamily: 'Muli', fontSize: 25, fontWeight: FontWeight.w900, fontStyle: FontStyle.normal),
-              ),
-            
-              SizedBox(
-              height: height*0.1,
-            ),]))
-          :Center(),
-            SizedBox(height: height*0.15,),   
+            SizedBox(height: height*0.05,),   
            Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -855,9 +1550,11 @@ void handleTimeout() {  // callback function
               setState(() {
                 exploded = false;
                 cardValues = [];
+                finished = false;
                 gotWinner = false;
                 winner = null;
                 score = 0;
+                timeLeft = 6;
               });
               _firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId);
             },
@@ -916,7 +1613,13 @@ void handleTimeout() {  // callback function
                               ),
                               new TextButton(
                                 onPressed: () {
-                                  _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
+                                  widget.public?_firebaseProvider.removeUserFromPublicLobby(widget.variables.currentUser, widget.lobbyId):_firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
+                                  if(lastPlayer && widget.public){
+                                    _firebaseProvider.stopPublicLobbyGame(widget.variables.currentUser.uid, widget.lobbyId);
+                                  }
+                                  else if(lastPlayer){
+                                    _firebaseProvider.stopLobbyGame(widget.variables.currentUser.uid, widget.lobbyId);
+                                  }
                                   Navigator.pop(context);
                                 //  _bounceController.reset();
                   // _animationController.reset();
@@ -968,10 +1671,17 @@ void handleTimeout() {  // callback function
    }
 
    Widget gameScreen(var width, var height, AsyncSnapshot snapshot){
-    return exploded
+    return 
+    !gameStarted
+    ?startScreen(width, height, snapshot)
+    :exploded && !finished
     ?explodedView(width, height, snapshot)
-    :perfectScore
+    :perfectScore && !finished
     ?perfectScoreWidget(width, height)
+    :submitted && !finished
+    ?submittedScreen(width, height, snapshot)
+    :finished
+    ?finalScreen(width, height, snapshot)
     :ShatteringWidget(
             builder: (shatter) => Scaffold(
       backgroundColor: Colors.black,
@@ -1008,11 +1718,31 @@ void handleTimeout() {  // callback function
                 ),
             ),
                 
-                Center(
+                randomizing
+                ?Center(
                   child: Container(
                     height: height*0.3,
                     child: (showRandomizing?randomizing?card(width, height, {'value': value, 'type': type}, 0):cardBack(width, height, shatter):Center()),
                   )
+                )
+                :Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Container(
+                      width: width*0.05,
+                    ),
+                    Center(
+                  child: Container(
+                    height: height*0.3,
+                    child: (showRandomizing?randomizing?card(width, height, {'value': value, 'type': type}, 0):cardBack(width, height, shatter):Center()),
+                  )
+                ),
+                Container(
+                  width: width*0.25,
+                  child: Text('Time: '+timeLeft.toInt().toString(), style: TextStyle(color: Color(0xff00ffff), fontSize: 20, fontFamily: 'Muli', fontWeight: FontWeight.w900))
+          ,
+                )
+                  ],
                 ),
                 SizedBox(
                   height: height*0.05,
@@ -1084,7 +1814,13 @@ void handleTimeout() {  // callback function
                               ),
                               new TextButton(
                                 onPressed: () {
-                                  _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
+                                  widget.public?_firebaseProvider.removeUserFromPublicLobby(widget.variables.currentUser, widget.lobbyId):_firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
+                                  if(lastPlayer && widget.public){
+                                    _firebaseProvider.stopPublicLobbyGame(widget.variables.currentUser.uid, widget.lobbyId);
+                                  }
+                                  else if(lastPlayer){
+                                    _firebaseProvider.stopLobbyGame(widget.variables.currentUser.uid, widget.lobbyId);
+                                  }
                                   Navigator.pop(context);
                                 //  _bounceController.reset();
                   // _animationController.reset();
@@ -1121,12 +1857,52 @@ void handleTimeout() {  // callback function
               ),
             ),
             ),
-            GestureDetector(
+            submitting
+            ? Container(
+              decoration: BoxDecoration(
+                color: Colors.grey,
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.3,
+              height: height*0.06,
+              child: Center(
+                child: Text('Submitting...', style: TextStyle(color: Color(0xff333333), fontSize: 16, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            )
+            :GestureDetector(
             onTap: (){
+             setState(() {
+               submitting = true;
+               submitted = true;
+             });
+             if(widget.public){
+              print('publiccc');
+                _firebaseProvider.submitPublicUserScore(widget.variables.currentUser, widget.lobbyId, score).then((value) {
+                  _firebaseProvider.removeUserFromPublicLobby(widget.variables.currentUser, widget.lobbyId);
+                  setState(() {
+                    submitting = false;               
+             });
+             Future.delayed(Duration(seconds: 2)).then((value) {
               setState(() {
-                disposed = true;
+                finished = true;
               });
-              Navigator.pop(context);
+             });
+                });
+               }
+               else{
+                print('non public');
+                _firebaseProvider.submitUserScore(widget.variables.currentUser, widget.lobbyId, score).then((value) {
+                   _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
+                  setState(() {
+                    submitting = false;               
+             });
+             Future.delayed(Duration(seconds: 2)).then((value) {
+              setState(() {
+                finished = true;
+              });
+             });
+                });
+               }
             },
             child: Container(
               decoration: BoxDecoration(
@@ -1260,7 +2036,12 @@ void handleTimeout() {  // callback function
 
     return GestureDetector(
          onTap: (){
+          setState(() {
+            timeLeft = 6;
+            countingSecond = false;
+          });
         randomize(width, height, shatter);
+        
       },
       child: Container(
       width: width*0.35,
@@ -1596,9 +2377,7 @@ void handleTimeout() {  // callback function
     if(players.length ==1){
       _firebaseProvider.stopLobbyGame(widget.variables.currentUser.uid, widget.lobbyId);
     }
-    _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId).then((value) {
-      _firebaseProvider.submitUserScore(widget.variables.currentUser, widget.lobbyId, currentPage*10);
-    });
+   
     }
         });
         Future.delayed(Duration(seconds: 5)).then((value) {
