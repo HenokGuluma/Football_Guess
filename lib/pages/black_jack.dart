@@ -684,6 +684,7 @@ void handleTimeout() {  // callback function
              SizedBox(height: height*0.05,),
             GestureDetector(
             onTap: (){
+              
               Navigator.pop(context);
              
             },

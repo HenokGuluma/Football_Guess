@@ -154,6 +154,9 @@ class _FootballersState extends State<Footballers>
   List<List<String>> goals_pairs = [];
   List<List<String>> height_pairs = [];
   List<List<String>> jersey_pairs = [];
+  bool automaticCountDown = false;
+  bool automaticCounting = false;
+  int automaticCount = 0;
   Color finalColor;
   final player = AudioPlayer(); 
   final correctPlayer = AudioPlayer();
@@ -464,7 +467,8 @@ Future<void>splitText(String text, String type){
       retrievingWinner = true;
     });
    Future.delayed(Duration(seconds: 6)).then((value) {
-     _firebaseProvider.getLobbyWinner(widget.lobbyId).then((lobbyWinner) {
+     if(widget.public){
+      _firebaseProvider.getPublicLobbyWinner(widget.lobbyId).then((lobbyWinner) {
       if(lobbyWinner!=null){
         setState(() {
           winner = lobbyWinner;
@@ -472,6 +476,17 @@ Future<void>splitText(String text, String type){
         });
       }
     });
+     }
+     else{
+      _firebaseProvider.getLobbyWinner(widget.lobbyId).then((lobbyWinner) {
+      if(lobbyWinner!=null){
+        setState(() {
+          winner = lobbyWinner;
+          retrievingWinner = false;
+        });
+      }
+    });
+     }
    });
     }
     else{
@@ -486,6 +501,13 @@ Future<void>splitText(String text, String type){
       }
       else if(paused){
 
+      }
+
+      else if(automaticCountDown){
+        _firebaseProvider.setAutomaticTime(widget.lobbyId);
+        setState(() {
+          automaticCountDown = false;
+        });
       }
 
       else if(!gameStarted){
@@ -559,6 +581,21 @@ Future<void>splitText(String text, String type){
 
   void startSecondCountDown(){
     Timer.periodic(Duration(milliseconds: 1000), (timer) { 
+      if(automaticCounting && !disposed){
+        if(automaticCount>0){
+          setState(() {
+          automaticCount = automaticCount -1;
+        });
+        }
+        else{
+          setState(() {
+            _colorController.reset();
+          automaticCounting = false;
+          gameStarted = true;
+          gamePlayTimeLeft = 0;
+        });
+        }
+      }
       if(!gameStarted){
 
       }
@@ -663,6 +700,7 @@ Future<void>splitText(String text, String type){
 
 
 void handleTimeout() {  // callback function
+  print('time out');
   setState(() {
           animate = true;
           wrongClick = true;
@@ -673,10 +711,21 @@ void handleTimeout() {  // callback function
       });
     });
         });
+        print('stage777');
         if(!widget.solo){
-          _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId).then((value) {
+          print('stage587');
+          if(widget.public){
+            print('stage478');
+            _firebaseProvider.removeUserFromPublicLobby(widget.variables.currentUser, widget.lobbyId).then((value) {
+      _firebaseProvider.submitPublicUserScore(widget.variables.currentUser, widget.lobbyId, currentPage*10);
+    });
+          }
+          else{
+            print('stage255');
+            _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId).then((value) {
       _firebaseProvider.submitUserScore(widget.variables.currentUser, widget.lobbyId, currentPage*10);
     });
+          }
        if(lastPlayer){
         stopGame();
        }
@@ -725,6 +774,15 @@ void handleTimeout() {  // callback function
              startDown = false;
             
           }
+          if(widget.public){
+            if(snapshot.data['players'].length >0 && !snapshot.data['startedCountdown']){
+            automaticCountDown = true;
+            automaticCounting = true;
+            automaticCount = 30;
+          }
+         
+          }
+          
         }
         else{
          
@@ -840,7 +898,7 @@ void handleTimeout() {  // callback function
                               ),
                               new TextButton(
                                 onPressed: () {
-                                  _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
+                                  widget.public?_firebaseProvider.removeUserFromPublicLobby(widget.variables.currentUser, widget.lobbyId):_firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
                                   Navigator.pop(context);
                                  _bounceController.reset();
                   _animationController.reset();
@@ -907,7 +965,7 @@ void handleTimeout() {  // callback function
                MaterialButton(
               onPressed: (){
                 print('sdfasdf');
-                _firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId);
+                widget.public?_firebaseProvider.addUserToPublicLobby(widget.variables.currentUser, widget.lobbyId):_firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId);
                 setState(() {
                   footballerPairs = [];
                   footballerPairs = concatenateList(footballerPairs, randomElements(easyPairs, 15));
@@ -1005,7 +1063,7 @@ void handleTimeout() {  // callback function
                               ),
                               new TextButton(
                                 onPressed: () {
-                                  _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
+                                  widget.public?_firebaseProvider.removeUserFromPublicLobby(widget.variables.currentUser, widget.lobbyId):_firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
                                   Navigator.pop(context);
                                  _bounceController.reset();
                   _animationController.reset();
@@ -1088,7 +1146,7 @@ void handleTimeout() {  // callback function
             });
           });
           _colorController.forward();
-                _firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId);
+                widget.public?_firebaseProvider.addUserToPublicLobby(widget.variables.currentUser, widget.lobbyId):_firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId);
                 setState(() {
                   timeLeft = 5.5;
                   // _slideController.value = 5.5;
@@ -1172,7 +1230,7 @@ void handleTimeout() {  // callback function
                               ),
                               new TextButton(
                                 onPressed: () {
-                                  _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
+                                  widget.public?_firebaseProvider.removeUserFromPublicLobby(widget.variables.currentUser, widget.lobbyId):_firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
                                   Navigator.pop(context);
                                  _bounceController.reset();
                   _animationController.reset();
@@ -1282,7 +1340,7 @@ void handleTimeout() {  // callback function
                               ),
                               new TextButton(
                                 onPressed: () {
-                                  _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
+                                 widget.public?_firebaseProvider.removeUserFromPublicLobby(widget.variables.currentUser, widget.lobbyId):_firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
                                   Navigator.pop(context);
                                  _bounceController.reset();
                   _animationController.reset();
@@ -1495,7 +1553,7 @@ void handleTimeout() {  // callback function
                               ),
                               new TextButton(
                                 onPressed: () {
-                                  _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
+                                  widget.public?_firebaseProvider.removeUserFromPublicLobby(widget.variables.currentUser, widget.lobbyId):_firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
                                   Navigator.pop(context);
                                  _bounceController.reset();
                   _animationController.reset();
@@ -1695,7 +1753,7 @@ void handleTimeout() {  // callback function
                               ),
                               new TextButton(
                                 onPressed: () {
-                                  _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
+                                  widget.public?_firebaseProvider.removeUserFromPublicLobby(widget.variables.currentUser, widget.lobbyId):_firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
                                   Navigator.pop(context);
                                  _bounceController.reset();
                   _animationController.reset();
@@ -1739,7 +1797,7 @@ void handleTimeout() {  // callback function
 
               ],
             )
-            :startDown
+            :startDown || automaticCounting
             ?Container(
               height: height*0.6,
               width: width,
@@ -1759,7 +1817,7 @@ void handleTimeout() {  // callback function
           ),
            Center(
             child: Text(
-                gamePlayTimeLeft.toInt().toString(), style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 50, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
+                widget.public?automaticCount.toInt().toString():gamePlayTimeLeft.toInt().toString(), style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 50, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
               ),
           ),
           
@@ -1877,7 +1935,7 @@ void handleTimeout() {  // callback function
                               ),
                               new TextButton(
                                 onPressed: () {
-                                  _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
+                                  widget.public?_firebaseProvider.removeUserFromPublicLobby(widget.variables.currentUser, widget.lobbyId):_firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
                                   Navigator.pop(context);
                                  _bounceController.reset();
                   _animationController.reset();
@@ -1975,7 +2033,7 @@ void handleTimeout() {  // callback function
                               ),
                               new TextButton(
                                 onPressed: () {
-                                  _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
+                                  widget.public?_firebaseProvider.removeUserFromPublicLobby(widget.variables.currentUser, widget.lobbyId):_firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
                                   Navigator.pop(context);
                                  _bounceController.reset();
                   _animationController.reset();
@@ -2171,7 +2229,7 @@ void handleTimeout() {  // callback function
                               ),
                               new TextButton(
                                 onPressed: () {
-                                  _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
+                                  widget.public?_firebaseProvider.removeUserFromPublicLobby(widget.variables.currentUser, widget.lobbyId):_firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
                                   Navigator.pop(context);
                                  _bounceController.reset();
                   _animationController.reset();
@@ -2234,7 +2292,7 @@ void handleTimeout() {  // callback function
             MaterialButton(
               onPressed: (){
                 if(!widget.solo){
-                  _firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId);
+                  widget.public?_firebaseProvider.addUserToPublicLobby(widget.variables.currentUser, widget.lobbyId):_firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId);
                 }
                 print('bounchd');
                 setState(() {
@@ -2941,9 +2999,18 @@ void handleTimeout() {  // callback function
     if(players.length ==1){
       widget.public?_firebaseProvider.stopPublicLobbyGame(widget.variables.currentUser.uid, widget.lobbyId):_firebaseProvider.stopLobbyGame(widget.variables.currentUser.uid, widget.lobbyId);
     }
-    widget.public?_firebaseProvider.removeUserFromPublicLobby(widget.variables.currentUser, widget.lobbyId):_firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId).then((value) {
-      widget.public?_firebaseProvider.submitPublicUserScore(widget.variables.currentUser, widget.lobbyId, currentPage*10):_firebaseProvider.submitUserScore(widget.variables.currentUser, widget.lobbyId, currentPage*10);
+   if(widget.public){
+            print('stage478');
+            _firebaseProvider.removeUserFromPublicLobby(widget.variables.currentUser, widget.lobbyId).then((value) {
+     _firebaseProvider.submitPublicUserScore(widget.variables.currentUser, widget.lobbyId, currentPage*10);
     });
+          }
+          else{
+            print('stage255');
+            _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId).then((value) {
+      _firebaseProvider.submitUserScore(widget.variables.currentUser, widget.lobbyId, currentPage*10);
+    });
+          }
     }
         });
         Future.delayed(Duration(seconds: 3)).then((value) {

@@ -217,6 +217,9 @@ Future<User> fetchUserDetailsById(String uid) async {
   Future<void> addPublicLobby(Lobby lobby) async{
     Map<String, dynamic> setMap = lobby.toMap(lobby);
     setMap['active'] = false;
+    setMap['playerInfo'] = {};
+    setMap['countDown'] = DateTime.now().millisecondsSinceEpoch;
+    setMap['startedCountdown'] = false;
     print(setMap);
     return _firestore.collection("publicLobbies").add(setMap);
   }
@@ -247,10 +250,19 @@ Future<User> fetchUserDetailsById(String uid) async {
     await _firestore.collection('lobbies').doc(lobbyId).update(updateMap);
   }
 
+  Future<void> setAutomaticTime(String lobbyId) async{
+    var now = DateTime.now().millisecondsSinceEpoch;
+    await _firestore.collection('publicLobbies').doc(lobbyId).update({'countDown': now+30000, 'startedCountdown': true});
+    return;
+  }
+
    Future<void> addUserToPublicLobby (User user, String lobbyId) async{
     DocumentSnapshot snap = await _firestore.collection('publicLobbies').doc(lobbyId).get();
     List<dynamic> playerList = snap.data()['players'];
-    Map<String, dynamic> playerInfo = snap.data()['playerInfo'];
+    Map<String, dynamic> playerInfo = {};
+    if(snap.data()['playerInfo']!=null){
+      playerInfo = snap.data()['playerInfo'];
+    }
     if(!playerList.contains(user.uid)){
       playerList.add(user.uid);
       Map<String, dynamic> userMap = user.toMap(user);
@@ -274,6 +286,10 @@ Future<User> fetchUserDetailsById(String uid) async {
 
   Future<DocumentSnapshot> getLobbyWinner(String lobbyId) async{
     QuerySnapshot snapshot = await _firestore.collection('lobbies').doc(lobbyId).collection('playerScores').orderBy('score', descending: true).limit(1).get();
+    return snapshot.docs[0];
+  }
+  Future<DocumentSnapshot> getPublicLobbyWinner(String lobbyId) async{
+    QuerySnapshot snapshot = await _firestore.collection('publicLobbies').doc(lobbyId).collection('playerScores').orderBy('score', descending: true).limit(1).get();
     return snapshot.docs[0];
   }
 
@@ -332,7 +348,7 @@ Future<User> fetchUserDetailsById(String uid) async {
   }
 
    Future<void> stopPublicLobbyGame (String userId, String lobbyId) async{
-    Map<String, dynamic> updateMap = {'active': false};
+    Map<String, dynamic> updateMap = {'active': false, 'startedCountdown': false};
     await _firestore.collection('publicLobbies').doc(lobbyId).update(updateMap);
   }
 
