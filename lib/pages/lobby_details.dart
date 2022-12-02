@@ -363,7 +363,7 @@ void handleTimeout() {  // callback function
                           else if (widget.lobby.gameType ==2){
                             return BankeruMultiplayer(public: widget.public, category: '0', lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId, startBackground: widget.startBackground,);
                           }
-                          return SpinningBaby();
+                          return SpinningBaby(public: widget.public, category: '0', lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId, startBackground: widget.startBackground,);
                           },
                         )).then((value) {
                           setState(() {
@@ -386,7 +386,7 @@ void handleTimeout() {  // callback function
                           else if (widget.lobby.gameType ==2){
                             return BankeruMultiplayer(category: '0',public: false, lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId, startBackground: widget.startBackground,);
                           }
-                          return SpinningBaby();
+                          return SpinningBaby(public: widget.public, category: '0', lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId, startBackground: widget.startBackground,);
                           },
                         )).then((value) {
                           setState(() {

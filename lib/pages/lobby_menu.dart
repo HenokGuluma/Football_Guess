@@ -389,6 +389,7 @@ getPublicLobbies(){
       child: GestureDetector(
       onTap: (){
         player.play();
+        print(widget.stopBackground); print(' is the background');
          Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           return LobbyDetails(variables: widget.variables, lobby: lobby, public: true, stopBackground: widget.stopBackground);

@@ -255,6 +255,11 @@ Future<User> fetchUserDetailsById(String uid) async {
     await _firestore.collection('publicLobbies').doc(lobbyId).update({'countDown': now+30000, 'startedCountdown': true});
     return;
   }
+    Future<void> setTimerFalse(String lobbyId) async{
+    var now = DateTime.now().millisecondsSinceEpoch;
+    await _firestore.collection('publicLobbies').doc(lobbyId).update({'startedCountdown': false});
+    return;
+  }
 
    Future<void> addUserToPublicLobby (User user, String lobbyId) async{
     DocumentSnapshot snap = await _firestore.collection('publicLobbies').doc(lobbyId).get();
@@ -345,6 +350,15 @@ Future<User> fetchUserDetailsById(String uid) async {
   Future<void> stopLobbyGame (String userId, String lobbyId) async{
     Map<String, dynamic> updateMap = {'active': false};
     await _firestore.collection('lobbies').doc(lobbyId).update(updateMap);
+  }
+
+  Future<void> sendSpinList(List<String> players, String lobbyId) async{
+    Map<String, dynamic> updateMap = {'active': true, 'spinList': players};
+    await _firestore.collection('lobbies').doc(lobbyId).update(updateMap);
+  }
+   Future<void> sendPublicSpinList(List<String> players, String lobbyId) async{
+    Map<String, dynamic> updateMap = {'active': true, 'spinList': players};
+    await _firestore.collection('publicLobbies').doc(lobbyId).update(updateMap);
   }
 
    Future<void> stopPublicLobbyGame (String userId, String lobbyId) async{

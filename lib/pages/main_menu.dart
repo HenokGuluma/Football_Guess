@@ -14,6 +14,7 @@ import 'package:instagram_clone/models/user.dart';
 import 'package:instagram_clone/pages/bankeru.dart';
 import 'package:instagram_clone/pages/black_jack.dart';
 import 'package:instagram_clone/pages/buy_coins.dart';
+import 'package:instagram_clone/pages/closest_number.dart';
 import 'package:instagram_clone/pages/football_menu.dart';
 import 'package:instagram_clone/pages/pay_for_coins.dart';
 import 'package:instagram_clone/pages/select_lobby.dart';
@@ -140,7 +141,7 @@ class GameMenuState extends State<GameMenu> {
    SizedBox(height: height*0.08,),
    menuOption(width, height, 2, modes, widget.variables),
    SizedBox(height: height*0.08,),
-   widget.creating?menuOption(width, height, 3, modes, widget.variables):Center(),
+   menuOption(width, height, 3, modes, widget.variables),
    ],
 ),
           ),
@@ -357,7 +358,7 @@ Center(
              Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           // return LobbyMenu();
-                          return SpinningBaby();
+                          return ClosestNumber();
                         },
                         ));
            }

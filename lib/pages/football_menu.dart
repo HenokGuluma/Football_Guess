@@ -365,7 +365,7 @@ void handleTimeout() {  // callback function
           Future.delayed(Duration(milliseconds: 300)).then((value) {
               Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
-                          return Footballers(category: categoryId[index], solo: true, categoryNo: index, startBackground: widget.startBackground, pauseBackground: widget.pauseBackground,);
+                          return Footballers(category: categoryId[index], solo: true, public: false, categoryNo: index, startBackground: widget.startBackground, pauseBackground: widget.pauseBackground,);
                         },
                         ));
           });

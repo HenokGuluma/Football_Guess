@@ -1,12 +1,29 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:instagram_clone/backend/firebase.dart';
+import 'package:instagram_clone/main.dart';
 
 import 'board_view.dart';
 import 'model.dart';
 
 class SpinningBaby extends StatefulWidget {
+
+  String category;
+  String lobbyId;
+  bool public;
+  String creatorId;
+  int categoryNo;
+  bool solo;
+  UserVariables variables;
+  Function startBackground;
+
+  SpinningBaby({
+    this.category, this.lobbyId, this.public, this.solo, this.variables, this.startBackground, this.creatorId, this.categoryNo,
+  });
+
   @override
   State<StatefulWidget> createState() {
     return _SpinningBabyState();
@@ -20,24 +37,24 @@ class _SpinningBabyState extends State<SpinningBaby>
   AnimationController _ctrl;
   Animation _ani;
   List<Luck> _items = [
-    Luck("Christiano-Ronaldo", Colors.accents[0]),
-    Luck("Lionel-Messi", Colors.accents[2]),
-    Luck("Alexis-Sanchez", Colors.accents[4]),
-    Luck("Paul-Pogba", Colors.accents[6]),
-    Luck("Sadio-Mane", Colors.accents[8]),
-    Luck("Mohammed-Salah", Colors.accents[10]),
-    Luck("Luca-Modric", Colors.accents[12]),
-    Luck("Harry Kane", Colors.accents[14]),
-     Luck("Kevin-DeBruyne", Colors.accents[1]),
-    Luck("Kylian-Mbappe", Colors.accents[3]),
-    Luck("Bukayo-Saka", Colors.accents[5]),
-    Luck("Neymar-Jr", Colors.accents[7]),
-     Luck("Steve Jobs", Colors.accents[12]),
-    Luck("Karim-Benzema", Colors.accents[14]),
-     Luck("Henok-Taddesse", Colors.accents[1]),
-    Luck("Yonatan-Taddesse", Colors.accents[3]),
-    Luck("Jeff Bezos", Colors.accents[5]),
-    Luck("Elon Musk", Colors.accents[7]),
+    Luck("Christiano-Ronaldo", 0),
+    Luck("Lionel-Messi", 1),
+    Luck("Alexis-Sanchez", 2),
+    Luck("Paul-Pogba", 3),
+    Luck("Sadio-Mane", 4),
+    Luck("Mohammed-Salah", 5),
+    Luck("Luca-Modric", 6),
+    Luck("Harry Kane", 7),
+     Luck("Kevin-DeBruyne", 8),
+    Luck("Kylian-Mbappe", 9),
+    Luck("Bukayo-Saka", 10),
+    Luck("Neymar-Jr", 11),
+     Luck("Steve Jobs", 12),
+    Luck("Karim-Benzema", 13),
+     Luck("Henok-Taddesse", 14),
+    Luck("Yonatan-Taddesse", 15),
+    Luck("Jeff Bezos", 16),
+    Luck("Elon Musk", 17),
   ];
   Timer _timer;
   int timeLeft = 150;
@@ -45,6 +62,22 @@ class _SpinningBabyState extends State<SpinningBaby>
   bool haveSpun = false;
   bool showWinner = false;
   bool disposed = false;
+  var _firestore = FirebaseFirestore.instance;
+  int playerAmount = 0;
+   bool setupPlayers = true;
+  dynamic playerInfos;
+  dynamic playerInfotemp;
+  bool resetColor = true;
+  List<dynamic> playerList = [];
+  List<dynamic> playerListOnline = [];
+  int _start = 100;
+  bool startDown = false;
+  bool lastPlayer = false;
+    bool automaticCountDown = false;
+  bool automaticCounting = false;
+  int automaticCount = 0;
+  var _firebaseProvider = FirebaseProvider();
+  List<dynamic> initialPlayers = ['@sewyew', '@babyShark', '@magnaw', '@chisua', '@antemAleh?', '@echinYiwedal'];
 
   @override
   void initState() {
@@ -67,7 +100,54 @@ class _SpinningBabyState extends State<SpinningBaby>
   Widget build(BuildContext context) {
     var width = MediaQuery.of(context).size.width;
      var height = MediaQuery.of(context).size.height;
-    return Scaffold(
+    return WillPopScope(
+    onWillPop: () async => false,
+    child: StreamBuilder<DocumentSnapshot>(
+      stream: _firestore
+          .collection("lobbies").doc(widget.lobbyId).snapshots(),
+      builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+        // print('hooray');
+        
+        if(snapshot.hasData){
+          // print('hooray');
+          playerAmount = snapshot.data['players'].length;
+          playerListOnline = snapshot.data['players'];
+          playerInfotemp = snapshot.data['playerInfo'];
+          if(snapshot.data['players'].length<2){
+            lastPlayer = true;
+             
+          }
+          
+
+          if(snapshot.data['active']){
+             startDown = true;
+            
+          }
+           
+          else{
+             startDown = false;
+            
+          }
+           if(widget.public){
+            if(snapshot.data['players'].length >0 && !snapshot.data['startedCountdown']){
+            automaticCountDown = true;
+            automaticCounting = true;
+            automaticCount = 30;
+          }
+         
+          }
+        }
+        else{
+         print('bowwwnce');
+        }
+        return gameScreen(width, height, snapshot);})
+        );
+   
+    
+    }
+
+    gameScreen(var width, var height, AsyncSnapshot snapshot){
+      return Scaffold(
       body: Container(
         width: width,
         height: height,
@@ -98,8 +178,8 @@ class _SpinningBabyState extends State<SpinningBaby>
                   Stack(
                 alignment: Alignment.center,
                 children: <Widget>[
-                  BoardView(items: _items, current: _current, angle: _angle),
-                  _buildGo(),
+                  BoardView(items: _items, current: _current, angle: _angle, players: snapshot.data['active']?snapshot.data['spinList']:initialPlayers),
+                  _buildGo(snapshot),
                  
                 ],
               ),
@@ -129,9 +209,10 @@ class _SpinningBabyState extends State<SpinningBaby>
         )
       ),
     );
-  }
+  
+    }
 
-  _buildGo() {
+  _buildGo(AsyncSnapshot snapshot) {
     return Material(
       color: Colors.white,
       shape: CircleBorder(),
@@ -146,7 +227,12 @@ class _SpinningBabyState extends State<SpinningBaby>
             style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.w900, fontFamily: 'Muli', ),
           ),
         ),
-        onTap: spinning?_noPress:_animation,
+        onTap: (){
+          spinning
+          ?_noPress()
+          :_animation(snapshot);
+          ;
+        }
       ),
     );
   }
@@ -181,8 +267,13 @@ class _SpinningBabyState extends State<SpinningBaby>
   }
 
 
-  _animation() {
+  _animation(AsyncSnapshot snapshot) {
+    List<dynamic> shuffledList = snapshot.data['players'];
+    shuffledList.shuffle();
     _items.shuffle();
+    initialPlayers.shuffle();
+    
+    // _firebaseProvider.sendSpinList(shuffledList, widget.lobbyId);
     setState(() {
       spinning = true;
       haveSpun = true;
@@ -202,13 +293,13 @@ class _SpinningBabyState extends State<SpinningBaby>
   }
 
   int _calIndex(value) {
-    var _base = (2 * pi / _items.length / 2) / (2 * pi);
-    return (((((_base + value) % 1) * _items.length)+_items.length/4) % _items.length).floor();
+    var _base = (2 * pi / initialPlayers.length / 2) / (2 * pi);
+    return (((((_base + value) % 1) * initialPlayers.length)+initialPlayers.length/4) % initialPlayers.length).floor();
   }
 
   _buildResult(_value) {
     var _index = _calIndex((_value) * (_angle) + _current);
-    String _asset = _items[_index].asset;
+    String _asset = initialPlayers[_index];
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 16.0),
       child: Align(

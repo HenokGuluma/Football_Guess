@@ -54,7 +54,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   height: height * 0.25,
                   decoration: BoxDecoration(
                       image: DecorationImage(
-                          image: AssetImage('assets/banker-removed.png'))),
+                          image: AssetImage('assets/bankeru-new.png'))),
                 ),
               )),
           SizedBox(
@@ -203,7 +203,7 @@ class _LoginScreenState extends State<LoginScreen> {
           widget.variables.setCurrentUser(_user);
            Navigator.pushReplacement(context,
             MaterialPageRoute(builder: (context) {
-              return SelectLobby(variables: widget.variables,);
+              return SelectLobby(variables: widget.variables, pauseBackground: widget.pauseBackground, startBackground: widget.startBackground,);
         }));
         });
        

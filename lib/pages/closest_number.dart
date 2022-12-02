@@ -18,7 +18,7 @@ import 'package:instagram_clone/models/exploding_widget.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:progress_indicators/progress_indicators.dart';
 
-class BlackJackMultiplayer extends StatefulWidget {
+class ClosestNumber extends StatefulWidget {
 
   String category;
   String lobbyId;
@@ -29,15 +29,15 @@ class BlackJackMultiplayer extends StatefulWidget {
   UserVariables variables;
   Function startBackground;
  
-  BlackJackMultiplayer({
+  ClosestNumber({
     this.category, this.lobbyId, this.public, this.solo, this.variables, this.startBackground, this.creatorId, this.categoryNo,
   });
 
   @override
-  BlackJackMultiplayerState createState() => BlackJackMultiplayerState();
+  ClosestNumberState createState() => ClosestNumberState();
 }
 
-class BlackJackMultiplayerState extends State<BlackJackMultiplayer>
+class ClosestNumberState extends State<ClosestNumber>
     with TickerProviderStateMixin {
   List<List<String>> images = 
   [['assets/Alexis-Sanchez.png', 'assets/Paul-Pogba.png'],
@@ -114,6 +114,7 @@ class BlackJackMultiplayerState extends State<BlackJackMultiplayer>
   AnimationController _animationController;
   AnimationController _slideController;
   AnimationController _colorController;
+  TextEditingController _editingController;
   AnimationController _bounceController;
   FirebaseFirestore _firestore = FirebaseFirestore.instance;
   FirebaseProvider _firebaseProvider = FirebaseProvider();
@@ -160,8 +161,15 @@ class BlackJackMultiplayerState extends State<BlackJackMultiplayer>
   List<Widget> drawnCards = [];
   Timer _timer;
   int _start = 100;
+  int _firstStart = 300;
+  int _secondStart = 400;
+  int _thirdStart = 500;
   bool randomizing = false;
   bool showRandomizing = true;
+  int firstNum = 0;
+  int secondNum = 0;
+  int thirdNum = 0;
+  int randomizedNumber;
    List<int> cards = [];
    List<Map<String, dynamic>> cardValues = [];
    int score = 0;
@@ -181,161 +189,107 @@ Future<void> setupSound() async{
     cancel.stop();
   }
 
-void startTimer(var width, var height, Function shatter) {
-  
+void startTimer(int numValue) {
+  int randomNum = Random().nextInt(9);
   const oneSec = const Duration(milliseconds: 10);
   _timer = new Timer.periodic(
     oneSec,
     (Timer timer) {
       var added = 0;
-      if(value == 0 && score<11){
-        added = 11;
-      }
-      else if (value ==0){
-        added = 1;
-      }
-      else if(value <9){
-        added = value+1;
-      }
-      else{
-        added = 10;
-      }
-      if (_start == 0) {
+     
+      if (_firstStart == 0) {
         timer.cancel();
         cards.add(value);
         cardValues.add({'value': value, 'type': type});
-           if (cardValues.length<2){
-            // print('dauuuwerwm');
-            randomize(width, height,shatter);
-            setState(() {
-              score = score+added;
-            });
-          }
-          else{
           setState(() {
             showRandomizing = false;
-            addedScore = added;
-             score = score+added;
-             
+            firstNum = numValue;             
           });
-          if(!countingSecond){
-            setState(() {
-              timeLeft = 6;
-              countingSecond = true;
-            });
-            startSecondCountDown();
-          }
           Future.delayed(Duration(milliseconds: 500)).then((value) {
-            if (score ==21){
-              setState(() {
-              perfectScore = true;
-              });
-              if(!widget.public){
-                _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId).then((value) {
-                if(lastPlayer){
-                                 _firebaseProvider.stopLobbyGame(widget.variables.currentUser.uid, widget.lobbyId);
-                                    
-                                  }
-             _firebaseProvider.submitUserScore(widget.variables.currentUser, widget.lobbyId, score);
-            });
-              }
-              else{
-                 _firebaseProvider.removeUserFromPublicLobby(widget.variables.currentUser, widget.lobbyId).then((value) {
-                if(lastPlayer){
-                                 _firebaseProvider.stopPublicLobbyGame(widget.variables.currentUser.uid, widget.lobbyId);
-                                    
-                                  }
-             _firebaseProvider.submitPublicUserScore(widget.variables.currentUser, widget.lobbyId, score);
-              });
-              }
-              
-               Future.delayed(Duration(seconds: 1)).then((value) {
-              setState(() {
-              randomizing = false;
-              showRandomizing = true;
-            });
-            });
-
-            Future.delayed(Duration(seconds: 2)).then((value) {
-              setState(() {
-                finished = true;
-              });
-            });
-            }
-            else if (score > 21){
-            shatter();
             
-            Future.delayed(Duration(seconds: 1)).then((value) {
-              setState(() {
-              
-              exploded = true;
-               randomizing = false;
-              showRandomizing = true;
-            });
-            if(!widget.public){
-                _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId).then((value) {
-                if(lastPlayer){
-                                 _firebaseProvider.stopLobbyGame(widget.variables.currentUser.uid, widget.lobbyId);
-                                    
-                                  }
-             _firebaseProvider.submitUserScore(widget.variables.currentUser, widget.lobbyId, score-addedScore);
-            });
-              }
-              else{
-                 _firebaseProvider.removeUserFromPublicLobby(widget.variables.currentUser, widget.lobbyId).then((value) {
-                if(lastPlayer){
-                                 _firebaseProvider.stopPublicLobbyGame(widget.variables.currentUser.uid, widget.lobbyId);
-                                    
-                                  }
-             _firebaseProvider.submitPublicUserScore(widget.variables.currentUser, widget.lobbyId, score-addedScore);
-              });
-              }
-            Future.delayed(Duration(seconds: 5)).then((value) {
-              setState(() {
-                finished = true;
-              });
-            });
-            });
-            }
-          else{
              setState(() {
             randomizing = false;
             showRandomizing = true;
            
           });
-          }
-
-         
+          
           });
-      }
       } else {
         // print(_start);
         setState(() {
-          _start--;
-          value = rng.nextInt(12);
-          type = rng.nextInt(3);
+          _firstStart--;
+          firstNum = randomNum;
         });
       }
     },
   );
 }
 
-void startSecondTimer(var width, var height, Function shatter) {
-  
-  const oneSec = const Duration(milliseconds: 100);
+void startSecondTimer(int numValue) {
+  int randomNum = Random().nextInt(9);
+  const oneSec = const Duration(milliseconds: 10);
   _timer = new Timer.periodic(
     oneSec,
     (Timer timer) {
-      
-      if (timeLeft == 0) {
+      var added = 0;
+     
+      if (_secondStart == 0) {
         timer.cancel();
-        submitScore();
-        setState(() {
-          finished = true;
-        });
+        cards.add(value);
+        cardValues.add({'value': value, 'type': type});
+          setState(() {
+            showRandomizing = false;
+            firstNum = numValue;             
+          });
+          Future.delayed(Duration(milliseconds: 500)).then((value) {
+            
+             setState(() {
+            randomizing = false;
+            showRandomizing = true;
+           
+          });
+          
+          });
       } else {
+        // print(_start);
         setState(() {
-          timeLeft = timeLeft -0.1;
+          _secondStart--;
+          firstNum = randomNum;
+        });
+      }
+    },
+  );
+}
+void startThirdTimer(int numValue) {
+  int randomNum = Random().nextInt(9);
+  const oneSec = const Duration(milliseconds: 10);
+  _timer = new Timer.periodic(
+    oneSec,
+    (Timer timer) {
+      var added = 0;
+     
+      if (_thirdStart == 0) {
+        timer.cancel();
+        cards.add(value);
+        cardValues.add({'value': value, 'type': type});
+          setState(() {
+            showRandomizing = false;
+            firstNum = numValue;             
+          });
+          Future.delayed(Duration(milliseconds: 500)).then((value) {
+            
+             setState(() {
+            randomizing = false;
+            showRandomizing = true;
+           
+          });
+          
+          });
+      } else {
+        // print(_start);
+        setState(() {
+          _thirdStart--;
+          firstNum = randomNum;
         });
       }
     },
@@ -428,16 +382,35 @@ _bounceController.addListener(() {
     }
   }
 
- void randomize(var width, var height, Function shatter){
+ void randomize(int number){
     // print('daaum');
     setState(() {
-      _start = 100;
+      _firstStart = 300;
+      _secondStart = 400;
+      _thirdStart = 500;
       randomizing = true;
       showRandomizing = true;
       
     });
-    startTimer(width, height, shatter);
+    int thirdDigit = 0;
+    int secondDigit = 0;
+    int firstDigit = 0;
+    if(number.toString().length==3){
+      thirdDigit = int.parse(number.toString()[2]);
+    }
+    if(number.toString().length==2){
+      thirdDigit = int.parse(number.toString()[1]);
+    }
+    if(number.toString().length==1){
+      thirdDigit = int.parse(number.toString()[0]);
+    }
+    startTimer(firstDigit);
+    startSecondTimer(secondDigit);
+    startThirdTimer(thirdDigit);
+
   }
+
+  
 
 
   void startCountDown(){
@@ -1316,42 +1289,8 @@ Widget startScreen(var width, var height, AsyncSnapshot snapshot){
       stream: _firestore
           .collection("lobbies").doc(widget.lobbyId).snapshots(),
       builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-        // print('hooray');
-        if(snapshot.hasData){
-          // print('hooray');
-          playerAmount = snapshot.data['players'].length;
-          playerListOnline = snapshot.data['players'];
-          playerInfotemp = snapshot.data['playerInfo'];
-          if(snapshot.data['players'].length<2){
-            lastPlayer = true;
-             
-          }
-          else if(snapshot.data['players'].length <1){
-            shouldGetWinner = true;
-          }
-
-          if(snapshot.data['active']){
-             startDown = true;
-            
-          }
-           
-          else{
-             startDown = false;
-            
-          }
-           if(widget.public){
-            if(snapshot.data['players'].length >0 && !snapshot.data['startedCountdown']){
-            automaticCountDown = true;
-            automaticCounting = true;
-            automaticCount = 30;
-          }
-         
-          }
-        }
-        else{
-         print('bowwwnce');
-        }
-        return gameScreen(width, height, snapshot);})
+       
+        return closestScreen(width, height);})
         );
    
    }
@@ -1702,6 +1641,87 @@ Widget startScreen(var width, var height, AsyncSnapshot snapshot){
  
    }
 
+   Widget closestScreen(var width, var height){
+    return Scaffold(
+      body: Stack(
+        children: [
+          Container(
+            width: width,
+            height: height,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/blackjack_wallpaper.png'),
+                fit: BoxFit.cover
+              )
+            ),
+          ),
+          Center(
+            
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                    SizedBox(
+                height: height*0.15,
+              ),
+                Text(randomizedNumber!=null?randomizedNumber.toString():'',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Muli',
+                                  fontSize: 46,
+                                  fontWeight: FontWeight.normal),
+                            ),
+                SizedBox(
+                  height: height*0.05,
+                ),
+                MaterialButton(
+                  onPressed: (){
+                    int num = Random().nextInt(400);
+                    randomize(num);
+                  },
+                  child:  Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.3,
+              height: height*0.06,
+              child: Center(
+                child: Text('Try Again', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            ),
+                  ),
+                SizedBox(
+                  height: height*0.05,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(thirdNum.toString(), style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Muli',
+                                  fontSize: 46,
+                                  fontWeight: FontWeight.normal),),
+                    Text(secondNum.toString(), style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Muli',
+                                  fontSize: 46,
+                                  fontWeight: FontWeight.normal),),
+                    Text(firstNum.toString(), style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Muli',
+                                  fontSize: 46,
+                                  fontWeight: FontWeight.normal),),
+                  ],
+                )
+              ]
+              )
+            ), 
+            
+            ])
+          );
+   }
+
    Widget gameScreen(var width, var height, AsyncSnapshot snapshot){
     return 
     !gameStarted
@@ -1959,7 +1979,9 @@ Widget startScreen(var width, var height, AsyncSnapshot snapshot){
           ), 
          
           ],
-      )));
+      )
+      )
+      );
    }
 
     Widget menuOption(var width, var height, int index, List<String> images){
@@ -2072,7 +2094,7 @@ Widget startScreen(var width, var height, AsyncSnapshot snapshot){
             timeLeft = 6;
             countingSecond = false;
           });
-        randomize(width, height, shatter);
+        
         
       },
       child: Container(

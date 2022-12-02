@@ -160,6 +160,78 @@ class _BlackJackState extends State<BlackJack>
 
 
 
+void startInitialTimer() {
+  
+  const oneSec = const Duration(milliseconds: 10);
+  _timer = new Timer.periodic(
+    oneSec,
+    (Timer timer) {
+      var added = 0;
+      if(value == 0 && score<11){
+        added = 11;
+      }
+      else if (value ==0){
+        added = 1;
+      }
+      else if(value <9){
+        added = value+1;
+      }
+      else{
+        added = 10;
+      }
+      if (_start == 0) {
+        timer.cancel();
+        cards.add(value);
+        cardValues.add({'value': value, 'type': type});
+           if (cardValues.length<2){
+            // print('dauuuwerwm');
+            initialRandomize();
+            setState(() {
+              score = score+added;
+            });
+          }
+          else{
+          setState(() {
+            showRandomizing = false;
+            addedScore = added;
+             score = score+added;
+          });
+          Future.delayed(Duration(milliseconds: 500)).then((value) {
+            if (score ==21){
+              setState(() {
+              perfectScore = true;
+              });
+               Future.delayed(Duration(seconds: 1)).then((value) {
+              setState(() {
+              randomizing = false;
+              showRandomizing = true;
+            });
+            });
+            }
+           
+          else{
+             setState(() {
+            randomizing = false;
+            showRandomizing = true;
+           
+          });
+          }
+
+         
+          });
+      }
+      } else {
+        // print(_start);
+        setState(() {
+          _start--;
+          value = rng.nextInt(12);
+          type = rng.nextInt(3);
+        });
+      }
+    },
+  );
+}
+
 
 void startTimer(var width, var height, Function shatter) {
   
@@ -267,10 +339,13 @@ void startTimer(var width, var height, Function shatter) {
     value = rng.nextInt(12);
     color = rng.nextInt(2);
     type = rng.nextInt(3);
-  
-
+    // initialRandomize();
     setupSound();
+
     super.initState();
+    Future.delayed(Duration(milliseconds: 100)).then((value) {
+      initialRandomize();
+    });
 
     
   }
@@ -304,6 +379,16 @@ void startTimer(var width, var height, Function shatter) {
     else{
 
     }
+  }
+
+  void initialRandomize(){
+    setState(() {
+      _start = 100;
+      randomizing = true;
+      showRandomizing = true;
+      
+    });
+    startInitialTimer();
   }
 
  void randomize(var width, var height, Function shatter){

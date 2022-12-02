@@ -2,9 +2,9 @@ import 'dart:ui';
 
 class Luck{
   final String image;
-  final Color color;
+  final int index;
 
-  Luck(this.image, this.color);
+  Luck(this.image, this.index);
 
 
   String get asset =>  image;

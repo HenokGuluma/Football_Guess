@@ -9,8 +9,9 @@ class BoardView extends StatefulWidget {
   final double angle;
   final double current;
   final List<Luck> items;
+  final List<dynamic> players;
 
-  const BoardView({Key key, this.angle, this.current, this.items})
+  const BoardView({Key key, this.angle, this.current, this.items, this.players})
       : super(key: key);
 
   @override
@@ -23,7 +24,12 @@ class _BoardViewState extends State<BoardView> {
   Size get size => Size(MediaQuery.of(context).size.width * 0.8,
       MediaQuery.of(context).size.width * 0.8);
 
-  double _rotote(int index) => ((index / widget.items.length) * 2 * pi);
+  double _rotote(int index) => ((index / widget.players.length) * 2 * pi);
+  List<Color> colorPalette = [
+    Colors.accents[0], Colors.accents[6], Colors.accents[14], Colors.accents[7], Colors.accents[2],
+    Colors.accents[4], Colors.accents[12], Colors.accents[10], Colors.accents[8], Colors.accents[1],
+    Colors.accents[5], Colors.accents[3],
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -45,8 +51,8 @@ class _BoardViewState extends State<BoardView> {
           child: Stack(
             alignment: Alignment.center,
             children: <Widget>[
-              for (var luck in widget.items) ...[_buildCard(luck)],
-              for (var luck in widget.items) ...[_buildImage(luck)],
+              for (var luck in widget.players) ...[_buildCard(luck)],
+              for (var luck in widget.players) ...[_buildImage(luck)],
             ],
           ),
         ),
@@ -59,9 +65,9 @@ class _BoardViewState extends State<BoardView> {
     );
   }
 
-  _buildCard(Luck luck) {
-    var _rotate = _rotote(widget.items.indexOf(luck));
-    var _angle = 2 * pi / widget.items.length;
+  _buildCard(String luck) {
+    var _rotate = _rotote(widget.players.indexOf(luck));
+    var _angle = 2 * pi / widget.players.length;
     return Transform.rotate(
       angle: _rotate,
       child: ClipPath(
@@ -74,7 +80,7 @@ class _BoardViewState extends State<BoardView> {
               gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [luck.color.withOpacity(0.5), luck.color.withOpacity(0)])),
+                  colors: [colorPalette[widget.players.indexOf(luck)%12].withOpacity(0.5), colorPalette[widget.players.indexOf(luck)%12].withOpacity(0)])),
         ),
       ),
     );
@@ -87,8 +93,8 @@ class _BoardViewState extends State<BoardView> {
     );
   }
 
-  _buildImage(Luck luck) {
-    var _rotate = _rotote(widget.items.indexOf(luck));
+  _buildImage(String luck) {
+    var _rotate = _rotote(widget.players.indexOf(luck));
     return Transform.rotate(
       angle: _rotate,
       child: Container(
@@ -97,13 +103,13 @@ class _BoardViewState extends State<BoardView> {
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
           constraints:
-              BoxConstraints.expand(height: size.height / 3, width: size.width*0.7),
+              BoxConstraints.expand(height: size.height / 3, width: size.width*0.6),
           child: Container(
             
             child: Transform(
             transform: Matrix4.rotationZ((-pi/2)),
             alignment: Alignment.topCenter,
-            child: Transform.translate(offset: Offset( 0, -size.height*0.03), child: displayName(luck.asset, size.width)),)
+            child: Transform.translate(offset: Offset( 0, -size.height*0.03), child: displayName(luck, size.width)),)
           )
           // Image.asset(luck.asset),
         ),
