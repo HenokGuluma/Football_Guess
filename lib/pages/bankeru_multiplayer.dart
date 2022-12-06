@@ -8,6 +8,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_countdown_timer/flutter_countdown_timer.dart';
 import 'package:flutter_spinning_wheel/src/utils.dart';
 import 'package:flutter_countdown_timer/countdown.dart';
@@ -108,10 +109,12 @@ class BankeruMultiplayerState extends State<BankeruMultiplayer>
   AnimationController _slideController;
   AnimationController _colorController;
     AnimationController _bounceController;
+  TextEditingController controller;
   FirebaseFirestore _firestore = FirebaseFirestore.instance;
   FirebaseProvider _firebaseProvider = FirebaseProvider();
   PageController _pageController;
   Animation _animation;
+  bool betting = false;
   Animation colorAnimation;
   bool animate = false;
   int bankerWallet = 0;
@@ -123,6 +126,7 @@ class BankeruMultiplayerState extends State<BankeruMultiplayer>
   double resetValue = 8;
   double gamePlayTimeLeft = 3;
   double divider = 8;
+  double betPlaced = 0;
   bool defeated = false;
   bool wrongClick = false;
   int gamePlayDuration = 0;
@@ -606,6 +610,12 @@ void handleTimeout() {  // callback function
    
    }
 
+   searchQuery(String text){
+    setState(() {
+      betPlaced = double.parse(text);
+    });
+   }
+
    Widget gameScreen(var width, var height, AsyncSnapshot snapshot){
     return Scaffold(
       backgroundColor: Colors.black,
@@ -644,13 +654,38 @@ void handleTimeout() {  // callback function
             ),
             snapshot.data['active'] && gameStarted
             ?Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                     Center(
-                  child: Container(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                            height: height*0.05,
+                          ),
+                          Text('Bank Vault', style: TextStyle(color: Color(0xff00ffff), fontSize: 20, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                          Text('5000 ETB', style: TextStyle(color: Color(0xffffffff), fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                           SizedBox(
+                            height: height*0.05,
+                          ),
+                          Text('Wallet', style: TextStyle(color: Color(0xff23ff34), fontSize: 20, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                          Text('2000 ETB', style: TextStyle(color: Color(0xffffffff), fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900))
+          ,
+                        ],
+                      ),
+                      Container(
                     height: height*0.3,
                     child: (showRandomizing?randomizing||middleCardDrawn?card(width, height, {'value': value, 'type': type}, 0):cardBack(width, height):Center()),
+                  ),
+                  Container(
+                    width: width*0.1,
+                  ),
+                    ],
                   )
                 ),
                 SizedBox(
@@ -658,24 +693,9 @@ void handleTimeout() {  // callback function
                 ),
                 Row(
                   children: [
+                   
                     Container(
-                      width: width*0.1,
-                      child: Transform(
-                        transform: Matrix4.rotationX(pi/2),
-                        child: LinearProgressIndicator(
-             /*  color: Color(0xff00ffff),
-              backgroundColor: Color(0xff005555), */
-              
-              minHeight: 5, 
-              backgroundColor: Colors.transparent,
-              value: 1/* timeLeft == divider?1:(timeLeft/(divider-1)).toDouble() */,
-              // value: _slideController.value,
-              valueColor: AlwaysStoppedAnimation(wrongClick?Colors.white:Colors.white),
-            ),
-                      )
-                    ),
-                    Container(
-              width: width*0.8,
+              width: width,
               height: height*0.3,
               child: Center(
                 child: cardValues.length>0 || randomizing
@@ -693,9 +713,7 @@ void handleTimeout() {  // callback function
           ,
               )
             ), 
-            Container(
-                      width: width*0.1,
-                    ),
+            
                   ],
                 ),
           SizedBox(height: height*0.05,),
@@ -750,7 +768,8 @@ void handleTimeout() {  // callback function
             )
               ],
             )
-            :Row(
+            :!randomizing
+            ?Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                      GestureDetector(
@@ -839,16 +858,63 @@ void handleTimeout() {  // callback function
               ),
             ),
             ),
-            GestureDetector(
+            betting
+            ?Container(
+              decoration: BoxDecoration(
+                // color: Color(0xff23ff34),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Colors.white)
+              ),
+              width: width*0.3,
+              height: height*0.06,
+              child: Center(
+                child: TextField(
+                              style: TextStyle(
+                                  fontFamily: 'Muli',
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w900), textAlign: TextAlign.center,
+                              controller: controller,
+                              keyboardType: TextInputType.number,
+                              cursorColor: Colors.white,
+                              autofocus: false,
+                              focusNode: FocusNode(),
+                              cursorHeight: 20,
+                              maxLength: 20,
+                              cursorWidth: 0.5,
+                              onChanged: searchQuery,
+                               inputFormatters: [
+                  FilteringTextInputFormatter.deny(
+                      RegExp(r'\s')),
+              ],
+                              decoration: InputDecoration(
+                                
+                                  hintText: 'Bet in ETB',
+                                  // contentPadding: EdgeInsets.only(bottom: 20),
+                                  focusedBorder: InputBorder.none,
+                                  enabledBorder: InputBorder.none,
+                                  errorBorder: InputBorder.none,
+                                  disabledBorder: InputBorder.none,
+                                  counterText: '',
+                                  border: InputBorder.none,
+                                  hintStyle: TextStyle(
+                                      fontFamily: 'Muli',
+                                      color: Color(0xff999999),
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w900)),
+                            ),
+            
+              ))
+            :GestureDetector(
             onTap: (){
               setState(() {
-                disposed = true;
+                betting = true;
               });
-               cancel.play();
-               checkGameStatus();
-              Navigator.pop(context);
+               selectPlayer.play();
+               
+             
               Future.delayed(Duration(seconds: 1)).then((value) {
-                cancel.stop();
+                selectPlayer.stop();
                 });
             },
             child: Container(
@@ -859,11 +925,32 @@ void handleTimeout() {  // callback function
               width: width*0.3,
               height: height*0.06,
               child: Center(
-                child: Text('Bet ' + '20 coins', style: TextStyle(color: Colors.black, fontSize: 16, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                child: Text('Place Bet', style: TextStyle(color: Colors.black, fontSize: 16, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
               ),
             ),
             ),
-            GestureDetector(
+            betting
+            ?GestureDetector(
+            onTap: (){
+              setState(() {
+                disposed = true;
+              });
+              checkGameStatus();
+              Navigator.pop(context);
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.35,
+              height: height*0.06,
+              child: Center(
+                child: Text('Confirm Bet', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            ),
+            )
+            :GestureDetector(
             onTap: (){
               setState(() {
                 disposed = true;
@@ -884,7 +971,94 @@ void handleTimeout() {  // callback function
             ),
             ),
                   ],
-                 ),
+                 )
+                 :GestureDetector(
+            onTap: (){
+              cancel.play();
+              showDialog(
+                        context: context,
+                        builder: ((context) {
+                          return new AlertDialog(
+                            backgroundColor: Color(0xff240044),
+                            title: new Text(
+                              'Leaving the game',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Muli',
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w900),
+                            ),
+                            content: new Text(
+                              'Are you sure you want to leave the game? All progresses and bets will be lost.',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Muli',
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.normal),
+                            ),
+                            actions: <Widget>[
+                              new TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                  setState(() {
+                                    paused = false;
+                                  });
+                                }, // Closes the dialog
+                                child: new Text(
+                                  'No',
+                                  style: TextStyle(
+                                      color: Color(0xffff2389),
+                                      fontSize: 16,
+                                      fontFamily: 'Muli',
+                                      fontWeight: FontWeight.w900),
+                                ),
+                              ),
+                              new TextButton(
+                                onPressed: () {
+                                  cancel.play();
+                                  checkGameStatus();
+                                  _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
+                                  Navigator.pop(context);
+                                //  _bounceController.reset();
+                  // _animationController.reset();
+                  setState(() {
+                    disposed = true;
+                  });
+                  // handleTimeout();
+                  _navigator.pop(context);
+                  Future.delayed(Duration(seconds: 1)).then((value) {
+                cancel.stop();
+                });
+                                },
+                                child: new Text(
+                                  'Yes',
+                                  style: TextStyle(
+                                      color: Color(0xff23ff89),
+                                      fontSize: 16,
+                                      fontFamily: 'Muli',
+                                      fontWeight: FontWeight.w900),
+                                ),
+                              ),
+                            ],
+                          );
+                        }));
+                        Future.delayed(Duration(seconds: 1)).then((value) {
+                cancel.stop();
+                });
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Color(0xffff2389),
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.3,
+              height: height*0.06,
+              child: Center(
+                child: Text('Leave', style: TextStyle(color: Colors.white, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            ),
+            )
+                 ,
            
               ],
             )

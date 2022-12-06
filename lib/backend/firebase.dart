@@ -153,7 +153,16 @@ Future<User> fetchUserDetailsById(String uid) async {
   }
 
   Future<Lobby> getLobbyById(String lobbyId) async{
+    print(lobbyId); print(' is the lobby id');
     DocumentSnapshot snapshot = await _firestore.collection('lobbies').doc(lobbyId).get();
+    if(snapshot.data()==null){
+      return Lobby();
+    }
+    return Lobby.fromMap(snapshot.data());
+  }
+   Future<Lobby> getPublicLobbyById(String lobbyId) async{
+    print(lobbyId); print(' is the lobby id');
+    DocumentSnapshot snapshot = await _firestore.collection('publicLobbies').doc(lobbyId).get();
     if(snapshot.data()==null){
       return Lobby();
     }
@@ -213,6 +222,18 @@ Future<User> fetchUserDetailsById(String uid) async {
     setMap['creator'] = creatorId.toMap(creatorId);
     return _firestore.collection("lobbies").doc(id).set(setMap);
   }
+  Future<void> editLobbyById(String id, Lobby lobby, User creatorId) async{
+    print(creatorId); print('stage1');
+    Map<String, dynamic> setMap = lobby.toMap(lobby);
+    Map<String, dynamic> info = {creatorId.uid: creatorId.toMap(creatorId)};
+    setMap['playerInfo'] = info;
+    setMap['active'] = false;
+    print(setMap);
+    await _firestore.collection('users').doc(creatorId.uid).collection('lobby').doc(id).update(setMap);
+    print(creatorId); print('stage2');
+    setMap['creator'] = creatorId.toMap(creatorId);
+    return _firestore.collection("lobbies").doc(id).update(setMap);
+  }
 
   Future<void> addPublicLobby(Lobby lobby) async{
     Map<String, dynamic> setMap = lobby.toMap(lobby);
@@ -221,11 +242,34 @@ Future<User> fetchUserDetailsById(String uid) async {
     setMap['countDown'] = DateTime.now().millisecondsSinceEpoch;
     setMap['startedCountdown'] = false;
     print(setMap);
-    return _firestore.collection("publicLobbies").add(setMap);
+    return _firestore.collection("publicLobbies").add(setMap).then((value) {
+      _firestore.collection("publicLobbies").doc(value.id).update({'uid': value.id});
+    });
+  }
+
+  Future<void> editPublicLobby(Lobby lobby) async{
+    Map<String, dynamic> setMap = lobby.toMap(lobby);
+    setMap['active'] = false;
+    setMap['playerInfo'] = {};
+    setMap['countDown'] = DateTime.now().millisecondsSinceEpoch;
+    setMap['startedCountdown'] = false;
+    print(setMap);
+    return _firestore.collection("publicLobbies").doc(lobby.uid).update(setMap);
   }
 
   Future<List<Lobby>> getPublicLobbies() async {
     QuerySnapshot snap = await _firestore.collection('publicLobbies').get();
+    List<Lobby> returnedList = [];
+    for (int i =0; i<snap.docs.length; i++){
+      Lobby newLobby = Lobby.fromDoc(snap.docs[i]);
+      newLobby.uid = snap.docs[i].id;
+      returnedList.add(newLobby);
+    }
+    return returnedList;
+  }
+
+  Future<List<Lobby>> getPublicLobbiesCategory(int type, int category) async {
+    QuerySnapshot snap = await _firestore.collection('publicLobbies').where("gameType", isEqualTo: type).where("gameCategory", isEqualTo: category).get();
     List<Lobby> returnedList = [];
     for (int i =0; i<snap.docs.length; i++){
       Lobby newLobby = Lobby.fromDoc(snap.docs[i]);

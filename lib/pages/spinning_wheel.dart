@@ -83,7 +83,7 @@ class _SpinningBabyState extends State<SpinningBaby>
   void initState() {
     // TODO: implement initState
     super.initState();
-    var _duration = Duration(milliseconds: 15000);
+    var _duration = Duration(milliseconds: 50000);
     _ctrl = AnimationController(vsync: this, duration: _duration)..addListener(() {
         
       setState(() {
@@ -91,7 +91,7 @@ class _SpinningBabyState extends State<SpinningBaby>
       });
 
      });;
-    _ani = CurvedAnimation(parent: _ctrl, curve: Curves.fastLinearToSlowEaseIn);
+    _ani = CurvedAnimation(parent: _ctrl, curve: Curves.fastOutSlowIn);
   }
 
   
@@ -147,6 +147,7 @@ class _SpinningBabyState extends State<SpinningBaby>
     }
 
     gameScreen(var width, var height, AsyncSnapshot snapshot){
+      Map<dynamic, dynamic> playerDetails = snapshot.data['playerInfo'];
       return Scaffold(
       body: Container(
         width: width,
@@ -178,12 +179,12 @@ class _SpinningBabyState extends State<SpinningBaby>
                   Stack(
                 alignment: Alignment.center,
                 children: <Widget>[
-                  BoardView(items: _items, current: _current, angle: _angle, players: snapshot.data['active']?snapshot.data['spinList']:initialPlayers),
+                  BoardView(items: _items, current: _current, angle: _angle, players: snapshot.data['active']?snapshot.data['spinList']:snapshot.data['players'], playerInfo: snapshot.data['playerInfo'],),
                   _buildGo(snapshot),
                  
                 ],
               ),
-               _buildResult(_value),
+               _buildResult(_value, snapshot),
               ]);
             }),
             GestureDetector(
@@ -292,14 +293,14 @@ class _SpinningBabyState extends State<SpinningBaby>
     startTimer();
   }
 
-  int _calIndex(value) {
-    var _base = (2 * pi / initialPlayers.length / 2) / (2 * pi);
-    return (((((_base + value) % 1) * initialPlayers.length)+initialPlayers.length/4) % initialPlayers.length).floor();
+  int _calIndex(value, snapshot) {
+    var _base = (2 * pi / snapshot.data['players'].length / 2) / (2 * pi);
+    return (((((_base + value) % 1) * snapshot.data['players'].length)+snapshot.data['players'].length/4) % snapshot.data['players'].length).floor();
   }
 
-  _buildResult(_value) {
-    var _index = _calIndex((_value) * (_angle) + _current);
-    String _asset = initialPlayers[_index];
+  _buildResult(_value, snapshot) {
+    var _index = _calIndex((_value) * (_angle) + _current, snapshot);
+    String _asset = '@' + snapshot.data['playerInfo'][snapshot.data['players'][_index]]['userName'];
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 16.0),
       child: Align(

@@ -223,7 +223,8 @@ void handleTimeout() {  // callback function
               setState(() {
                 editing = true;
               });
-            _firebaseProvider.getLobbyById(widget.variables.currentUser.lobbyId).then((lobby){
+              if(widget.public){
+                  _firebaseProvider.getPublicLobbyById(widget.lobby.uid).then((lobby){
                Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           // return SelectLobby();
@@ -236,6 +237,23 @@ void handleTimeout() {  // callback function
                         });
                 
             });
+              }
+              else{
+                  _firebaseProvider.getLobbyById(widget.variables.lobby.uid).then((lobby){
+               Navigator.push(context, MaterialPageRoute( 
+          builder: (BuildContext context) {
+                          // return SelectLobby();
+                          return  EditLobby(variables: widget.variables, lobby: lobby, public: widget.public,);
+                        },
+                        )).then((value) {
+                           setState(() {
+                editing = false;
+              });
+                        });
+                
+            });
+              }
+          
 
             Future.delayed(Duration(seconds: 1)).then((value) {
               selectPlayer.stop();

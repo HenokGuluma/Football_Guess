@@ -265,7 +265,7 @@ class _InstaProfileScreenState extends State<InstaProfileScreen>
                         });
             },
           ),
-           GestureDetector(
+           /* GestureDetector(
             child: ProfileButtons('Spinner Wheel', width, height),
             onTap: () {
               Navigator.push(
@@ -273,7 +273,7 @@ class _InstaProfileScreenState extends State<InstaProfileScreen>
                   MaterialPageRoute(
                       builder: ((context) => SpinningBaby())));
             },
-          ),
+          ), */
           
 
             

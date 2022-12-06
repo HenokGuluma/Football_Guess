@@ -160,10 +160,13 @@ class ClosestNumberState extends State<ClosestNumber>
   List<dynamic> playerListOnline = [];
   List<Widget> drawnCards = [];
   Timer _timer;
+  Timer _firstTimer;
+  Timer _secondTimer;
+  Timer _thirdTimer;
   int _start = 100;
   int _firstStart = 300;
-  int _secondStart = 400;
-  int _thirdStart = 500;
+  int _secondStart = 200;
+  int _thirdStart = 100;
   bool randomizing = false;
   bool showRandomizing = true;
   int firstNum = 0;
@@ -190,9 +193,8 @@ Future<void> setupSound() async{
   }
 
 void startTimer(int numValue) {
-  int randomNum = Random().nextInt(9);
   const oneSec = const Duration(milliseconds: 10);
-  _timer = new Timer.periodic(
+  _firstTimer = new Timer.periodic(
     oneSec,
     (Timer timer) {
       var added = 0;
@@ -215,6 +217,7 @@ void startTimer(int numValue) {
           
           });
       } else {
+        int randomNum = Random().nextInt(9);
         // print(_start);
         setState(() {
           _firstStart--;
@@ -226,9 +229,8 @@ void startTimer(int numValue) {
 }
 
 void startSecondTimer(int numValue) {
-  int randomNum = Random().nextInt(9);
   const oneSec = const Duration(milliseconds: 10);
-  _timer = new Timer.periodic(
+  _secondTimer = new Timer.periodic(
     oneSec,
     (Timer timer) {
       var added = 0;
@@ -239,7 +241,7 @@ void startSecondTimer(int numValue) {
         cardValues.add({'value': value, 'type': type});
           setState(() {
             showRandomizing = false;
-            firstNum = numValue;             
+            secondNum = numValue;             
           });
           Future.delayed(Duration(milliseconds: 500)).then((value) {
             
@@ -251,19 +253,19 @@ void startSecondTimer(int numValue) {
           
           });
       } else {
+        int randomNum = Random().nextInt(9);
         // print(_start);
         setState(() {
           _secondStart--;
-          firstNum = randomNum;
+          secondNum = randomNum;
         });
       }
     },
   );
 }
 void startThirdTimer(int numValue) {
-  int randomNum = Random().nextInt(9);
   const oneSec = const Duration(milliseconds: 10);
-  _timer = new Timer.periodic(
+  _thirdTimer = new Timer.periodic(
     oneSec,
     (Timer timer) {
       var added = 0;
@@ -274,7 +276,7 @@ void startThirdTimer(int numValue) {
         cardValues.add({'value': value, 'type': type});
           setState(() {
             showRandomizing = false;
-            firstNum = numValue;             
+            thirdNum = numValue;             
           });
           Future.delayed(Duration(milliseconds: 500)).then((value) {
             
@@ -286,10 +288,11 @@ void startThirdTimer(int numValue) {
           
           });
       } else {
+        int randomNum = Random().nextInt(9);
         // print(_start);
         setState(() {
           _thirdStart--;
-          firstNum = randomNum;
+          thirdNum = randomNum;
         });
       }
     },
@@ -309,11 +312,11 @@ submitScore(){
  @override
   void dispose() {
     // _pageController.dispose();
-    _animationController.dispose();
-    _slideController.dispose();
-    _bounceController.dispose();
+    // _animationController.dispose();
+    // _slideController.dispose();
+    // _bounceController.dispose();
     // startTimer();
-    _timer.cancel();
+    // _timer.cancel();
 
    
     super.dispose();
@@ -367,6 +370,7 @@ _bounceController.addListener(() {
       retrievingWinner = true;
     });
    Future.delayed(Duration(seconds: 5)).then((value) {
+
      _firebaseProvider.getLobbyWinner(widget.lobbyId).then((lobbyWinner) {
       if(lobbyWinner!=null){
         setState(() {
@@ -386,8 +390,8 @@ _bounceController.addListener(() {
     // print('daaum');
     setState(() {
       _firstStart = 300;
-      _secondStart = 400;
-      _thirdStart = 500;
+      _secondStart = 200;
+      _thirdStart = 100;
       randomizing = true;
       showRandomizing = true;
       
@@ -396,13 +400,16 @@ _bounceController.addListener(() {
     int secondDigit = 0;
     int firstDigit = 0;
     if(number.toString().length==3){
-      thirdDigit = int.parse(number.toString()[2]);
+      firstDigit = int.parse(number.toString()[2]);
+      secondDigit = int.parse(number.toString()[1]);
+      thirdDigit = int.parse(number.toString()[0]);
     }
     if(number.toString().length==2){
-      thirdDigit = int.parse(number.toString()[1]);
+      firstDigit = int.parse(number.toString()[1]);
+      secondDigit = int.parse(number.toString()[0]);
     }
     if(number.toString().length==1){
-      thirdDigit = int.parse(number.toString()[0]);
+      firstDigit = int.parse(number.toString()[0]);
     }
     startTimer(firstDigit);
     startSecondTimer(secondDigit);
@@ -460,9 +467,9 @@ _bounceController.addListener(() {
        else if(paused){
 
       }
-      else if(!startDown && !widget.solo){
+      /* else if(!startDown && !widget.solo){
        
-      }
+      } */
       else if(gamePlayTimeLeft >0){
          
         setState(() {
@@ -590,12 +597,8 @@ _bounceController.addListener(() {
 
        if(!gotWinner && playerAmount<1 && !disposed){
         // print('baaaam');
-        getWinner().then((value) {
-          setState(() {
-            gotWinner = true;
-            // shouldGetWinner = false;
-          });
-        });
+       
+       
       }
 
       if(setupPlayers && playerInfotemp!=null){
@@ -1664,12 +1667,12 @@ Widget startScreen(var width, var height, AsyncSnapshot snapshot){
                     SizedBox(
                 height: height*0.15,
               ),
-                Text(randomizedNumber!=null?randomizedNumber.toString():'',
+                Text(randomizedNumber!=null?randomizedNumber.toString():'000',
                               style: TextStyle(
                                   color: Colors.white,
                                   fontFamily: 'Muli',
-                                  fontSize: 46,
-                                  fontWeight: FontWeight.normal),
+                                  fontSize: 86,
+                                  fontWeight: FontWeight.w900),
                             ),
                 SizedBox(
                   height: height*0.05,
@@ -1677,6 +1680,9 @@ Widget startScreen(var width, var height, AsyncSnapshot snapshot){
                 MaterialButton(
                   onPressed: (){
                     int num = Random().nextInt(400);
+                    setState(() {
+                      randomizedNumber = num;
+                    });
                     randomize(num);
                   },
                   child:  Container(
@@ -1687,7 +1693,7 @@ Widget startScreen(var width, var height, AsyncSnapshot snapshot){
               width: width*0.3,
               height: height*0.06,
               child: Center(
-                child: Text('Try Again', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                child: Text('Randomize', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
               ),
             ),
                   ),
@@ -1697,23 +1703,138 @@ Widget startScreen(var width, var height, AsyncSnapshot snapshot){
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(thirdNum.toString(), style: TextStyle(
-                                  color: Colors.white,
+                   Container(
+                      width: width*0.25,
+                      height: width*0.35,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Color(0xff444444))
+                      ),
+                      child: Center(
+                        child: Text(thirdNum.toString(), style: TextStyle(
+                                  color: Color(0xff23ff34),
                                   fontFamily: 'Muli',
-                                  fontSize: 46,
-                                  fontWeight: FontWeight.normal),),
-                    Text(secondNum.toString(), style: TextStyle(
-                                  color: Colors.white,
+                                  fontSize: 126,
+                                  fontWeight: FontWeight.w900),),
+                      )
+                    ),
+                    Container(
+                      width: width*0.25,
+                      height: width*0.35,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Color(0xff444444))
+                      ),
+                      child: Center(
+                        child: Text(secondNum.toString(), style: TextStyle(
+                                  color: Color(0xff23ff34),
                                   fontFamily: 'Muli',
-                                  fontSize: 46,
-                                  fontWeight: FontWeight.normal),),
-                    Text(firstNum.toString(), style: TextStyle(
-                                  color: Colors.white,
+                                  fontSize: 126,
+                                  fontWeight: FontWeight.w900),),
+                      )
+                    ),
+                    Container(
+                      width: width*0.25,
+                      height: width*0.35,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Color(0xff444444))
+                      ),
+                      child: Center(
+                        child: Text(firstNum.toString(), style: TextStyle(
+                                  color: Color(0xff23ff34),
                                   fontFamily: 'Muli',
-                                  fontSize: 46,
-                                  fontWeight: FontWeight.normal),),
+                                  fontSize: 126,
+                                  fontWeight: FontWeight.w900),),
+                      )
+                    ),
                   ],
-                )
+                ),
+                SizedBox(
+                  height: height*0.1,
+                ),
+                GestureDetector(
+            onTap: (){
+               cancel.play();
+              showDialog(
+                        context: context,
+                        builder: ((context) {
+                          return new AlertDialog(
+                            backgroundColor: Color(0xff240044),
+                            title: new Text(
+                              'Leaving the game',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Muli',
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w900),
+                            ),
+                            content: new Text(
+                              'Are you sure you want to leave the game? All progresses and bets will be lost.',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Muli',
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.normal),
+                            ),
+                            actions: <Widget>[
+                              new TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                  setState(() {
+                                    paused = false;
+                                  });
+                                }, // Closes the dialog
+                                child: new Text(
+                                  'No',
+                                  style: TextStyle(
+                                      color: Color(0xffff2389),
+                                      fontSize: 16,
+                                      fontFamily: 'Muli',
+                                      fontWeight: FontWeight.w900),
+                                ),
+                              ),
+                              new TextButton(
+                                onPressed: () {
+                                  cancel.play();
+                                  
+                                  Navigator.pop(context);
+                                //  _bounceController.reset();
+                  // _animationController.reset();
+                  setState(() {
+                    disposed = true;
+                  });
+                  // handleTimeout();
+                  _navigator.pop(context);
+                  Future.delayed(Duration(seconds: 1)).then((value) {
+                cancel.stop();
+                });
+                                },
+                                child: new Text(
+                                  'Yes',
+                                  style: TextStyle(
+                                      color: Color(0xff23ff89),
+                                      fontSize: 16,
+                                      fontFamily: 'Muli',
+                                      fontWeight: FontWeight.w900),
+                                ),
+                              ),
+                            ],
+                          );
+                        }));
+                        Future.delayed(Duration(seconds: 1)).then((value) {
+                cancel.stop();
+                });
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Color(0xffff2389),
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.3,
+              height: height*0.06,
+              child: Center(
+                child: Text('Leave', style: TextStyle(color: Colors.white, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            ),
+            ),
               ]
               )
             ), 

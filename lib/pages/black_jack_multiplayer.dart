@@ -1060,7 +1060,7 @@ Widget submittedScreen(var width, var height, AsyncSnapshot snapshot){
               SizedBox(
                 height: height*0.05,
               ),
-              GestureDetector(
+              /* GestureDetector(
             onTap: (){
               // Navigator.pop(context);
               setState(() {
@@ -1089,7 +1089,7 @@ Widget submittedScreen(var width, var height, AsyncSnapshot snapshot){
               ),
             ),
             ),
-            ])),
+             */])),
       ],
     ),
   );
@@ -1417,7 +1417,7 @@ Widget startScreen(var width, var height, AsyncSnapshot snapshot){
             ),
             ),
             SizedBox(height: height*0.05,), */
-            GestureDetector(
+            /* GestureDetector(
             onTap: (){
                cancel.play();
               showDialog(
@@ -1508,7 +1508,7 @@ Widget startScreen(var width, var height, AsyncSnapshot snapshot){
               ),
             ),
             ),
-           
+            */
             
             ])
           ), 
@@ -1573,10 +1573,10 @@ Widget startScreen(var width, var height, AsyncSnapshot snapshot){
                  )
                  : Center(),
             SizedBox(height: height*0.05,),   
-           Row(
+           /* Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-               /* GestureDetector(
+               GestureDetector(
             onTap: (){
               // Navigator.pop(context);
               setState(() {
@@ -1602,7 +1602,7 @@ Widget startScreen(var width, var height, AsyncSnapshot snapshot){
               ),
             ),
             ),
-             */
+            
             GestureDetector(
             onTap: (){
                showDialog(
@@ -1692,7 +1692,7 @@ Widget startScreen(var width, var height, AsyncSnapshot snapshot){
 
             ],
            )
-           
+            */
             
             ])
           ), 

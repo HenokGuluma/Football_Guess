@@ -154,6 +154,7 @@ class _BankeruState extends State<Bankeru>
    Map<String, dynamic> middleCard = {};
    bool middleCardDrawn = false;
    int score = 0;
+   double lives = 5;
    bool gameOver = false;
    bool win = false;
 
@@ -166,6 +167,7 @@ class _BankeruState extends State<Bankeru>
   void initState() {
     super.initState();
     //  print('bankeruu');
+      _navigator = Navigator.of(context);
     Future.delayed(Duration(milliseconds: 100)).then((value) {
       randomize();
     });
@@ -221,25 +223,29 @@ class _BankeruState extends State<Bankeru>
         
            if (cardValues.length<2){
             randomize();
-            setState(() {
-              score = score+added;
-            });
+            
           }
           else if(middleCardDrawn){
             print('shabobom');
              int low = cardValues[0]['value'];
             int high = cardValues[1]['value'];
             bool winner;
+            int newScore = score;
+            double newLives = lives;
             if((low<value) && (value<high) || (high<value) && (value<low)){
               winner = true;
+              newScore = score+20;
             }
             else{
               winner = false;
+              newLives = lives-1;
             }
              setState(() {
             middleCard = {'value': value, 'type': type};
             gameOver = true;
             win = winner;
+            score = newScore;
+            lives = newLives;
             randomizing = false;
           });
           print(middleCard);
@@ -251,7 +257,7 @@ class _BankeruState extends State<Bankeru>
           });
              Future.delayed(Duration(milliseconds: 500)).then((value) {
             setState(() {
-            score = score+added;
+            // score = score+added;
             randomizing = false;
             showRandomizing = true;
           });
@@ -557,26 +563,91 @@ void handleTimeout() {  // callback function
                  Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
+                    Text('Lives: ' + lives.toString(), style: TextStyle(color: Colors.white, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              
                      GestureDetector(
             onTap: (){
-               cancel.play();
-              Navigator.pop(context);
-              Future.delayed(Duration(seconds: 1)).then((value) {
-                cancel.stop();
-                });
+
+              showDialog(
+                        context: context,
+                        builder: ((context) {
+                          return new AlertDialog(
+                            backgroundColor: Color(0xff240044),
+                            title: new Text(
+                              'Leaving the game',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Muli',
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w900),
+                            ),
+                            content: new Text(
+                              'Are you sure you want to leave the game? All progresses and bets will be lost.',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Muli',
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.normal),
+                            ),
+                            actions: <Widget>[
+                              new TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                  setState(() {
+                                    paused = false;
+                                  });
+                                }, // Closes the dialog
+                                child: new Text(
+                                  'No',
+                                  style: TextStyle(
+                                      color: Color(0xffff2389),
+                                      fontSize: 16,
+                                      fontFamily: 'Muli',
+                                      fontWeight: FontWeight.w900),
+                                ),
+                              ),
+                              new TextButton(
+                                onPressed: () {
+                                  
+                                  Navigator.pop(context);
+                                //  _bounceController.reset();
+                  // _animationController.reset();
+                  setState(() {
+                    disposed = true;
+                  });
+                  // handleTimeout();
+                  _navigator.pop(context);
+                                },
+                                child: new Text(
+                                  'Yes',
+                                  style: TextStyle(
+                                      color: Color(0xff23ff89),
+                                      fontSize: 16,
+                                      fontFamily: 'Muli',
+                                      fontWeight: FontWeight.w900),
+                                ),
+                              ),
+                            ],
+                          );
+                        }));
+
+
             },
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Color(0xffff2389),
                 borderRadius: BorderRadius.circular(20)
               ),
               width: width*0.3,
               height: height*0.06,
               child: Center(
-                child: Text('Go Back', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                child: Text('Leave', style: TextStyle(color: Colors.white, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
               ),
             ),
             ),
+            Text('Score: ' + score.toString(), style: TextStyle(color: Color(0xff23ff34), fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              
+
             ],
                  ),
                  SizedBox(
@@ -624,7 +695,7 @@ void handleTimeout() {  // callback function
               width: width*0.3,
               height: height*0.06,
               child: Center(
-                child: Text('Winner', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                child: Text('Win', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
               ),
             ):Container(
               decoration: BoxDecoration(
@@ -634,7 +705,7 @@ void handleTimeout() {  // callback function
               width: width*0.3,
               height: height*0.06,
               child: Center(
-                child: Text('Loser', style: TextStyle(color: Colors.white, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                child: Text('Lose', style: TextStyle(color: Colors.white, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
               ),
             ),
                 GestureDetector(
@@ -656,12 +727,39 @@ void handleTimeout() {  // callback function
               width: width*0.3,
               height: height*0.06,
               child: Center(
-                child: Text('Try Again', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                child: Text('Next', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
               ),
             ),
             )
               ],
-            ):Center(),
+            ):
+            !randomizing
+            ?GestureDetector(
+            onTap: (){
+              setState(() {
+                gameOver = false;
+                cardValues = [];
+                middleCard = {};
+                middleCardDrawn = false;
+                win = false;
+                lives = lives-0.5;
+              });
+              randomize();
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.3,
+              height: height*0.06,
+              child: Center(
+                child: Text('Skip', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            ),
+            )
+            :Center()
+            ,
            
             
             ])

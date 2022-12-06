@@ -100,6 +100,12 @@ class _PlayModeState extends State<PlayMode>
         loading = false;
       });
     });
+
+    Future.delayed(Duration(seconds: 5)).then((value) {
+      setState(() {
+        loading = false;
+      });
+    });
    
   /*  }
    else{
@@ -396,7 +402,7 @@ void handleTimeout() {  // callback function
             Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           // return LobbyMenu();
-                          return GameMenu(variables: variables, public: false, creating: false, pauseBackground: pauseBackgroundMusic, startBackground: startBackgroundMusic,);
+                          return GameMenu(variables: variables, public: false, editing: false, creating: false, pauseBackground: pauseBackgroundMusic, startBackground: startBackgroundMusic,);
                         },
                         ));
         }

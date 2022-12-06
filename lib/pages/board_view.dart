@@ -9,9 +9,10 @@ class BoardView extends StatefulWidget {
   final double angle;
   final double current;
   final List<Luck> items;
-  final List<dynamic> players;
+  final dynamic players;
+  final dynamic playerInfo;
 
-  const BoardView({Key key, this.angle, this.current, this.items, this.players})
+  const BoardView({Key key, this.angle, this.current, this.items, this.players, this.playerInfo})
       : super(key: key);
 
   @override
@@ -87,9 +88,10 @@ class _BoardViewState extends State<BoardView> {
   }
 
   Widget displayName(String name, var width){
+    
     return Container(
       width: width*0.2,
-      child: Text(name, style: TextStyle(color: Colors.white, fontFamily: 'Muli', fontSize: 16, fontWeight: FontWeight.w900),)
+      child: Text('@'+widget.playerInfo[name]['userName'], style: TextStyle(color: Colors.white, fontFamily: 'Muli', fontSize: 20, fontWeight: FontWeight.w900),)
     );
   }
 

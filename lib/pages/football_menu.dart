@@ -23,6 +23,7 @@ class FootBallMenu extends StatefulWidget {
   String uid;
   String name;
   String rate;
+  bool editing;
   User thisUser;
   int gameCategory;
   UserVariables variables;
@@ -30,7 +31,7 @@ class FootBallMenu extends StatefulWidget {
   Function startBackground;
 
 
-  FootBallMenu({this.creating, this.public, this.uid, this.name, this.rate, this.gameCategory, this.thisUser, this.variables, this.pauseBackground, this.startBackground});
+  FootBallMenu({this.creating, this.editing, this.public, this.uid, this.name, this.rate, this.gameCategory, this.thisUser, this.variables, this.pauseBackground, this.startBackground});
   @override
   _FootBallMenuState createState() => _FootBallMenuState();
 }
@@ -283,7 +284,25 @@ void handleTimeout() {  // callback function
                 creatorName: widget.variables.currentUser.userName,
               );
               print(widget.variables.currentUser.uid); print(' is the user');
-             if(widget.public){
+            if(widget.public){
+                if(widget.editing){
+                   _firebaseProvider.editPublicLobby(lobby).then((value) {
+                
+                Flushbar(
+                  title: 'Created a Lobby',
+                  backgroundColor: Color(0xff00ffff),
+                  titleText: Text('Successfully edited the lobby', style: TextStyle(color: Colors.black, fontSize: 16, fontFamily: 'Muli')),
+                );
+
+                 Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                  builder: ((context) => MyApp())),
+                              (Route<dynamic> route) => false,
+                            );
+              });
+                }
+                else{
                  _firebaseProvider.addPublicLobby(lobby).then((value) {
                 
                 Flushbar(
@@ -300,8 +319,29 @@ void handleTimeout() {  // callback function
                             );
               });
               }
+              }
               else{
-                 _firebaseProvider.addLobbyById(widget.uid, lobby, widget.thisUser).then((value) {
+                 if(widget.editing){
+                  _firebaseProvider.editLobbyById(widget.uid, lobby, widget.thisUser).then((value) {
+                widget.variables.setLobby(lobby);
+                
+                
+                Flushbar(
+                  title: 'Created a Lobby',
+                  backgroundColor: Color(0xff00ffff),
+                  titleText: Text('Successfully edited the lobby', style: TextStyle(color: Colors.black, fontSize: 16, fontFamily: 'Muli')),
+                );
+
+                 Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                  builder: ((context) => MyApp())),
+                              (Route<dynamic> route) => false,
+                            );
+              });
+                 }
+                 else{
+                  _firebaseProvider.addLobbyById(widget.uid, lobby, widget.thisUser).then((value) {
                 widget.variables.setLobby(lobby);
                 
                 
@@ -318,7 +358,9 @@ void handleTimeout() {  // callback function
                               (Route<dynamic> route) => false,
                             );
               });
+                 }
               }
+             
             },
             child: Container(
               decoration: BoxDecoration(

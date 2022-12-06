@@ -19,22 +19,21 @@ import 'package:instagram_clone/pages/football_menu.dart';
 import 'package:instagram_clone/pages/footballers.dart';
 import 'package:instagram_clone/pages/insta_profile_screen.dart';
 import 'package:instagram_clone/pages/lobby_details.dart';
+import 'package:instagram_clone/pages/lobby_menu.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:progress_indicators/progress_indicators.dart';
 
-class LobbyMenu extends StatefulWidget {
+class LobbyCategory extends StatefulWidget {
  
  UserVariables variables;
  Function stopBackground;
- int gameType;
- int gameCategory;
 
- LobbyMenu({this.variables, this.stopBackground, this.gameCategory, this.gameType});
+ LobbyCategory({this.variables, this.stopBackground});
   @override
-  _LobbyMenuState createState() => _LobbyMenuState();
+  _LobbyCategoryState createState() => _LobbyCategoryState();
 }
 
-class _LobbyMenuState extends State<LobbyMenu>
+class _LobbyCategoryState extends State<LobbyCategory>
     with TickerProviderStateMixin {
   List<List<String>> images = 
   [['assets/Alexis-Sanchez.png', 'assets/Paul-Pogba.png'],
@@ -57,7 +56,7 @@ class _LobbyMenuState extends State<LobbyMenu>
   List<String> menuImages = ['assets/football2.jpg', 'assets/football3.jpg','assets/football4.jpg',  'assets/football1.png'];
   List<String> modes = ['assets/football2.jpg', 'assets/football3.jpg','assets/football4.jpg',  'assets/football1.png', 'assets/blackjack-option.png', 'assets/bank_vault.png', 'assets/roulette.png'];
 
-  List<List<Map<String, dynamic>>> LobbyMenu = 
+  List<List<Map<String, dynamic>>> LobbyCategory = 
   [
     [
       {'name': 'Alexis Sanchez', 'age': 33, 'image':'assets/Alexis-Sanchez.png' },
@@ -135,7 +134,7 @@ _animationController.addListener(() {
       });
 
      });
-     getPublicLobbies();
+    //  getPublicLobbies();
      setupSound();
   }
 
@@ -219,7 +218,7 @@ getPublicLobbies(){
                   player.play();
                     Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
-                          // return LobbyMenu();
+                          // return LobbyCategory();
                           return InstaProfileScreen(variables: widget.variables,);
                         },
                         ));
@@ -292,7 +291,7 @@ getPublicLobbies(){
           crossAxisCount: 2,
           childAspectRatio: 0.9
         ),
-        itemCount: publicLobbies.length,
+        itemCount: modes.length,
         itemBuilder: (_, index) {
           return lobbyItem(width, height, index);
         },
@@ -331,7 +330,7 @@ getPublicLobbies(){
               player.play();
                Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
-                          // return LobbyMenu();
+                          // return LobbyCategory();
                           return  AddPublicLobby(variables: widget.variables);
                         },
                         ));
@@ -386,6 +385,25 @@ getPublicLobbies(){
 
   Widget lobbyItem(var width, var height, int index){
     Lobby lobby = publicLobbies[index];
+    int category = 0;
+    int type = 0;
+    if(index <4){
+      type = 0;
+      category = 0;
+    }
+    else if (index == 4){
+       type = 1;
+      category = 0;
+    }
+    else if (index == 5){
+       type = 2;
+      category = 0;
+    }
+    else if (index == 6){
+       type = 3;
+      category = 0;
+    }
+   
     return Padding(
       padding: EdgeInsets.only(top: width*0.03, bottom: width*0.03),
       child: GestureDetector(
@@ -394,7 +412,7 @@ getPublicLobbies(){
         print(widget.stopBackground); print(' is the background');
          Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
-                          return LobbyDetails(variables: widget.variables, lobby: lobby, public: true, stopBackground: widget.stopBackground);
+                          return LobbyMenu(variables: widget.variables, stopBackground: widget.stopBackground, gameCategory: category, gameType: type,);
                         },
                         ));
                          Future.delayed(Duration(seconds: 1)).then((value) {

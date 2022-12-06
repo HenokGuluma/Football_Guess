@@ -372,6 +372,7 @@ void handleTimeout() {  // callback function
                           return GameMenu(
                             public: widget.public,
                             creating: true,
+                            editing: false,
                             uid: _uidController.text,
                             name: _nameController.text,
                             rate: _rateController.text,

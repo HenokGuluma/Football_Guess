@@ -25,6 +25,7 @@ import 'package:just_audio/just_audio.dart';
 
 class GameMenu extends StatefulWidget {
   bool creating;
+  bool editing;
   bool public;
   String uid;
   String name;
@@ -36,7 +37,7 @@ class GameMenu extends StatefulWidget {
   
 
 
-  GameMenu({this.creating, this.public, this.uid, this.name, this.rate, this.thisUser, this.variables, this.pauseBackground, this.startBackground});
+  GameMenu({this.creating, this.editing, this.public, this.uid, this.name, this.rate, this.thisUser, this.variables, this.pauseBackground, this.startBackground});
 
   @override
   GameMenuState createState() => GameMenuState();
@@ -250,6 +251,24 @@ Center(
               );
               print(widget.variables.currentUser.uid); print(' is the user');
               if(widget.public){
+                if(widget.editing){
+                   _firebaseProvider.editPublicLobby(lobby).then((value) {
+                
+                Flushbar(
+                  title: 'Created a Lobby',
+                  backgroundColor: Color(0xff00ffff),
+                  titleText: Text('Successfully edited the lobby', style: TextStyle(color: Colors.black, fontSize: 16, fontFamily: 'Muli')),
+                );
+
+                 Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                  builder: ((context) => MyApp())),
+                              (Route<dynamic> route) => false,
+                            );
+              });
+                }
+                else{
                  _firebaseProvider.addPublicLobby(lobby).then((value) {
                 
                 Flushbar(
@@ -266,8 +285,29 @@ Center(
                             );
               });
               }
+              }
               else{
-                 _firebaseProvider.addLobbyById(widget.uid, lobby, widget.thisUser).then((value) {
+                 if(widget.editing){
+                  _firebaseProvider.editLobbyById(widget.uid, lobby, widget.thisUser).then((value) {
+                widget.variables.setLobby(lobby);
+                
+                
+                Flushbar(
+                  title: 'Created a Lobby',
+                  backgroundColor: Color(0xff00ffff),
+                  titleText: Text('Successfully edited the lobby', style: TextStyle(color: Colors.black, fontSize: 16, fontFamily: 'Muli')),
+                );
+
+                 Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                  builder: ((context) => MyApp())),
+                              (Route<dynamic> route) => false,
+                            );
+              });
+                 }
+                 else{
+                  _firebaseProvider.addLobbyById(widget.uid, lobby, widget.thisUser).then((value) {
                 widget.variables.setLobby(lobby);
                 
                 
@@ -284,6 +324,7 @@ Center(
                               (Route<dynamic> route) => false,
                             );
               });
+                 }
               }
              
             },
@@ -370,6 +411,7 @@ Center(
                           return FootBallMenu(
                             public: widget.public,
                             creating: widget.creating,
+                            editing: widget.editing,
                             uid: widget.uid,
                             name: widget.name,
                             rate: widget.rate,
