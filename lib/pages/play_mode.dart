@@ -159,6 +159,15 @@ void handleTimeout() {  // callback function
     setState(() {
       currentUser = user;
     });
+
+      if(user.dailyTimer < DateTime.now().millisecondsSinceEpoch){
+        _firebaseProvider.resetTokens(currentUser.uid);
+        User newUser = currentUser;
+        newUser.tokens = 5;
+        setState(() {
+          currentUser = newUser;
+        });
+      }
      }
      else{
       return;

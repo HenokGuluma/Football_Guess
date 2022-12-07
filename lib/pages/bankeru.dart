@@ -156,6 +156,7 @@ class _BankeruState extends State<Bankeru>
    int score = 0;
    double lives = 5;
    bool gameOver = false;
+   bool finishedLives = false;
    bool win = false;
 
 
@@ -239,6 +240,11 @@ class _BankeruState extends State<Bankeru>
             else{
               winner = false;
               newLives = lives-1;
+            }
+            if(newLives <=0){
+              setState(() {
+                finishedLives = true;
+              });
             }
              setState(() {
             middleCard = {'value': value, 'type': type};
@@ -531,7 +537,9 @@ void handleTimeout() {  // callback function
  
     return WillPopScope(
     onWillPop: () async => false,
-    child: gameScreen(width, height)
+    child: !finishedLives
+    ?gameScreen(width, height)
+    :finishedScreen(width, height)
         );
    
    }
@@ -743,6 +751,7 @@ void handleTimeout() {  // callback function
                 middleCardDrawn = false;
                 win = false;
                 lives = lives-0.5;
+                score = score+2;
               });
               randomize();
             },
@@ -818,7 +827,182 @@ void handleTimeout() {  // callback function
    }
 
 
-   
+   Widget finishedScreen(var width, var height){
+    return Scaffold(
+      body: Stack(
+        children: [
+          Container(
+            width: width,
+            height: height,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/blackjack_wallpaper.png'),
+                fit: BoxFit.cover
+              )
+            ),
+          ),
+          Container(
+            width: width,
+            height: height,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                SizedBox(
+                  height: height*0.25,
+                ),
+                  Text(
+                'Nice Effort', style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 45, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
+              ),
+            SizedBox(
+              height: height*0.1,
+            ),
+            Text(
+                'Your final Score is: ' + score.toString(), style: TextStyle(color: Colors.white, fontFamily: 'Muli', fontSize: 25, fontWeight: FontWeight.w900),
+              ),
+              SizedBox(
+              height: height*0.1,
+            ),
+            MaterialButton(
+              onPressed: (){
+                setState(() {
+                    _colorController = AnimationController(duration: Duration(seconds: resetValue.toInt()), vsync: this);
+           colorAnimation = ColorTween(begin: Color(0xff63ff00), end: Color(0xffff2389)).animate(_colorController)
+          ..addListener(() {
+            setState(() {
+              // The state that has changed here is the animation object’s value.
+            });
+          });
+          _colorController.forward();
+                  lives = 5;
+                  finishedLives = false;
+                  timeLeft = 5.5;
+                  // _slideController.value = 5.5;
+                  defeated = false;
+                  gameOver = false;
+                  cardValues = [];
+                  middleCard = {};
+                  middleCardDrawn = false;
+                  win = false;
+                  score = 0;
+                  resetValue = 6;
+                  gamePlayDuration=0;
+                  divider = 6;
+                  finished = false;
+                  wrongClick = false;
+                  resetColor = true;
+                  correctPicked = false;
+                  animate = false;
+                  currentPage = 0;
+                });
+
+                randomize();
+                
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20)
+                ),
+                width: width*0.45,
+                height: width*0.12,
+                child: Center(
+                  child: Text(
+                'Try Again', style: TextStyle(color: Colors.black, fontFamily: 'Muli', fontSize: 22, fontWeight: FontWeight.w900),
+              ),
+                ),
+              ),
+            ),
+            SizedBox(height: height*0.05,),
+             MaterialButton(
+                onPressed: (){
+                 showDialog(
+                        context: context,
+                        builder: ((context) {
+                          return new AlertDialog(
+                            backgroundColor: Color(0xff240044),
+                            title: new Text(
+                              'Leaving the game',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Muli',
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w900),
+                            ),
+                            content: new Text(
+                              'Are you sure you want to leave the game? All progresses and bets will be lost.',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Muli',
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.normal),
+                            ),
+                            actions: <Widget>[
+                              new TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                  setState(() {
+                                    paused = false;
+                                  });
+                                }, // Closes the dialog
+                                child: new Text(
+                                  'No',
+                                  style: TextStyle(
+                                      color: Color(0xffff2389),
+                                      fontSize: 16,
+                                      fontFamily: 'Muli',
+                                      fontWeight: FontWeight.w900),
+                                ),
+                              ),
+                              new TextButton(
+                                onPressed: () {
+                                  // _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
+                                  Navigator.pop(context);
+                                 _bounceController.reset();
+                  _animationController.reset();
+                  setState(() {
+                    disposed = true;
+                  });
+                  if(lastPlayer){
+                    stopGame();
+                  }
+                  // handleTimeout();
+                  _navigator.pop(context); player.stop(); /* widget.startBackground(); */
+                                },
+                                child: new Text(
+                                  'Yes',
+                                  style: TextStyle(
+                                      color: Color(0xff23ff89),
+                                      fontSize: 16,
+                                      fontFamily: 'Muli',
+                                      fontWeight: FontWeight.w900),
+                                ),
+                              ),
+                            ],
+                          );
+                        }));
+
+
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Color(0xffff2378),
+                    borderRadius: BorderRadius.circular(20)
+                  ),
+                  width: width*0.3,
+                  height: 40,
+                  child: Center(
+                    child: Text('Leave', style: TextStyle(color: Colors.white, fontSize:18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                  ),
+                ),
+              ),
+          
+              ],
+            ),
+          )
+        ],
+      ),
+    );
+   }
 
 
    Widget gameScreenSolo(var width, var height, ){

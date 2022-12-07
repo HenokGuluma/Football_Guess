@@ -23,6 +23,7 @@ class ClosestNumber extends StatefulWidget {
   String category;
   String lobbyId;
   bool public;
+  int rate;
   String creatorId;
   int categoryNo;
   bool solo;
@@ -30,7 +31,7 @@ class ClosestNumber extends StatefulWidget {
   Function startBackground;
  
   ClosestNumber({
-    this.category, this.lobbyId, this.public, this.solo, this.variables, this.startBackground, this.creatorId, this.categoryNo,
+    this.category, this.lobbyId, this.public, this.solo, this.rate, this.variables, this.startBackground, this.creatorId, this.categoryNo,
   });
 
   @override
@@ -389,9 +390,9 @@ _bounceController.addListener(() {
  void randomize(int number){
     // print('daaum');
     setState(() {
-      _firstStart = 300;
-      _secondStart = 200;
-      _thirdStart = 100;
+      _firstStart = 500;
+      _secondStart = 350;
+      _thirdStart = 200;
       randomizing = true;
       showRandomizing = true;
       
@@ -745,7 +746,7 @@ Widget finalScreen(var width, var height, AsyncSnapshot snapshot){
                 score = 0;
                 timeLeft = 6;
               });
-              _firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId);_firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId);
+              _firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId, widget.rate);_firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId, widget.rate);
             },
             child: Container(
               decoration: BoxDecoration(
@@ -1051,7 +1052,7 @@ Widget submittedScreen(var width, var height, AsyncSnapshot snapshot){
                 score = 0;
                 timeLeft = 6;
               });
-              _firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId);_firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId);
+              _firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId, widget.rate);_firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId, widget.rate);
             },
             child: Container(
               decoration: BoxDecoration(

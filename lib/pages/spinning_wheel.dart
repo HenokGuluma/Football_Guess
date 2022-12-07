@@ -17,11 +17,12 @@ class SpinningBaby extends StatefulWidget {
   String creatorId;
   int categoryNo;
   bool solo;
+  int rate;
   UserVariables variables;
   Function startBackground;
 
   SpinningBaby({
-    this.category, this.lobbyId, this.public, this.solo, this.variables, this.startBackground, this.creatorId, this.categoryNo,
+    this.category, this.lobbyId, this.rate, this.public, this.solo, this.variables, this.startBackground, this.creatorId, this.categoryNo,
   });
 
   @override

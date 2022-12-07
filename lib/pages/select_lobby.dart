@@ -20,6 +20,7 @@ import 'package:instagram_clone/pages/add_lobby.dart';
 import 'package:instagram_clone/pages/football_menu.dart';
 import 'package:instagram_clone/pages/footballers.dart';
 import 'package:instagram_clone/pages/insta_profile_screen.dart';
+import 'package:instagram_clone/pages/lobby_category.dart';
 import 'package:instagram_clone/pages/lobby_details.dart';
 import 'package:instagram_clone/pages/lobby_menu.dart';
 import 'package:just_audio/just_audio.dart';
@@ -441,7 +442,7 @@ void handleTimeout() {  // callback function
                Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           // return SelectLobby();
-                          return  LobbyMenu(variables: widget.variables, stopBackground: widget.pauseBackground);
+                          return  LobbyCategory(variables: widget.variables, stopBackground: widget.pauseBackground);
                         },
                         ));
                          Future.delayed(Duration(seconds: 1)).then((value) {

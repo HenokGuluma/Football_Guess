@@ -160,7 +160,7 @@ void handleTimeout() {  // callback function
   }
 
 getPublicLobbies(){
-  _firebaseProvider.getPublicLobbies().then((list) {
+  _firebaseProvider.getPublicLobbiesCategory(widget.gameType, widget.gameCategory).then((list) {
     setState(() {
       publicLobbies = list;
       loading = false;

@@ -22,6 +22,7 @@ class BlackJackMultiplayer extends StatefulWidget {
 
   String category;
   String lobbyId;
+  int rate;
   bool public;
   String creatorId;
   int categoryNo;
@@ -30,7 +31,7 @@ class BlackJackMultiplayer extends StatefulWidget {
   Function startBackground;
  
   BlackJackMultiplayer({
-    this.category, this.lobbyId, this.public, this.solo, this.variables, this.startBackground, this.creatorId, this.categoryNo,
+    this.category, this.lobbyId, this.public, this.rate, this.solo, this.variables, this.startBackground, this.creatorId, this.categoryNo,
   });
 
   @override
@@ -236,7 +237,7 @@ void startTimer(var width, var height, Function shatter) {
                                  _firebaseProvider.stopLobbyGame(widget.variables.currentUser.uid, widget.lobbyId);
                                     
                                   }
-             _firebaseProvider.submitUserScore(widget.variables.currentUser, widget.lobbyId, score);
+             _firebaseProvider.submitBlackUserScore(widget.variables.currentUser, widget.lobbyId, score, false);
             });
               }
               else{
@@ -245,7 +246,7 @@ void startTimer(var width, var height, Function shatter) {
                                  _firebaseProvider.stopPublicLobbyGame(widget.variables.currentUser.uid, widget.lobbyId);
                                     
                                   }
-             _firebaseProvider.submitPublicUserScore(widget.variables.currentUser, widget.lobbyId, score);
+             _firebaseProvider.submitBlackPublicUserScore(widget.variables.currentUser, widget.lobbyId, score, false);
               });
               }
               
@@ -278,7 +279,7 @@ void startTimer(var width, var height, Function shatter) {
                                  _firebaseProvider.stopLobbyGame(widget.variables.currentUser.uid, widget.lobbyId);
                                     
                                   }
-             _firebaseProvider.submitUserScore(widget.variables.currentUser, widget.lobbyId, score-addedScore);
+             _firebaseProvider.submitBlackUserScore(widget.variables.currentUser, widget.lobbyId, score-addedScore, true);
             });
               }
               else{
@@ -287,7 +288,7 @@ void startTimer(var width, var height, Function shatter) {
                                  _firebaseProvider.stopPublicLobbyGame(widget.variables.currentUser.uid, widget.lobbyId);
                                     
                                   }
-             _firebaseProvider.submitPublicUserScore(widget.variables.currentUser, widget.lobbyId, score-addedScore);
+             _firebaseProvider.submitBlackPublicUserScore(widget.variables.currentUser, widget.lobbyId, score-addedScore, true);
               });
               }
             Future.delayed(Duration(seconds: 5)).then((value) {
@@ -344,10 +345,10 @@ void startSecondTimer(var width, var height, Function shatter) {
 
 submitScore(){
   if(widget.public){
-    _firebaseProvider.submitPublicUserScore(widget.variables.currentUser, widget.lobbyId, score);
+    _firebaseProvider.submitBlackPublicUserScore(widget.variables.currentUser, widget.lobbyId, score, false);
   }
   else{
-    _firebaseProvider.submitUserScore(widget.variables.currentUser, widget.lobbyId, score);
+    _firebaseProvider.submitBlackUserScore(widget.variables.currentUser, widget.lobbyId, score, false);
   }
 }
 
@@ -413,7 +414,8 @@ _bounceController.addListener(() {
       retrievingWinner = true;
     });
    Future.delayed(Duration(seconds: 5)).then((value) {
-     _firebaseProvider.getLobbyWinner(widget.lobbyId).then((lobbyWinner) {
+    if(widget.public){
+       _firebaseProvider.getBlackPublicLobbyWinner(widget.lobbyId).then((lobbyWinner) {
       if(lobbyWinner!=null){
         setState(() {
           winner = lobbyWinner;
@@ -421,6 +423,17 @@ _bounceController.addListener(() {
         });
       }
     });
+    }
+    else{
+       _firebaseProvider.getBlackLobbyWinner(widget.lobbyId).then((lobbyWinner) {
+      if(lobbyWinner!=null){
+        setState(() {
+          winner = lobbyWinner;
+          retrievingWinner = false;
+        });
+      }
+    });
+    }
    });
     }
     else{
@@ -769,7 +782,7 @@ Widget finalScreen(var width, var height, AsyncSnapshot snapshot){
                 score = 0;
                 timeLeft = 6;
               });
-              _firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId);_firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId);
+              _firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId, widget.rate);_firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId, widget.rate);
             },
             child: Container(
               decoration: BoxDecoration(
@@ -1909,7 +1922,7 @@ Widget startScreen(var width, var height, AsyncSnapshot snapshot){
              });
              if(widget.public){
               print('publiccc');
-                _firebaseProvider.submitPublicUserScore(widget.variables.currentUser, widget.lobbyId, score).then((value) {
+                _firebaseProvider.submitBlackPublicUserScore(widget.variables.currentUser, widget.lobbyId, score, false).then((value) {
                   _firebaseProvider.removeUserFromPublicLobby(widget.variables.currentUser, widget.lobbyId);
                   setState(() {
                     submitting = false;               
@@ -1923,7 +1936,7 @@ Widget startScreen(var width, var height, AsyncSnapshot snapshot){
                }
                else{
                 print('non public');
-                _firebaseProvider.submitUserScore(widget.variables.currentUser, widget.lobbyId, score).then((value) {
+                _firebaseProvider.submitBlackUserScore(widget.variables.currentUser, widget.lobbyId, score, false).then((value) {
                    _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
                   setState(() {
                     submitting = false;               

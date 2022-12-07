@@ -25,12 +25,13 @@ class BankeruMultiplayer extends StatefulWidget {
   String creatorId;
   int categoryNo;
   bool solo;
+  int rate;
   bool public;
   UserVariables variables;
   Function startBackground;
  
   BankeruMultiplayer({
-    this.category, this.lobbyId, this.public, this.startBackground, this.solo, this.variables, this.creatorId, this.categoryNo,
+    this.category, this.lobbyId, this.public, this.rate, this.startBackground, this.solo, this.variables, this.creatorId, this.categoryNo,
   });
 
   @override
@@ -160,11 +161,14 @@ class BankeruMultiplayerState extends State<BankeruMultiplayer>
    bool middleCardDrawn = false;
    int score = 0;
    bool gameOver = false;
+   bool switchedTurn = false;
+   bool switchTurn = false;
    bool win = false;
   final player = AudioPlayer(); 
   final cancel = AudioPlayer();
   final selectPlayer = AudioPlayer();
   String activeUser = '';
+  int missedChance = 0;
   bool randomizeBool = true;
 
 
@@ -228,6 +232,37 @@ _bounceController.addListener(() {
     cancel.setVolume(0.1);
     cancel.play();
     cancel.stop();
+  }
+
+  Future<void> changeActiveUser(String userId) async{
+    if(widget.public){
+      await _firestore.collection('publicLobbies').doc(widget.lobbyId).update({'activeUser': userId});
+    }
+    else{
+      await _firestore.collection('lobbies').doc(widget.lobbyId).update({'activeUser': userId});
+    }
+    setState(() {
+      switchedTurn = false;
+      switchTurn = false;
+    });
+   return; 
+  }
+
+  skipTurn(List<dynamic> playerList, int index)async{
+    if(missedChance >0){
+      if(widget.public){
+        _firebaseProvider.removeUserFromPublicLobby(widget.variables.currentUser, widget.lobbyId);
+      }
+      else{
+        _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
+      }
+    }
+    else{
+      setState(() {
+        missedChance = missedChance+1;
+      });
+    }
+    changeActiveUser(playerList[index]);
   }
 
   
@@ -312,6 +347,47 @@ _bounceController.addListener(() {
   );
 }
 
+ void startTurnTimer(List<dynamic> playerLists) {
+  
+  const oneSec = const Duration(milliseconds: 10);
+  _timer = new Timer.periodic(
+    oneSec,
+    (Timer timer) {
+      
+      if (_start == 0) {
+        timer.cancel();
+         skipTurn(playerLists, playerLists.indexOf(widget.variables.currentUser.userName)+1);
+      } else {
+        // print(_start);
+        setState(() {
+          _start--;
+          value = rng.nextInt(12);
+          type = rng.nextInt(3);
+        });
+      }
+    },
+  );
+}
+
+void startGameTimer() {
+  
+  const oneSec = const Duration(milliseconds: 10);
+  _timer = new Timer.periodic(
+    oneSec,
+    (Timer timer) {
+      
+      if (disposed) {
+        
+      } else if (gameStarted && !switchedTurn && switchTurn) {
+       startTurnTimer(playerList);
+       setState(() {
+         switchedTurn = true;
+       });
+      }
+    },
+  );
+}
+
 
   Future<void> getWinner() async{
     if(!widget.solo){
@@ -319,7 +395,8 @@ _bounceController.addListener(() {
       retrievingWinner = true;
     });
    Future.delayed(Duration(seconds: 10)).then((value) {
-     _firebaseProvider.getLobbyWinner(widget.lobbyId).then((lobbyWinner) {
+    if(widget.public){
+       _firebaseProvider.getPublicLobbyWinner(widget.lobbyId).then((lobbyWinner) {
       if(lobbyWinner!=null){
         setState(() {
           winner = lobbyWinner;
@@ -327,6 +404,17 @@ _bounceController.addListener(() {
         });
       }
     });
+    }
+    else{
+       _firebaseProvider.getLobbyWinner(widget.lobbyId).then((lobbyWinner) {
+      if(lobbyWinner!=null){
+        setState(() {
+          winner = lobbyWinner;
+          retrievingWinner = false;
+        });
+      }
+    });
+    }
    });
     }
     else{
@@ -600,6 +688,13 @@ void handleTimeout() {  // callback function
           else{
              startDown = false;
             
+          }
+
+          if(snapshot.data['activeUser'] == widget.variables.currentUser.userName){
+            switchTurn = true;
+          }
+          else{
+            switchTurn = false;
           }
         }
         else{

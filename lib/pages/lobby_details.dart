@@ -30,8 +30,9 @@ class LobbyDetails extends StatefulWidget {
  Function startBackground;
  Function stopBackground;
  bool public;
+ int rate;
 
- LobbyDetails({this.variables, this.lobby, this.startBackground, this.stopBackground, this.public});
+ LobbyDetails({this.variables, this.lobby, this.rate, this.startBackground, this.stopBackground, this.public});
   @override
   _LobbyDetailsState createState() => _LobbyDetailsState();
 }
@@ -367,21 +368,21 @@ void handleTimeout() {  // callback function
                 joining = true;
               });
               if(widget.public){
-                 _firebaseProvider.addUserToPublicLobby(widget.variables.currentUser, widget.lobby.uid).then((value) {
+                 _firebaseProvider.addUserToPublicLobby(widget.variables.currentUser, widget.lobby.uid, widget.rate).then((value) {
                 widget.stopBackground();
                  Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           if(widget.lobby.gameType == 0){
-                            return Footballers(public: widget.public, category: categoryId[widget.lobby.gameCategory], lobbyId: widget.lobby.uid, solo: false, creatorId: widget.lobby.creatorId, variables: widget.variables, categoryNo: widget.lobby.gameCategory, startBackground: widget.startBackground,);
+                            return Footballers(public: widget.public, category: categoryId[widget.lobby.gameCategory], lobbyId: widget.lobby.uid, solo: false, creatorId: widget.lobby.creatorId, variables: widget.variables, categoryNo: widget.lobby.gameCategory, startBackground: widget.startBackground, rate: widget.lobby.rate.toInt(),);
                           }
                           else if (widget.lobby.gameType ==1){
                             print(widget.public); print(' is the public');
-                            return BlackJackMultiplayer(public: widget.public, category: '0', lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId, startBackground: widget.startBackground,);
+                            return BlackJackMultiplayer(public: widget.public, category: '0', lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId, startBackground: widget.startBackground, rate: widget.lobby.rate.toInt(),);
                           }
                           else if (widget.lobby.gameType ==2){
-                            return BankeruMultiplayer(public: widget.public, category: '0', lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId, startBackground: widget.startBackground,);
+                            return BankeruMultiplayer(public: widget.public, category: '0', lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId, startBackground: widget.startBackground, rate: widget.lobby.rate.toInt());
                           }
-                          return SpinningBaby(public: widget.public, category: '0', lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId, startBackground: widget.startBackground,);
+                          return SpinningBaby(public: widget.public, category: '0', lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId, startBackground: widget.startBackground, rate: widget.lobby.rate.toInt());
                           },
                         )).then((value) {
                           setState(() {
@@ -391,7 +392,7 @@ void handleTimeout() {  // callback function
               });
               }
               else{
-                 _firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobby.uid).then((value) {
+                 _firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobby.uid, widget.rate).then((value) {
                 
                  Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {

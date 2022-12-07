@@ -55,6 +55,7 @@ class _LobbyCategoryState extends State<LobbyCategory>
 
   List<String> menuImages = ['assets/football2.jpg', 'assets/football3.jpg','assets/football4.jpg',  'assets/football1.png'];
   List<String> modes = ['assets/football2.jpg', 'assets/football3.jpg','assets/football4.jpg',  'assets/football1.png', 'assets/blackjack-option.png', 'assets/bank_vault.png', 'assets/roulette.png'];
+  List<String> gameNames = ['Rapid-Jersey', 'Rapid-Goals','Rapid-Age',  'Rapid-Age', 'BlackJack', 'Bankeru', 'Spinner-Wheel'];
 
   List<List<Map<String, dynamic>>> LobbyCategory = 
   [
@@ -101,7 +102,7 @@ class _LobbyCategoryState extends State<LobbyCategory>
   int gamePlayDuration = 0;
   double size = 1;
   List<Lobby> publicLobbies = [];
-  bool loading = true;
+  bool loading = false;
   
   
   @override
@@ -266,7 +267,7 @@ getPublicLobbies(){
             ) */
           Container(
             width: width,
-            height: height*0.75,
+            height: height*0.7,
             child:  loading
             ?Center(
               child: Column(
@@ -282,14 +283,14 @@ getPublicLobbies(){
               ),
             )
             :Container(
-              height: height*0.75,
+              height: height*0.7,
               width: width*0.9,
               child: Center(
                 child: GridView.builder(
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           // A grid view with 3 items per row
           crossAxisCount: 2,
-          childAspectRatio: 0.9
+          childAspectRatio: 1
         ),
         itemCount: modes.length,
         itemBuilder: (_, index) {
@@ -300,7 +301,9 @@ getPublicLobbies(){
             )
           ), 
 
-         
+         SizedBox(
+          height: height*0.05,
+         ),
          widget.variables.currentUser.admin
          ?Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -384,23 +387,23 @@ getPublicLobbies(){
    }
 
   Widget lobbyItem(var width, var height, int index){
-    Lobby lobby = publicLobbies[index];
+    // Lobby lobby = publicLobbies[index];
     int category = 0;
     int type = 0;
     if(index <4){
       type = 0;
-      category = 0;
+      category = index;
     }
     else if (index == 4){
-       type = 1;
+      type = 1;
       category = 0;
     }
     else if (index == 5){
-       type = 2;
+      type = 2;
       category = 0;
     }
     else if (index == 6){
-       type = 3;
+      type = 3;
       category = 0;
     }
    
@@ -421,7 +424,7 @@ getPublicLobbies(){
       },
       child: Container(
         width: width*0.3,
-        height: width*0.45,
+        height: width*0.4,
         child: Column(
           children: [
             SizedBox(
@@ -436,7 +439,7 @@ getPublicLobbies(){
                 shape: BoxShape.circle,
                 color: Colors.black,
                 image: DecorationImage(
-                  image: AssetImage(lobby.gameType==0?menuImages[lobby.gameCategory]:modes[lobby.gameType]),
+                  image: AssetImage(index<4?modes[category]:modes[type+3]),
                   fit: BoxFit.cover
                 ),
                  boxShadow: [BoxShadow(
@@ -455,18 +458,10 @@ getPublicLobbies(){
             Container(
               width: width*0.45,
               child: Center(
-                child: Text(lobby.name , style: TextStyle(fontFamily: 'Muli', color: Color(0xffff4399), fontSize: 20, fontWeight: FontWeight.w900), overflow: TextOverflow.ellipsis,),
+                child: Text(gameNames[index] , style: TextStyle(fontFamily: 'Muli', color: Color(0xffffffff), fontSize: 20, fontWeight: FontWeight.w900), overflow: TextOverflow.ellipsis,),
               ),
             ),
-            SizedBox(
-              height: height*0.01,
-            ),
-            Container(
-              width: width*0.45,
-              child: Center(
-                child: Text(lobby.rate.toString() + ' ETB', style: TextStyle(fontFamily: 'Muli', color: Colors.white, fontSize: 16, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic), overflow: TextOverflow.ellipsis,),
-              ),
-            )
+            
           ],
         ),
       ),

@@ -25,6 +25,7 @@ class Footballers extends StatefulWidget {
   String lobbyId;
   String creatorId;
   int categoryNo;
+  int rate;
   bool solo;
   UserVariables variables;
    Function pauseBackground;
@@ -32,7 +33,7 @@ class Footballers extends StatefulWidget {
 
  
   Footballers({
-    this.category, this.lobbyId, this.solo, this.public, this.variables, this.creatorId, this.categoryNo, this.pauseBackground, this.startBackground
+    this.category, this.lobbyId, this.rate, this.solo, this.public, this.variables, this.creatorId, this.categoryNo, this.pauseBackground, this.startBackground
   });
 
   @override
@@ -988,7 +989,7 @@ void handleTimeout() {  // callback function
                MaterialButton(
               onPressed: (){
                 print('sdfasdf');
-                widget.public?_firebaseProvider.addUserToPublicLobby(widget.variables.currentUser, widget.lobbyId):_firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId);
+                widget.public?_firebaseProvider.addUserToPublicLobby(widget.variables.currentUser, widget.lobbyId, widget.rate):_firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId, widget.rate);
                 setState(() {
                   footballerPairs = [];
                   footballerPairs = concatenateList(footballerPairs, randomElements(easyPairs, 15));
@@ -1172,7 +1173,7 @@ void handleTimeout() {  // callback function
             });
           });
           _colorController.forward();
-                widget.public?_firebaseProvider.addUserToPublicLobby(widget.variables.currentUser, widget.lobbyId):_firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId);
+                widget.public?_firebaseProvider.addUserToPublicLobby(widget.variables.currentUser, widget.lobbyId, widget.rate):_firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId, widget.rate);
                 setState(() {
                   timeLeft = 5.5;
                   // _slideController.value = 5.5;
@@ -2419,7 +2420,7 @@ void handleTimeout() {  // callback function
             MaterialButton(
               onPressed: (){
                 if(!widget.solo){
-                  widget.public?_firebaseProvider.addUserToPublicLobby(widget.variables.currentUser, widget.lobbyId):_firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId);
+                  widget.public?_firebaseProvider.addUserToPublicLobby(widget.variables.currentUser, widget.lobbyId, widget.rate):_firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId, widget.rate);
                 }
                 print('bounchd');
                 setState(() {
