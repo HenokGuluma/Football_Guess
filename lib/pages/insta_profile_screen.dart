@@ -14,6 +14,7 @@ import 'package:instagram_clone/main.dart';
 import 'package:instagram_clone/models/user.dart';
 import 'package:instagram_clone/pages/bankeru.dart';
 import 'package:instagram_clone/pages/buy_coins.dart';
+import 'package:instagram_clone/pages/buy_tokens.dart';
 import 'package:instagram_clone/pages/coin_wallet.dart';
 import 'package:instagram_clone/pages/edit_profile_screen.dart';
 import 'package:instagram_clone/pages/spinning_wheel.dart';
@@ -253,13 +254,26 @@ class _InstaProfileScreenState extends State<InstaProfileScreen>
                 },
               ),
              GestureDetector(
-            child: ProfileButtons('Coin Wallet', width, height),
+            child: ProfileButtons('Wallet', width, height),
             onTap: () {
               selectPlayer.play();
               Navigator.push(
                   context,
                   MaterialPageRoute(
                       builder: ((context) => CoinWallet(variables: widget.variables))));
+                       Future.delayed(Duration(seconds: 1)).then((value) {
+                          selectPlayer.stop();
+                        });
+            },
+          ),
+          GestureDetector(
+            child: ProfileButtons('Buy Tokens', width, height),
+            onTap: () {
+              selectPlayer.play();
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: ((context) => BuyTokens(variables: widget.variables))));
                        Future.delayed(Duration(seconds: 1)).then((value) {
                           selectPlayer.stop();
                         });

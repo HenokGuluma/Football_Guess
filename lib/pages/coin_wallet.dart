@@ -31,8 +31,8 @@ class CoinWalletState extends State<CoinWallet> {
   FirebaseProvider _firebaseProvider = FirebaseProvider();
   bool like;
   int counter = 0;
-  List<String> modes = ['assets/buy-coins.png', 'assets/send-coins.png'];
-  List<String> options = ['Buy Coins', 'Send coins'];
+  List<String> modes = ['assets/buy-coins.png', 'assets/withdraw.png', 'assets/send-coins.png'];
+  List<String> options = ['Deposit', 'Widthdraw','Send cash'];
   Map<int, double> optionsMap = {1: 25, 3: 50, 5: 75, 10: 100};
 
   List<bool> balls = [true, true, true, true, true];
@@ -72,7 +72,7 @@ class CoinWalletState extends State<CoinWallet> {
           toolbarHeight: 70,
           backgroundColor: Colors.black,
           title: Text(
-            'Coin Wallet',
+            'Wallet',
             style: TextStyle(
                 fontFamily: 'Muli',
                 color: Colors.white,
@@ -82,7 +82,7 @@ class CoinWalletState extends State<CoinWallet> {
           actions: [
             Row(
               children: [
-                 SvgPicture.asset('assets/coin.svg', color: Color(0xff00ffff), height: 20, width: 20,),
+                //  SvgPicture.asset('assets/coin.svg', color: Color(0xff00ffff), height: 20, width: 20,),
                 Text(
             ' Wallet: ',
             style: TextStyle(
@@ -92,7 +92,7 @@ class CoinWalletState extends State<CoinWallet> {
                 fontWeight: FontWeight.w900),
           ),
            Text(
-            widget.variables.currentUser.coins.toString(),
+            widget.variables.currentUser.coins.toString() + ' ETB',
             style: TextStyle(
                 fontFamily: 'Muli',
                 color: Colors.white,
@@ -124,6 +124,9 @@ class CoinWalletState extends State<CoinWallet> {
             menuOption(width, height, 0, modes, widget.variables),
    SizedBox(height: height*0.08,),
    menuOption(width, height, 1, modes, widget.variables),
+   SizedBox(height: height*0.08,),
+   menuOption(width, height, 2, modes, widget.variables),
+   SizedBox(height: height*0.08,),
 
         ]),
         

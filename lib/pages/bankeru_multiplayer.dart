@@ -511,6 +511,22 @@ void startGameTimer() {
     });
   }
 
+  shuffleCard(Map<String, dynamic> card)async{
+    if(!widget.public){
+      await _firestore.collection('lobbies').doc(widget.lobbyId).update({'shuffle': true, 'cardValue': card});
+      Future.delayed(Duration(seconds: 1)).then((value) async {
+        await _firestore.collection('lobbies').doc(widget.lobbyId).update({'shuffle': false});
+      });
+    }
+    else{
+       await _firestore.collection('publicLobbies').doc(widget.lobbyId).update({'shuffle': true, 'cardValue': card});
+      Future.delayed(Duration(seconds: 1)).then((value) async {
+        await _firestore.collection('publicLobbies').doc(widget.lobbyId).update({'shuffle': false});
+      });
+    }
+    
+  }
+
   void startSecondCountDown(){
     Timer.periodic(Duration(milliseconds: 1000), (timer) { 
       if(!gameStarted){

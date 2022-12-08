@@ -54,7 +54,9 @@ class GameMenuState extends State<GameMenu> {
   bool like;
   int counter = 0;
   List<String> modes = ['assets/rapidBall.png', 'assets/blackjack-option.png', 'assets/bank_vault.png', 'assets/roulette.png'];
+  List<String> modesSolo = ['assets/rapidBall.png', 'assets/blackjack-option.png', 'assets/bank_vault.png', 'assets/jackpot.png'];
   List<String> options = ['RapidBall', 'Black Jack', 'Bankeru', 'Spinner'];
+   List<String> optionsSolo = ['RapidBall', 'Black Jack', 'Bankeru', 'Jackpot'];
   Map<int, double> optionsMap = {1: 25, 3: 50, 5: 75, 10: 100};
 
   List<bool> balls = [true, true, true, true, true];
@@ -436,7 +438,7 @@ Center(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(15),
           image: DecorationImage(
-            image: AssetImage(images[index]),
+            image: AssetImage(widget.creating?images[index]:modesSolo[index]),
             fit: BoxFit.cover
           )
         ),
@@ -461,7 +463,7 @@ Center(
          
         ),
         child: Center(
-          child: Text(options[index], style: TextStyle(color: Colors.black, fontSize: 22, fontFamily: 'Muli', fontWeight: FontWeight.w900),)
+          child: Text(widget.creating?options[index]:optionsSolo[index], style: TextStyle(color: Colors.black, fontSize: 22, fontFamily: 'Muli', fontWeight: FontWeight.w900),)
         ),
       ),
       index==selectedIndex

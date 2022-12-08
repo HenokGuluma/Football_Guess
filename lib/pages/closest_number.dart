@@ -1289,12 +1289,7 @@ Widget startScreen(var width, var height, AsyncSnapshot snapshot){
  
     return WillPopScope(
     onWillPop: () async => false,
-    child: StreamBuilder<DocumentSnapshot>(
-      stream: _firestore
-          .collection("lobbies").doc(widget.lobbyId).snapshots(),
-      builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-       
-        return closestScreen(width, height);})
+    child: closestScreen(width, height)
         );
    
    }

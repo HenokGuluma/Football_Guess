@@ -957,8 +957,8 @@ void handleTimeout() {  // callback function
                                 onPressed: () {
                                   // _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
                                   Navigator.pop(context);
-                                 _bounceController.reset();
-                  _animationController.reset();
+                                //  _bounceController.reset();
+                  // _animationController.reset();
                   setState(() {
                     disposed = true;
                   });
