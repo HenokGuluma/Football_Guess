@@ -78,7 +78,7 @@ class BuycoinsState extends State<BuyCoins> {
           toolbarHeight: 70,
           backgroundColor: Colors.black,
           title: Text(
-            'Buy Coins',
+            'Desposit cash',
             style: TextStyle(
                 fontFamily: 'Muli',
                 color: Colors.white,
@@ -88,7 +88,7 @@ class BuycoinsState extends State<BuyCoins> {
           actions: [
             Row(
               children: [
-                 SvgPicture.asset('assets/coin.svg', color: Color(0xff00ffff), height: 20, width: 20,),
+                //  SvgPicture.asset('assets/coin.svg', color: Color(0xff00ffff), height: 20, width: 20,),
                 Text(
             ' Wallet: ',
             style: TextStyle(
@@ -98,7 +98,7 @@ class BuycoinsState extends State<BuyCoins> {
                 fontWeight: FontWeight.w900),
           ),
            Text(
-            widget.variables.currentUser.coins.toString(),
+            widget.variables.currentUser.coins.toString() + ' ETB',
             style: TextStyle(
                 fontFamily: 'Muli',
                 color: Colors.white,
@@ -131,7 +131,7 @@ class BuycoinsState extends State<BuyCoins> {
               width: width*0.5,
               height: height*0.05,
               child: Center(
-                child: Text('Enter amount of coins', style: TextStyle(color: Color(0xff00ffff), fontSize: 25, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                child: Text('Enter amount to Deposit', style: TextStyle(color: Color(0xff00ffff), fontSize: 25, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
               ),
             ),
             SizedBox(height: height * 0.04),
@@ -171,7 +171,7 @@ class BuycoinsState extends State<BuyCoins> {
                               
                               decoration: InputDecoration(
                                 
-                                  hintText: 'Amount of coins',
+                                  hintText: 'Amount to Deposit',
                                   // contentPadding: EdgeInsets.only(bottom: 20),
                                   focusedBorder: InputBorder.none,
                                   enabledBorder: InputBorder.none,

@@ -53,9 +53,9 @@ class GameMenuState extends State<GameMenu> {
   FirebaseProvider _firebaseProvider = FirebaseProvider();
   bool like;
   int counter = 0;
-  List<String> modes = ['assets/rapidBall.png', 'assets/blackjack-option.png', 'assets/bank_vault.png', 'assets/roulette.png'];
+  List<String> modes = ['assets/rapidBall.png', 'assets/blackjack-option.png', 'assets/bank_vault.png', 'assets/roulette.png', 'assets/jackpot.png' ];
   List<String> modesSolo = ['assets/rapidBall.png', 'assets/blackjack-option.png', 'assets/bank_vault.png', 'assets/jackpot.png'];
-  List<String> options = ['RapidBall', 'Black Jack', 'Bankeru', 'Spinner'];
+  List<String> options = ['RapidBall', 'Black Jack', 'Bankeru', 'Spinner', 'Jackpot'];
    List<String> optionsSolo = ['RapidBall', 'Black Jack', 'Bankeru', 'Jackpot'];
   Map<int, double> optionsMap = {1: 25, 3: 50, 5: 75, 10: 100};
 
@@ -143,8 +143,10 @@ class GameMenuState extends State<GameMenu> {
    menuOption(width, height, 1, modes, widget.variables),
    SizedBox(height: height*0.08,),
    menuOption(width, height, 2, modes, widget.variables),
-   SizedBox(height: height*0.08,),
-   menuOption(width, height, 3, modes, widget.variables),
+    widget.creating?SizedBox(height: height*0.08,):Center(),
+    widget.creating?menuOption(width, height, 3, modes, widget.variables):Center(),
+    widget.creating?SizedBox(height: height*0.08,):Center(),
+   widget.creating?menuOption(width, height, 4, modes, widget.variables):Center()
    ],
 ),
           ),
@@ -160,6 +162,7 @@ Center(
                 borderRadius: BorderRadius.circular(20)
               ),
               width: width*0.3,
+
               height: height*0.06,
               child: Center(
                 child: Text('Go Back', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
@@ -401,10 +404,17 @@ Center(
              Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           // return LobbyMenu();
-                          return ClosestNumber();
+                          return ClosestNumber(variables: widget.variables);
                         },
                         ));
            }
+        }
+        else if (index == 4){
+           
+            setState(() {
+              selectedIndex = 4;
+            });
+          
         }
         else{
           Navigator.push(context, MaterialPageRoute( 

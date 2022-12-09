@@ -54,8 +54,8 @@ class _LobbyCategoryState extends State<LobbyCategory>
   List<String> categoryId = ['jersey', 'goals', 'age', 'height'];
 
   List<String> menuImages = ['assets/football2.jpg', 'assets/football3.jpg','assets/football4.jpg',  'assets/football1.png'];
-  List<String> modes = ['assets/football2.jpg', 'assets/football3.jpg','assets/football4.jpg',  'assets/football1.png', 'assets/blackjack-option.png', 'assets/bank_vault.png', 'assets/roulette.png'];
-  List<String> gameNames = ['Rapid-Jersey', 'Rapid-Goals','Rapid-Age',  'Rapid-Age', 'BlackJack', 'Bankeru', 'Spinner-Wheel'];
+  List<String> modes = ['assets/football2.jpg', 'assets/football3.jpg','assets/football4.jpg',  'assets/football1.png', 'assets/blackjack-option.png', 'assets/bank_vault.png', 'assets/roulette.png', 'assets/jackpot.png'];
+  List<String> gameNames = ['Rapid-Jersey', 'Rapid-Goals','Rapid-Age',  'Rapid-Height', 'BlackJack', 'Bankeru', 'Spinner-Wheel', 'JackPot'];
 
   List<List<Map<String, dynamic>>> LobbyCategory = 
   [
@@ -245,7 +245,7 @@ getPublicLobbies(){
             padding: EdgeInsets.only(top: height*0.05),
             child:  Center(
               child: Text(
-                'Join a Lobby', style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 30, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
+                'Pick a Category', style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 30, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
               ),
             )
            )
@@ -404,6 +404,10 @@ getPublicLobbies(){
     }
     else if (index == 6){
       type = 3;
+      category = 0;
+    }
+    else if (index == 7){
+      type = 4;
       category = 0;
     }
    

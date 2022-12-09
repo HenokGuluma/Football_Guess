@@ -73,11 +73,6 @@ public final class GeneratedPluginRegistrant {
       Log.e(TAG, "Error registering plugin image_crop, com.lykhonis.imagecrop.ImageCropPlugin", e);
     }
     try {
-      adhoc.successive.com.fluttergallaryplugin.FlutterGallaryPlugin.registerWith(shimPluginRegistry.registrarFor("adhoc.successive.com.fluttergallaryplugin.FlutterGallaryPlugin"));
-    } catch(Exception e) {
-      Log.e(TAG, "Error registering plugin image_gallery, adhoc.successive.com.fluttergallaryplugin.FlutterGallaryPlugin", e);
-    }
-    try {
       io.flutter.plugins.imagepicker.ImagePickerPlugin.registerWith(shimPluginRegistry.registrarFor("io.flutter.plugins.imagepicker.ImagePickerPlugin"));
     } catch(Exception e) {
       Log.e(TAG, "Error registering plugin image_picker, io.flutter.plugins.imagepicker.ImagePickerPlugin", e);

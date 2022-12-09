@@ -8,6 +8,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_countdown_timer/flutter_countdown_timer.dart';
 import 'package:flutter_spinning_wheel/src/utils.dart';
 import 'package:flutter_countdown_timer/countdown.dart';
@@ -15,6 +16,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:instagram_clone/backend/firebase.dart';
 import 'package:instagram_clone/main.dart';
 import 'package:instagram_clone/models/exploding_widget.dart';
+import 'package:instagram_clone/pages/buy_tokens.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:progress_indicators/progress_indicators.dart';
 
@@ -159,6 +161,7 @@ class ClosestNumberState extends State<ClosestNumber>
   bool resetColor = true;
   List<dynamic> playerList = [];
   List<dynamic> playerListOnline = [];
+  TextEditingController _controller = TextEditingController();
   List<Widget> drawnCards = [];
   Timer _timer;
   Timer _firstTimer;
@@ -174,6 +177,7 @@ class ClosestNumberState extends State<ClosestNumber>
   int secondNum = 0;
   int thirdNum = 0;
   int randomizedNumber;
+  int choiceNumber;
    List<int> cards = [];
    List<Map<String, dynamic>> cardValues = [];
    int score = 0;
@@ -1656,23 +1660,91 @@ Widget startScreen(var width, var height, AsyncSnapshot snapshot){
           ),
           Center(
             
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
+            child: ListView(
+              // mainAxisAlignment: MainAxisAlignment.start,
+              // crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                     SizedBox(
-                height: height*0.15,
+                height: height*0.02,
               ),
-                Text(randomizedNumber!=null?randomizedNumber.toString():'000',
-                              style: TextStyle(
-                                  color: Colors.white,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  MaterialButton(
+                  onPressed: (){
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: ((context) => BuyTokens(variables: widget.variables))));
+                  },
+                  child:  Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.3,
+              height: height*0.06,
+              child: Center(
+                child: Text('Buy Tokens', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            ),
+                  ),
+                  Text('Tokens: 20', style: TextStyle(color: Colors.white, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              
+                ],
+              ),
+              SizedBox(height: height*0.05,),
+              Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                   Container(
+                      width: width*0.25,
+                      height: width*0.35,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Color(0xff444444))
+                      ),
+                      child: Center(
+                        child: Text(thirdNum.toString(), style: TextStyle(
+                                  color: Color(0xff00ffff),
                                   fontFamily: 'Muli',
-                                  fontSize: 86,
-                                  fontWeight: FontWeight.w900),
-                            ),
-                SizedBox(
-                  height: height*0.05,
+                                  fontSize: 126,
+                                  fontWeight: FontWeight.w900),),
+                      )
+                    ),
+                    Container(
+                      width: width*0.25,
+                      height: width*0.35,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Color(0xff444444))
+                      ),
+                      child: Center(
+                        child: Text(secondNum.toString(), style: TextStyle(
+                                  color: Color(0xff00ffff),
+                                  fontFamily: 'Muli',
+                                  fontSize: 126,
+                                  fontWeight: FontWeight.w900),),
+                      )
+                    ),
+                    Container(
+                      width: width*0.25,
+                      height: width*0.35,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Color(0xff444444))
+                      ),
+                      child: Center(
+                        child: Text(firstNum.toString(), style: TextStyle(
+                                  color: Color(0xff00ffff),
+                                  fontFamily: 'Muli',
+                                  fontSize: 126,
+                                  fontWeight: FontWeight.w900),),
+                      )
+                    ),
+                  ],
                 ),
+                SizedBox(
+                  height: height*0.1,
+                ),
+                
                 MaterialButton(
                   onPressed: (){
                     int num = Random().nextInt(400);
@@ -1696,57 +1768,76 @@ Widget startScreen(var width, var height, AsyncSnapshot snapshot){
                 SizedBox(
                   height: height*0.05,
                 ),
+               submitted
+               ?Center(
+                child: Text(choiceNumber!=null?choiceNumber.toString():'000',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Muli',
+                                  fontSize: 86,
+                                  fontWeight: FontWeight.w900),
+                            ),
+               )
+                            :Column(
+                              children: [
+                                Container(
+                              // constraints: BoxConstraints(maxWidth: width*0.5),
+                              width: width*0.5,
+                              height: height*0.1,
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.grey)
+                              ),
+                              child: Center(
+                                child: Padding(
+                                  padding: EdgeInsets.only(top: height*0.02),
+                                  child: TextFormField(
+                                    
+                                    // textAlignVertical: TextAlignVertical.center,
+                                    keyboardType: TextInputType.number,
+                  inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly
+              ],
+                    style: TextStyle(fontFamily: 'Muli', color: Colors.white, fontWeight: FontWeight.w900, fontSize: 45),
+                    textAlign: TextAlign.center,
+                    controller: _controller,
+                    maxLength: 3,
+                    
+                    decoration: InputDecoration(
+                      contentPadding: EdgeInsets.only(
+                  top: height*0.08,  // HERE THE IMPORTANT PART
+                ),
+                        enabledBorder: UnderlineInputBorder(      
+                      borderSide: BorderSide(color: Colors.transparent),   
+                      ),  
+              focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.transparent),
+                   ),
+                        hintText: 'Choice',
+                        
+                        hintStyle: TextStyle(
+                            fontFamily: 'Muli',
+                            color: Colors.grey,
+                            fontSize: 45.0),
+                            
+                        // labelText: 'Choose from 1 to 400',
+                        labelStyle: TextStyle(
+                            fontFamily: 'Muli',
+                            color: Colors.white,
+                            fontSize: 20.0)),
+                    ),
+                              
+                                )),
+                            ),
+                
+                              ],
+                            ),
+                            SizedBox(
+                  height: height*0.05,
+                ),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                   Container(
-                      width: width*0.25,
-                      height: width*0.35,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Color(0xff444444))
-                      ),
-                      child: Center(
-                        child: Text(thirdNum.toString(), style: TextStyle(
-                                  color: Color(0xff23ff34),
-                                  fontFamily: 'Muli',
-                                  fontSize: 126,
-                                  fontWeight: FontWeight.w900),),
-                      )
-                    ),
-                    Container(
-                      width: width*0.25,
-                      height: width*0.35,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Color(0xff444444))
-                      ),
-                      child: Center(
-                        child: Text(secondNum.toString(), style: TextStyle(
-                                  color: Color(0xff23ff34),
-                                  fontFamily: 'Muli',
-                                  fontSize: 126,
-                                  fontWeight: FontWeight.w900),),
-                      )
-                    ),
-                    Container(
-                      width: width*0.25,
-                      height: width*0.35,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Color(0xff444444))
-                      ),
-                      child: Center(
-                        child: Text(firstNum.toString(), style: TextStyle(
-                                  color: Color(0xff23ff34),
-                                  fontFamily: 'Muli',
-                                  fontSize: 126,
-                                  fontWeight: FontWeight.w900),),
-                      )
-                    ),
-                  ],
-                ),
-                SizedBox(
-                  height: height*0.1,
-                ),
-                GestureDetector(
+                    GestureDetector(
             onTap: (){
                cancel.play();
               showDialog(
@@ -1831,7 +1922,40 @@ Widget startScreen(var width, var height, AsyncSnapshot snapshot){
               ),
             ),
             ),
-              ]
+              
+            _controller.text.length>0 && !submitted
+            ?GestureDetector(
+              onTap: (){
+                setState(() {
+                  choiceNumber = int.parse(_controller.text);
+                  submitted = true;
+                });
+              },
+              child: Container(
+              decoration: BoxDecoration(
+                color: Color(0xff23ff34),
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.3,
+              height: height*0.06,
+              child: Center(
+                child: Text('Submit', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            ),
+            )
+            :Container(
+              decoration: BoxDecoration(
+                color: Color(0xff444444),
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.3,
+              height: height*0.06,
+              child: Center(
+                child: Text('Submit', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            ),
+                  ],
+                )]
               )
             ), 
             

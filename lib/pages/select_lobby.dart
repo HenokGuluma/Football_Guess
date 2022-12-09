@@ -60,7 +60,7 @@ class _SelectLobbyState extends State<SelectLobby>
   
 
   List<String> menuImages = ['assets/football2.jpg', 'assets/football3.jpg','assets/football4.jpg',  'assets/football1.png'];
-  List<String> modes = ['assets/rapidBall.png', 'assets/blackjack-option.png', 'assets/bank_vault.png', 'assets/roulette.png'];
+  List<String> modes = ['assets/rapidBall.png', 'assets/blackjack-option.png', 'assets/bank_vault.png', 'assets/roulette.png', 'assets/jackpot.png'];
 
   List<List<Map<String, dynamic>>> SelectLobby = 
   [
@@ -503,10 +503,11 @@ void handleTimeout() {  // callback function
                 joining = true;
               });
             _firebaseProvider.getLobbyById(widget.variables.currentUser.lobbyId).then((lobby){
+              print(lobby.uid); print( ' is the lobby');
                Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           // return SelectLobby();
-                          return  LobbyDetails(variables: widget.variables, lobby: lobby, public: false, startBackground: widget.pauseBackground,);
+                          return  LobbyDetails(variables: widget.variables, lobby: lobby, public: false, startBackground: widget.pauseBackground, rate: lobby.rate.toInt(),);
                         },
                         ));
                          Future.delayed(Duration(seconds: 1)).then((value) {
@@ -590,7 +591,7 @@ void handleTimeout() {  // callback function
         FocusScope.of(context).unfocus();
          Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
-                          return LobbyDetails(variables: widget.variables, lobby: snapshot, public: false,);
+                          return LobbyDetails(variables: widget.variables, lobby: snapshot, public: false, startBackground: widget.pauseBackground, rate: snapshot.rate.toInt());
                         },
                         ));
                          Future.delayed(Duration(seconds: 1)).then((value) {

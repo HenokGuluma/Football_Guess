@@ -13,9 +13,11 @@ import 'package:flutter_countdown_timer/countdown.dart';
 import 'package:instagram_clone/backend/firebase.dart';
 import 'package:instagram_clone/main.dart';
 import 'package:instagram_clone/models/lobby.dart';
+import 'package:instagram_clone/models/user.dart';
 import 'package:instagram_clone/pages/add_lobby.dart';
 import 'package:instagram_clone/pages/bankeru_multiplayer.dart';
 import 'package:instagram_clone/pages/black_jack_multiplayer.dart';
+import 'package:instagram_clone/pages/closest_number_multiplayer.dart';
 import 'package:instagram_clone/pages/edit_lobby.dart';
 import 'package:instagram_clone/pages/football_menu.dart';
 import 'package:instagram_clone/pages/footballers.dart';
@@ -59,8 +61,8 @@ class _LobbyDetailsState extends State<LobbyDetails>
 
   List<String> menuImages = ['assets/football2.jpg', 'assets/football3.jpg','assets/football4.jpg',  'assets/football1.png'];
 
-  List<String> modes = ['assets/rapidBall.png', 'assets/blackjack-option.png', 'assets/bank_vault.png', 'assets/roulette.png'];
-  List<String> options = ['RapidBall', 'Black Jack', 'Bankeru', 'Spinner'];
+  List<String> modes = ['assets/rapidBall.png', 'assets/blackjack-option.png', 'assets/bank_vault.png', 'assets/roulette.png', 'assets/jackpot.png'];
+  List<String> options = ['RapidBall', 'Black Jack', 'Bankeru', 'Spinner', 'Jackpot'];
 
   List<List<Map<String, dynamic>>> LobbyDetails = 
   [
@@ -240,7 +242,7 @@ void handleTimeout() {  // callback function
             });
               }
               else{
-                  _firebaseProvider.getLobbyById(widget.variables.lobby.uid).then((lobby){
+                  _firebaseProvider.getLobbyById(widget.lobby.uid).then((lobby){
                Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           // return SelectLobby();
@@ -405,7 +407,10 @@ void handleTimeout() {  // callback function
                           else if (widget.lobby.gameType ==2){
                             return BankeruMultiplayer(category: '0',public: false, lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId, startBackground: widget.startBackground,);
                           }
-                          return SpinningBaby(public: widget.public, category: '0', lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId, startBackground: widget.startBackground,);
+                          else if (widget.lobby.gameType == 3){
+                            return SpinningBaby(public: widget.public, category: '0', lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId, startBackground: widget.startBackground,);
+                          }
+                          return ClosestMultiplayer(category: '0',public: false, lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId, startBackground: widget.startBackground,);
                           },
                         )).then((value) {
                           setState(() {
@@ -414,6 +419,11 @@ void handleTimeout() {  // callback function
                         });
               });
               }
+
+              User newUser = widget.variables.currentUser;
+              int wallet = newUser.coins;
+              wallet = wallet - widget.rate;
+              widget.variables.setCurrentUser(newUser);
               
               Future.delayed(Duration(seconds: 1)).then((value) {
                 selectPlayer.stop();

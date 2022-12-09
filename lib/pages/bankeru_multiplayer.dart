@@ -527,6 +527,35 @@ void startGameTimer() {
     
   }
 
+   twoCards(List<Map<String, dynamic>> cards)async{
+    if(!widget.public){
+      await _firestore.collection('lobbies').doc(widget.lobbyId).update({'shuffle': true, 'initialCards': cards});
+      Future.delayed(Duration(seconds: 1)).then((value) async {
+        await _firestore.collection('lobbies').doc(widget.lobbyId).update({'shuffle': false});
+      });
+    }
+    else{
+       await _firestore.collection('publicLobbies').doc(widget.lobbyId).update({'shuffle': true, 'initialCards': cards});
+      Future.delayed(Duration(seconds: 1)).then((value) async {
+        await _firestore.collection('publicLobbies').doc(widget.lobbyId).update({'shuffle': false});
+      });
+    }
+    
+  }
+
+  placeBet(int amount, AsyncSnapshot snapshot) async{
+    Map<String, dynamic> betsPlaced = snapshot.data['betsPlaced'];
+    int betLeft = snapshot.data['betLeft'];
+    betsPlaced[widget.variables.currentUser.userName] = amount;
+    if(widget.public){
+      await _firestore.collection('publicLobbies').doc(widget.lobbyId).update({'betsPlaced': betsPlaced});
+    }
+    else{
+      await _firestore.collection('lobbies').doc(widget.lobbyId).update({'betsPlaced': betsPlaced});
+    }
+  }
+
+
   void startSecondCountDown(){
     Timer.periodic(Duration(milliseconds: 1000), (timer) { 
       if(!gameStarted){
@@ -721,6 +750,10 @@ void handleTimeout() {  // callback function
    
    }
 
+   double calculateWinnings (int total){
+    return total*0.95;
+   }
+
    searchQuery(String text){
     setState(() {
       betPlaced = double.parse(text);
@@ -785,7 +818,7 @@ void handleTimeout() {  // callback function
                             height: height*0.05,
                           ),
                           Text('Wallet', style: TextStyle(color: Color(0xff23ff34), fontSize: 20, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
-                          Text('2000 ETB', style: TextStyle(color: Color(0xffffffff), fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900))
+                          Text(widget.variables.currentUser.coins.toString() + ' ETB', style: TextStyle(color: Color(0xffffffff), fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900))
           ,
                         ],
                       ),
@@ -1797,7 +1830,7 @@ void handleTimeout() {  // callback function
             width: width*0.1,
       height: width*0.1,
           ),
-          SizedBox(height: height*0.02,),
+          // SizedBox(height: height*0.02,),
           Center(
             child: Text('@'+data['userName'], style: TextStyle(
               color: Colors.white, fontFamily:'Muli', fontSize: 15, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic

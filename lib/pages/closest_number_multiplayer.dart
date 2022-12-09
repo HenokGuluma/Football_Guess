@@ -8,6 +8,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_countdown_timer/flutter_countdown_timer.dart';
 import 'package:flutter_spinning_wheel/src/utils.dart';
 import 'package:flutter_countdown_timer/countdown.dart';
@@ -115,7 +116,8 @@ class ClosestMultiplayerState extends State<ClosestMultiplayer>
   AnimationController _animationController;
   AnimationController _slideController;
   AnimationController _colorController;
-  TextEditingController _editingController;
+  TextEditingController _controller = TextEditingController();
+  int choiceNumber;
   AnimationController _bounceController;
   FirebaseFirestore _firestore = FirebaseFirestore.instance;
   FirebaseProvider _firebaseProvider = FirebaseProvider();
@@ -1293,6 +1295,31 @@ Widget startScreen(var width, var height, AsyncSnapshot snapshot){
       stream: _firestore
           .collection("lobbies").doc(widget.lobbyId).snapshots(),
       builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+
+        if(snapshot.hasData){
+          // print('hooray');
+          playerAmount = snapshot.data['players'].length;
+          playerListOnline = snapshot.data['players'];
+          playerInfotemp = snapshot.data['playerInfo'];
+          if(snapshot.data['players'].length<2){
+            lastPlayer = true;
+             
+          }
+          else if(snapshot.data['players'].length <1){
+            shouldGetWinner = true;
+          }
+
+          if(snapshot.data['active']){
+             startDown = true;
+            
+          }
+           
+          else{
+             startDown = false;
+            
+          }
+
+        }
        
         return closestScreen(width, height, snapshot);})
         );
@@ -1646,7 +1673,10 @@ Widget startScreen(var width, var height, AsyncSnapshot snapshot){
    }
 
    Widget closestScreen(var width, var height, AsyncSnapshot snapshot){
-    List<dynamic> playerLists = snapshot.data['players'];
+    List<dynamic> playerLists = [];
+    if(snapshot.data!=null){
+      playerLists = snapshot.data['players'];
+    }
     return Scaffold(
       body: Stack(
         children: [
@@ -1662,14 +1692,13 @@ Widget startScreen(var width, var height, AsyncSnapshot snapshot){
           ),
           Center(
             
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
+            child: ListView(
               children: [
                  SizedBox(
-                height: height*0.1,
+                height: height*0.05,
               ),
-                 Container(
+                 playerInfos!=null
+                 ?Container(
               height: height*0.15,
               child: ListView.builder(
                 itemBuilder: (BuildContext context, int index) { 
@@ -1679,7 +1708,11 @@ Widget startScreen(var width, var height, AsyncSnapshot snapshot){
                 scrollDirection: Axis.horizontal,
                 itemCount: playerLists.length,
                 ),
-            ),
+            )
+            :Container(
+              height: height*0.15,
+            )
+            ,
                     SizedBox(
                 height: height*0.05,
               ),
@@ -1731,7 +1764,7 @@ Widget startScreen(var width, var height, AsyncSnapshot snapshot){
                   ],
                 ),
                 SizedBox(
-                  height: height*0.1,
+                  height: height*0.05,
                 ),
                 
                 MaterialButton(
@@ -1755,15 +1788,86 @@ Widget startScreen(var width, var height, AsyncSnapshot snapshot){
             ),
                   ),
                 SizedBox(
-                  height: height*0.05,
+                  height: height*0.1,
                 ),
-               Text(randomizedNumber!=null?randomizedNumber.toString():'000',
+               submitted
+               ?Center(
+                child: Text(choiceNumber!=null?choiceNumber.toString():'000',
                               style: TextStyle(
                                   color: Colors.white,
                                   fontFamily: 'Muli',
                                   fontSize: 86,
                                   fontWeight: FontWeight.w900),
                             ),
+               )
+                            :Column(
+                              children: [
+                                Container(
+                              // constraints: BoxConstraints(maxWidth: width*0.5),
+                              width: width*0.5,
+                              height: height*0.1,
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.transparent)
+                              ),
+                              child: Center(
+                                child: Padding(
+                                  padding: EdgeInsets.only(top: height*0.00),
+                                  child: TextFormField(
+                                    
+                                    // textAlignVertical: TextAlignVertical.center,
+                                    keyboardType: TextInputType.number,
+                  inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly
+              ],
+                    style: TextStyle(fontFamily: 'Muli', color: Colors.white, fontWeight: FontWeight.w900, fontSize: 45),
+                    textAlign: TextAlign.center,
+                    controller: _controller,
+                    maxLength: 3,
+                    
+                    decoration: InputDecoration(
+                      contentPadding: EdgeInsets.only(
+                  bottom: height*0.02,  // HERE THE IMPORTANT PART
+                ),
+                        enabledBorder: UnderlineInputBorder(      
+                      borderSide: BorderSide(color: Color(0xff00ffff)),   
+                      ),  
+              focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Color(0xff00ffff)),
+                   ),
+                        hintText: 'Choice',
+                        
+                        hintStyle: TextStyle(
+                            fontFamily: 'Muli',
+                            color: Colors.grey,
+                            fontSize: 45.0),
+                            
+                        // labelText: 'Choose from 1 to 400',
+                        labelStyle: TextStyle(
+                            fontFamily: 'Muli',
+                            color: Colors.white,
+                            fontSize: 20.0)),
+                    ),
+                              
+                                )),
+                            ),
+                
+                              ],
+                            ),
+                           _controller.text.length<1
+                           ?Center()
+                           :int.parse(_controller.text)<1 || int.parse(_controller.text)>400
+                           ?Center(
+                            child: Text(
+                              'Enter a valid number between 1 and 400',
+                              style: TextStyle(
+                                  color: Color(0xffff2345),
+                                  fontFamily: 'Muli',
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.normal),
+                            ), 
+                           )
+                           :Center()
+                           ,
                 SizedBox(
                   height: height*0.05,
                 ),
@@ -1856,9 +1960,13 @@ Widget startScreen(var width, var height, AsyncSnapshot snapshot){
             ),
             ),
               
-            GestureDetector(
+            _controller.text.length>0 && !submitted && int.parse(_controller.text)>=1 && int.parse(_controller.text)<=400
+            ?GestureDetector(
               onTap: (){
-                
+                setState(() {
+                  choiceNumber = int.parse(_controller.text);
+                  submitted = true;
+                });
               },
               child: Container(
               decoration: BoxDecoration(
@@ -1871,6 +1979,17 @@ Widget startScreen(var width, var height, AsyncSnapshot snapshot){
                 child: Text('Submit', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
               ),
             ),
+            )
+            :Container(
+              decoration: BoxDecoration(
+                color: Color(0xff444444),
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.3,
+              height: height*0.06,
+              child: Center(
+                child: Text('Submit', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
             )
                   ],
                 )
