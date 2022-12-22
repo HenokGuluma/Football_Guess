@@ -5,6 +5,7 @@ import 'package:async/async.dart';
 import 'package:animated_check/animated_check.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -15,6 +16,7 @@ import 'package:flutter_countdown_timer/countdown.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:instagram_clone/backend/firebase.dart';
 import 'package:instagram_clone/main.dart';
+import 'package:instagram_clone/models/user.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:progress_indicators/progress_indicators.dart';
 
@@ -110,7 +112,7 @@ class BankeruMultiplayerState extends State<BankeruMultiplayer>
   AnimationController _slideController;
   AnimationController _colorController;
     AnimationController _bounceController;
-  TextEditingController controller;
+  TextEditingController controller = TextEditingController();
   FirebaseFirestore _firestore = FirebaseFirestore.instance;
   FirebaseProvider _firebaseProvider = FirebaseProvider();
   PageController _pageController;
@@ -127,7 +129,7 @@ class BankeruMultiplayerState extends State<BankeruMultiplayer>
   double resetValue = 8;
   double gamePlayTimeLeft = 3;
   double divider = 8;
-  double betPlaced = 0;
+  bool betPlaced = false;
   bool defeated = false;
   bool wrongClick = false;
   int gamePlayDuration = 0;
@@ -152,7 +154,7 @@ class BankeruMultiplayerState extends State<BankeruMultiplayer>
   List<dynamic> playerListOnline = [];
   List<Widget> drawnCards = [];
   Timer _timer;
-  int _start = 100;
+  int _start = 800;
   bool randomizing = true;
   bool showRandomizing = true;
    List<int> cards = [];
@@ -169,7 +171,17 @@ class BankeruMultiplayerState extends State<BankeruMultiplayer>
   final selectPlayer = AudioPlayer();
   String activeUser = '';
   int missedChance = 0;
+  String nextUser = '';
   bool randomizeBool = true;
+  int skipTimer = 10;
+  bool shouldStartSkipTimer = false;
+  bool startedSkipTimer = false;
+  bool skipButton = false;
+  bool turnCancelled = false;
+  bool skipped = false;
+  bool shouldSkip = false;
+  bool shouldRandomize = false;
+  bool didRandomize = false;
 
 
  @override
@@ -188,6 +200,7 @@ class BankeruMultiplayerState extends State<BankeruMultiplayer>
     startGamePlayCountDown();
     startSecondCountDown();
     setupSound();
+    startTurnTimer(playerList);
       _bounceController = AnimationController(
 
       duration: Duration(milliseconds: 500),
@@ -209,6 +222,7 @@ _bounceController.addListener(() {
       }
 
      });
+
   }
 
    @override
@@ -242,14 +256,23 @@ _bounceController.addListener(() {
       await _firestore.collection('lobbies').doc(widget.lobbyId).update({'activeUser': userId});
     }
     setState(() {
+      skipTimer = 10;
+      shouldSkip = true;
       switchedTurn = false;
       switchTurn = false;
     });
    return; 
   }
 
-  skipTurn(List<dynamic> playerList, int index)async{
-    if(missedChance >0){
+  skipTurn(dynamic player, bool idle)async{
+    if(!idle){
+      print('skipped voluntarily');
+      setState(() {
+        missedChance = 0;
+      });
+    }
+    else if(missedChance >0){
+      print('waka waka');
       if(widget.public){
         _firebaseProvider.removeUserFromPublicLobby(widget.variables.currentUser, widget.lobbyId);
       }
@@ -258,11 +281,12 @@ _bounceController.addListener(() {
       }
     }
     else{
+      print('lazy ass');
       setState(() {
         missedChance = missedChance+1;
       });
     }
-    changeActiveUser(playerList[index]);
+    changeActiveUser(nextUser);
   }
 
   
@@ -329,6 +353,7 @@ _bounceController.addListener(() {
             randomizing = false;
             showRandomizing = true;
           });
+          startGameTimer();
           });
           }
          
@@ -348,19 +373,25 @@ _bounceController.addListener(() {
 }
 
  void startTurnTimer(List<dynamic> playerLists) {
-  
-  const oneSec = const Duration(milliseconds: 10);
+  print('turn timer started');
+  const oneSec = const Duration(milliseconds: 1000);
   _timer = new Timer.periodic(
     oneSec,
     (Timer timer) {
-      
-      if (_start == 0) {
-        timer.cancel();
-         skipTurn(playerLists, playerLists.indexOf(widget.variables.currentUser.userName)+1);
+      if(turnCancelled || skipped || !gameStarted || betPlaced){
+        // print('whoops');
+      }
+      else if (timeLeft == 0) {
+        print('shazaaam');
+        // timer.cancel();
+        setState(() {
+          turnCancelled = true;
+        });
+         skipTurn(widget.variables.currentUser.uid, true);
       } else {
         // print(_start);
         setState(() {
-          _start--;
+          timeLeft--;
           value = rng.nextInt(12);
           type = rng.nextInt(3);
         });
@@ -370,7 +401,8 @@ _bounceController.addListener(() {
 }
 
 void startGameTimer() {
-  
+  print('started game timer');
+  print(gameStarted); print(switchedTurn); print(switchTurn);
   const oneSec = const Duration(milliseconds: 10);
   _timer = new Timer.periodic(
     oneSec,
@@ -379,11 +411,40 @@ void startGameTimer() {
       if (disposed) {
         
       } else if (gameStarted && !switchedTurn && switchTurn) {
-       startTurnTimer(playerList);
+        print('booom');
+        setState(() {
+          timeLeft = 8;
+          turnCancelled = false;
+          skipped = false;
+        });
        setState(() {
          switchedTurn = true;
        });
       }
+    },
+  );
+}
+
+void startSkipTimer() {
+  
+  const oneSec = const Duration(milliseconds: 1000);
+  _timer = new Timer.periodic(
+    oneSec,
+    (Timer timer) {
+      
+      if (disposed) {
+        
+      } 
+      else if(skipTimer == 0 && shouldSkip){
+        // print('eeerrrrooooorrrrrrrrr');
+        setState(() {
+          skipButton = true;
+        });
+      }
+      else{
+        skipTimer--;
+      }
+      
     },
   );
 }
@@ -458,7 +519,7 @@ void startGameTimer() {
       }
       
       else{
-        handleTimeout();
+        // handleTimeout();
       }
 
       
@@ -511,6 +572,67 @@ void startGameTimer() {
     });
   }
 
+  void showVaultFlushbar(BuildContext context) {
+    Flushbar(
+      padding: EdgeInsets.all(10),
+      borderRadius: 0,
+      //flushbarPosition: FlushbarPosition.,
+      backgroundGradient: LinearGradient(
+        colors: [Color(0xff00ffff), Color(0xff00ffff)],
+        stops: [0.6, 1],
+      ),
+      duration: Duration(seconds: 2),
+      dismissDirection: FlushbarDismissDirection.HORIZONTAL,
+      forwardAnimationCurve: Curves.fastLinearToSlowEaseIn,
+      messageText: Center(
+          child: Text(
+        'Please bet an amount not higher than the bank vault balance.',
+        style: TextStyle(fontFamily: 'Muli', color: Colors.black),
+      )),
+    )..show(context);
+  }
+
+   void showWalletFlushbar(BuildContext context) {
+    Flushbar(
+      padding: EdgeInsets.all(10),
+      borderRadius: 0,
+      //flushbarPosition: FlushbarPosition.,
+      backgroundGradient: LinearGradient(
+        colors: [Color(0xff00ffff), Color(0xff00ffff)],
+        stops: [0.6, 1],
+      ),
+      duration: Duration(seconds: 2),
+      dismissDirection: FlushbarDismissDirection.HORIZONTAL,
+      forwardAnimationCurve: Curves.fastLinearToSlowEaseIn,
+      messageText: Center(
+          child: Text(
+        'Please bet an amount not higher than your wallet balance.',
+        style: TextStyle(fontFamily: 'Muli', color: Colors.black),
+      )),
+    )..show(context);
+  }
+
+   void showValidFlushbar(BuildContext context) {
+    Flushbar(
+      padding: EdgeInsets.all(10),
+      borderRadius: 0,
+      //flushbarPosition: FlushbarPosition.,
+      backgroundGradient: LinearGradient(
+        colors: [Color(0xff00ffff), Color(0xff00ffff)],
+        stops: [0.6, 1],
+      ),
+      duration: Duration(seconds: 2),
+      dismissDirection: FlushbarDismissDirection.HORIZONTAL,
+      forwardAnimationCurve: Curves.fastLinearToSlowEaseIn,
+      messageText: Center(
+          child: Text(
+        'Please enter a valid number for a bet.',
+        style: TextStyle(fontFamily: 'Muli', color: Colors.black),
+      )),
+    )..show(context);
+  }
+
+
   shuffleCard(Map<String, dynamic> card)async{
     if(!widget.public){
       await _firestore.collection('lobbies').doc(widget.lobbyId).update({'shuffle': true, 'cardValue': card});
@@ -547,12 +669,23 @@ void startGameTimer() {
     Map<String, dynamic> betsPlaced = snapshot.data['betsPlaced'];
     int betLeft = snapshot.data['betLeft'];
     betsPlaced[widget.variables.currentUser.userName] = amount;
+    betLeft = betLeft - amount;
+    var increment = FieldValue.increment(0-amount);
     if(widget.public){
-      await _firestore.collection('publicLobbies').doc(widget.lobbyId).update({'betsPlaced': betsPlaced});
+      await _firestore.collection('publicLobbies').doc(widget.lobbyId).update({'betsPlaced': betsPlaced, 'betLeft': betLeft});
     }
     else{
-      await _firestore.collection('lobbies').doc(widget.lobbyId).update({'betsPlaced': betsPlaced});
+      await _firestore.collection('lobbies').doc(widget.lobbyId).update({'betsPlaced': betsPlaced, 'betLeft': betLeft});
     }
+    await _firestore.collection('users').doc(widget.variables.currentUser.uid).update({'coins': increment});
+    /* User user = widget.variables.currentUser;
+    user.coins = user.coins - amount;
+    widget.variables.setCurrentUser(user);
+    setState(() {
+      
+    }); */
+
+    changeActiveUser(nextUser);
   }
 
 
@@ -657,13 +790,31 @@ void startGameTimer() {
           randomizeBool = false;
         });
       }
+
+      if(shouldStartSkipTimer && !startedSkipTimer){
+        setState(() {
+          skipTimer = 10;
+        });
+        setState(() {
+          shouldSkip = true;
+          startedSkipTimer = true;
+          
+        });
+        startSkipTimer();
+      }
+
+      if(shouldRandomize && !didRandomize){
+        setState(() {
+          didRandomize = true;
+        });
+      }
       // print(playerAmount); print(' is the amount');
 
     });
   }
 
   void stopGame(){
-     _firebaseProvider.stopLobbyGame(widget.variables.currentUser.uid, widget.lobbyId);
+     _firebaseProvider.stopBankeruLobbyGame(widget.variables.currentUser.uid, widget.lobbyId);
   }
 
 void checkGameStatus(){
@@ -735,12 +886,32 @@ void handleTimeout() {  // callback function
             
           }
 
-          if(snapshot.data['activeUser'] == widget.variables.currentUser.userName){
+          if(snapshot.data['activeUser'] == widget.variables.currentUser.uid){
             switchTurn = true;
+          }
+          else if (snapshot.data['activeUser'] != activeUser){
+            shouldStartSkipTimer = true;
+            switchTurn = false;
           }
           else{
             switchTurn = false;
           }
+
+          int indexPlayer = playerList.indexOf(snapshot.data['activeUser']);
+          if(indexPlayer == playerList.length - 1 && playerList.length!=0){
+            nextUser = playerList[0];
+          }
+          else if (playerList.length!=0){
+            nextUser = playerList[indexPlayer+1];
+          }
+
+          if(snapshot.data['roundCompleted']){
+            shouldRandomize = true;
+          }
+          else{
+            shouldRandomize = false;
+          }
+          
         }
         else{
          print('bowwwnce');
@@ -756,9 +927,10 @@ void handleTimeout() {  // callback function
 
    searchQuery(String text){
     setState(() {
-      betPlaced = double.parse(text);
+      
     });
    }
+
 
    Widget gameScreen(var width, var height, AsyncSnapshot snapshot){
     return Scaffold(
@@ -777,13 +949,13 @@ void handleTimeout() {  // callback function
           ),
           Center(
             
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
+            child: ListView(
+              // mainAxisAlignment: MainAxisAlignment.start,
+              // crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                  
                    SizedBox(
-                height: height*0.08,
+                height: height*0.02,
               ),
              Container(
               height: height*0.15,
@@ -810,25 +982,69 @@ void handleTimeout() {  // callback function
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           SizedBox(
-                            height: height*0.05,
+                            height: height*0.02,
                           ),
                           Text('Bank Vault', style: TextStyle(color: Color(0xff00ffff), fontSize: 20, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
-                          Text('5000 ETB', style: TextStyle(color: Color(0xffffffff), fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                          Text(snapshot.data['vault'] == null?'0 ETB':snapshot.data['vault'].toString()+ ' ETB', style: TextStyle(color: Color(0xffffffff), fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
                            SizedBox(
-                            height: height*0.05,
+                            height: height*0.02,
+                          ),
+                          Text('Bet Left', style: TextStyle(color: Color(0xff00ffff), fontSize: 20, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                          Text(snapshot.data['betLeft'] == null?'0 ETB':snapshot.data['betLeft'].toString()+ ' ETB', style: TextStyle(color: Color(0xffffffff), fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                          SizedBox(
+                            height: height*0.02,
                           ),
                           Text('Wallet', style: TextStyle(color: Color(0xff23ff34), fontSize: 20, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
                           Text(widget.variables.currentUser.coins.toString() + ' ETB', style: TextStyle(color: Color(0xffffffff), fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900))
           ,
                         ],
                       ),
-                      Container(
+                      randomizing
+                ?Center(
+                  child: Container(
+                    height: height*0.3,
+                    child: (showRandomizing?randomizing?card(width, height, {'value': value, 'type': type}, 0):cardBack(width, height):Center()),
+                  )
+                )
+                :Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Container(
+                      width: width*0.1,
+                    ),
+                   /*  Center(
+                  child: Container(
+                    height: height*0.3,
+                    child: (showRandomizing?randomizing?card(width, height, {'value': value, 'type': type}, 0):cardBack(width, height):Center()),
+                  )
+                ),
+                Container(
+                      width: width*0.05,
+                    ), */
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text('Timer', style: TextStyle(color: Color(0xff00ffff), fontSize: 40, fontFamily: 'Muli', fontWeight: FontWeight.w900))
+          ,
+          SizedBox(
+            height: height*0.02,
+          ),
+          Text(snapshot.data['activeUser'] == widget.variables.currentUser.uid
+            ?(timeLeft).toInt().toString()
+            :skipTimer.toString(),
+             style: TextStyle(color: Color(0xffffffff), fontSize: 50, fontFamily: 'Muli', fontWeight: FontWeight.w900))
+          ,
+                  ],
+                )
+                  ],
+                ),
+                     /*  Container(
                     height: height*0.3,
                     child: (showRandomizing?randomizing||middleCardDrawn?card(width, height, {'value': value, 'type': type}, 0):cardBack(width, height):Center()),
                   ),
                   Container(
                     width: width*0.1,
-                  ),
+                  ), */
                     ],
                   )
                 ),
@@ -914,7 +1130,7 @@ void handleTimeout() {  // callback function
             )
             :!randomizing
             ?Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                      GestureDetector(
             onTap: (){
@@ -1002,7 +1218,49 @@ void handleTimeout() {  // callback function
               ),
             ),
             ),
-            betting
+           Container(
+            width: width*0.7,
+            child: snapshot.data['activeUser'] != widget.variables.currentUser.uid
+           ?Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              betPlaced
+            ?Text('Bet: ' + controller.text + ' ETB', style: TextStyle(color: Colors.white, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900))
+            :Center(),
+            SizedBox(
+              width: width*0.05,
+            ),
+            skipButton
+            ?GestureDetector(
+            onTap: (){
+              changeActiveUser(nextUser);
+              setState(() {
+                skipTimer = 10;
+              });
+              setState(() {
+                skipButton = false;
+                shouldSkip = false;
+              });
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.3,
+              height: height*0.06,
+              child: Center(
+                child: Text('Next Player', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            ),
+            )
+            :Center()
+            ],
+           ) 
+           :Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+               betting
             ?Container(
               decoration: BoxDecoration(
                 // color: Color(0xff23ff34),
@@ -1049,6 +1307,8 @@ void handleTimeout() {  // callback function
                             ),
             
               ))
+            :betPlaced
+            ?Center()
             :GestureDetector(
             onTap: (){
               setState(() {
@@ -1076,11 +1336,29 @@ void handleTimeout() {  // callback function
             betting
             ?GestureDetector(
             onTap: (){
-              setState(() {
-                disposed = true;
+             
+              int bet = int.parse(controller.text);
+              int vault = 0;
+              if(snapshot.data['vault']!=null){
+                vault = snapshot.data['vault'];
+              }
+              if(bet>widget.variables.currentUser.coins){
+                showWalletFlushbar(context);
+              }
+              else if(bet>vault){
+                showVaultFlushbar(context);
+              }
+              else if (bet==null){
+                showValidFlushbar(context);
+              }
+              else{
+                 setState(() {
+                betPlaced = true;
+                betting = false;
               });
-              checkGameStatus();
-              Navigator.pop(context);
+                placeBet(bet, snapshot);
+              }
+              
             },
             child: Container(
               decoration: BoxDecoration(
@@ -1094,13 +1372,14 @@ void handleTimeout() {  // callback function
               ),
             ),
             )
+            :betPlaced
+            ?Text('Bet Placed: ' + controller.text + ' ETB', style: TextStyle(color: Colors.white, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900))
             :GestureDetector(
             onTap: (){
-              setState(() {
-                disposed = true;
-              });
-              checkGameStatus();
-              Navigator.pop(context);
+             skipTurn(widget.variables.currentUser.uid, false);
+             setState(() {
+               skipped = true;
+             });
             },
             child: Container(
               decoration: BoxDecoration(
@@ -1114,7 +1393,11 @@ void handleTimeout() {  // callback function
               ),
             ),
             ),
-                  ],
+                  
+            ],
+           )
+           )
+           ],
                  )
                  :GestureDetector(
             onTap: (){
@@ -1264,7 +1547,8 @@ void handleTimeout() {  // callback function
             )
                           :MaterialButton(
                 onPressed: (){
-                  _firebaseProvider.startLobbyGame(widget.creatorId, widget.lobbyId);
+                  _firebaseProvider.addMoneyToVault(snapshot.data['players'].length * widget.rate, widget.lobbyId);
+                  _firebaseProvider.startBankeruLobbyGame(widget.creatorId, widget.lobbyId);
                 },
                 child:  Container(
                    width: width*0.4,
@@ -1589,10 +1873,10 @@ void handleTimeout() {  // callback function
 
     return GestureDetector(
          onTap: (){
-          setState(() {
+         /*  setState(() {
             middleCardDrawn = true;
           });
-        randomize();
+        randomize(); */
       },
       child: Container(
       width: width*0.35,
@@ -1812,9 +2096,11 @@ void handleTimeout() {  // callback function
    Widget profileCircle(var width, var height, int index, dynamic data, AsyncSnapshot snapshot){
     List<dynamic> theList = snapshot.data['players'];
     bool active = theList.contains(data['uid']);
+    Map<String, dynamic> bets = snapshot.data['betsPlaced'];
     return Padding(
-      padding: EdgeInsets.only(left: 10, right: 10),
+      padding: EdgeInsets.only(left: 0, right: 0),
       child: Container(
+        width: width*0.25,
       child: Column(
         children: [
           Container(
@@ -1830,21 +2116,32 @@ void handleTimeout() {  // callback function
             width: width*0.1,
       height: width*0.1,
           ),
-          // SizedBox(height: height*0.02,),
+          SizedBox(height: height*0.01,),
           Center(
             child: Text('@'+data['userName'], style: TextStyle(
-              color: Colors.white, fontFamily:'Muli', fontSize: 15, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic
+              color: snapshot.data['activeUser'] == data['uid'] || !snapshot.data['active']
+          ?Colors.white:Color(0xff777777), fontFamily:'Muli', fontSize: 15, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic
             )),
           ),
-          SizedBox(height: height*0.01,),
-          Container(
+          SizedBox(height: height*0.005,),
+          snapshot.data['activeUser'] ==data['uid'] || !snapshot.data['active']
+          ?Container(
             width: width*0.02,
             height: width*0.02,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: active?Color(0xff23ff89):Color(0xffff2389)
             ),
+          ):Center(),
+          SizedBox(height: height*0.005,),
+          bets.containsKey(data['userName'])
+          ? Center(
+            child: Text(''+ bets[data['userName']].toString() + ' ETB', style: TextStyle(
+              color: Colors.yellow, fontFamily:'Muli', fontSize: 12, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic
+            )),
           )
+          :Center()
+
         ],
       ),
     )
@@ -1926,7 +2223,7 @@ void handleTimeout() {  // callback function
     else{
       List<dynamic> players = snapshot.data['players'];
     if(players.length ==1){
-      _firebaseProvider.stopLobbyGame(widget.variables.currentUser.uid, widget.lobbyId);
+      _firebaseProvider.stopBankeruLobbyGame(widget.variables.currentUser.uid, widget.lobbyId);
     }
     _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId).then((value) {
       _firebaseProvider.submitUserScore(widget.variables.currentUser, widget.lobbyId, currentPage*10);

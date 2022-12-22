@@ -30,6 +30,7 @@ class GameMenu extends StatefulWidget {
   String uid;
   String name;
   String rate;
+  int priority;
   User thisUser;
   UserVariables variables;
   Function pauseBackground;
@@ -37,7 +38,7 @@ class GameMenu extends StatefulWidget {
   
 
 
-  GameMenu({this.creating, this.editing, this.public, this.uid, this.name, this.rate, this.thisUser, this.variables, this.pauseBackground, this.startBackground});
+  GameMenu({this.creating, this.editing, this.priority, this.public, this.uid, this.name, this.rate, this.thisUser, this.variables, this.pauseBackground, this.startBackground});
 
   @override
   GameMenuState createState() => GameMenuState();
@@ -264,6 +265,7 @@ Center(
                   backgroundColor: Color(0xff00ffff),
                   titleText: Text('Successfully edited the lobby', style: TextStyle(color: Colors.black, fontSize: 16, fontFamily: 'Muli')),
                 );
+                widget.pauseBackground();
 
                  Navigator.pushAndRemoveUntil(
                               context,
@@ -274,7 +276,7 @@ Center(
               });
                 }
                 else{
-                 _firebaseProvider.addPublicLobby(lobby).then((value) {
+                 _firebaseProvider.addPublicLobby(lobby, widget.priority).then((value) {
                 
                 Flushbar(
                   title: 'Created a Lobby',
@@ -422,6 +424,7 @@ Center(
                           // return LobbyMenu();
                           return FootBallMenu(
                             public: widget.public,
+                            priority: widget.priority,
                             creating: widget.creating,
                             editing: widget.editing,
                             uid: widget.uid,

@@ -161,8 +161,10 @@ void handleTimeout() {  // callback function
 
 getPublicLobbies(){
   _firebaseProvider.getPublicLobbiesCategory(widget.gameType, widget.gameCategory).then((list) {
+    List<dynamic> arrangedList = list;
+    arrangedList.sort((a, b) => a.rate.compareTo(b.rate));
     setState(() {
-      publicLobbies = list;
+      publicLobbies = arrangedList.reversed.toList();
       loading = false;
     });
   });

@@ -35,6 +35,7 @@ class AddPublicLobbyState extends State<AddPublicLobby>
   AnimationController _bounceController;
   TextEditingController _nameController = TextEditingController();
   TextEditingController _uidController= TextEditingController();
+  TextEditingController _priorityController = TextEditingController();
   TextEditingController _rateController = TextEditingController();
   PageController _pageController;
   FirebaseProvider _firebaseProvider = FirebaseProvider();
@@ -205,6 +206,29 @@ void handleTimeout() {  // callback function
                 child: TextFormField(
                   keyboardType: TextInputType.number,
                     style: TextStyle(fontFamily: 'Muli', color: Colors.white, fontSize: 30, fontWeight: FontWeight.w900),
+                    controller: _priorityController,
+                    enabled: true,
+                    maxLength: 5,
+                    decoration: InputDecoration(
+                      
+                        hintText: 'Priority',
+                        hintStyle: TextStyle(
+                            fontFamily: 'Muli',
+                            color: Colors.grey,
+                            fontSize: 20.0),
+                        labelText: 'Priority',
+                        labelStyle: TextStyle(
+                            fontFamily: 'Muli',
+                            color: Colors.white,
+                            fontSize: 20.0)),
+                    onChanged: changeText),
+              ),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 30.0, vertical: 8.0),
+                child: TextFormField(
+                  keyboardType: TextInputType.number,
+                    style: TextStyle(fontFamily: 'Muli', color: Colors.white, fontSize: 30, fontWeight: FontWeight.w900),
                     controller: _rateController,
                     enabled: true,
                     maxLength: 5,
@@ -259,6 +283,8 @@ void handleTimeout() {  // callback function
                           return GameMenu(
                             public: true,
                             creating: true,
+                            priority: int.parse(_priorityController.text),
+                            editing: false,
                             uid: _uidController.text,
                             name: _nameController.text,
                             rate: _rateController.text,

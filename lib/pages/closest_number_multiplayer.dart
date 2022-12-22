@@ -16,6 +16,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:instagram_clone/backend/firebase.dart';
 import 'package:instagram_clone/main.dart';
 import 'package:instagram_clone/models/exploding_widget.dart';
+import 'package:instagram_clone/models/user.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:progress_indicators/progress_indicators.dart';
 
@@ -57,6 +58,7 @@ class ClosestMultiplayerState extends State<ClosestMultiplayer>
   final player = AudioPlayer(); 
   final cancel = AudioPlayer();
   final selectPlayer = AudioPlayer();
+  final winnerPlayer = AudioPlayer();
 
    List<String> profileNames = ['ashley123', 'joe_rogan',
     'willSmith', 'ruthaBG89'
@@ -182,6 +184,8 @@ class ClosestMultiplayerState extends State<ClosestMultiplayer>
    int addedScore = 0;
    bool exploded = false;
    bool perfectScore = false;
+   bool gameOver = false;
+   int totalWinnings = 0;
 
 
 
@@ -189,10 +193,25 @@ Future<void> setupSound() async{
     await player.setAsset('assets/glass.mp3');
     await selectPlayer.setAsset('assets/sound-effects/option-click-confirm.wav');
     await cancel.setAsset('assets/sound-effects/option-click.wav');
+    await winnerPlayer.setAsset('assets/sound-effects/winner.mp3');
     selectPlayer.setVolume(0.1);
     cancel.setVolume(0.1);
     cancel.play();
     cancel.stop();
+    winnerPlayer.setVolume(0.5);
+    winnerPlayer.play();
+    winnerPlayer.stop();
+  }
+
+  depositWinning(int amount){
+    User newUser = widget.variables.currentUser;
+      newUser.coins = widget.variables.currentUser.coins + amount;
+      widget.variables.setCurrentUser(newUser);
+      setState(() {
+        
+      });
+    _firebaseProvider.depositWinning(widget.variables.currentUser.uid, amount).then((value) {
+    });
   }
 
 void startTimer(int numValue) {
@@ -201,7 +220,7 @@ void startTimer(int numValue) {
     oneSec,
     (Timer timer) {
       var added = 0;
-     
+
       if (_firstStart == 0) {
         timer.cancel();
         cards.add(value);
@@ -211,12 +230,35 @@ void startTimer(int numValue) {
             firstNum = numValue;             
           });
           Future.delayed(Duration(milliseconds: 500)).then((value) {
+            if(winner!=null){
+              if(widget.variables.currentUser.userName == winner.data()['userName']){
+            depositWinning(totalWinnings);  
+          winnerPlayer.play();
+          setState(() {
+            
+          });
+        }
+            }
+            else{
+              print('shiaaat');
+            }
+            
+          });
+
+          Future.delayed(Duration(milliseconds: 1000)).then((value) {
             
              setState(() {
             randomizing = false;
             showRandomizing = true;
+            gameOver = true;      
            
           });
+          stopGame();
+        // winnerPlayer.play();
+         Future.delayed(Duration(milliseconds: 3000)).then((value) {
+           winnerPlayer.stop();
+          });
+          
           
           });
       } else {
@@ -279,14 +321,13 @@ void startThirdTimer(int numValue) {
         cardValues.add({'value': value, 'type': type});
           setState(() {
             showRandomizing = false;
-            thirdNum = numValue;             
+            thirdNum = numValue;    
           });
-          Future.delayed(Duration(milliseconds: 500)).then((value) {
+          Future.delayed(Duration(milliseconds: 1000)).then((value) {
             
              setState(() {
             randomizing = false;
-            showRandomizing = true;
-           
+            showRandomizing = true; 
           });
           
           });
@@ -367,14 +408,15 @@ _bounceController.addListener(() {
     
   }
 
-  Future<void> getWinner() async{
+  Future<void> getWinner(int score) async{
     if(!widget.solo){
       setState(() {
       retrievingWinner = true;
     });
-   Future.delayed(Duration(seconds: 5)).then((value) {
+    _firebaseProvider.submitUserScore(widget.variables.currentUser, widget.lobbyId, score);
+   Future.delayed(Duration(seconds: 4)).then((value) {
 
-     _firebaseProvider.getLobbyWinner(widget.lobbyId).then((lobbyWinner) {
+     _firebaseProvider.getClosestLobbyWinner(widget.lobbyId).then((lobbyWinner) {
       if(lobbyWinner!=null){
         setState(() {
           winner = lobbyWinner;
@@ -392,8 +434,8 @@ _bounceController.addListener(() {
  void randomize(int number){
     // print('daaum');
     setState(() {
-      _firstStart = 500;
-      _secondStart = 350;
+      _firstStart = 400;
+      _secondStart = 300;
       _thirdStart = 200;
       randomizing = true;
       showRandomizing = true;
@@ -598,10 +640,12 @@ _bounceController.addListener(() {
 
       // print(timeLeft/resetValue); print (' is the timer');
 
-       if(!gotWinner && playerAmount<1 && !disposed){
-        // print('baaaam');
-       
-       
+       if(!gotWinner && shouldGetWinner && !disposed){
+        print('bounceshakbawbaw');
+        setState(() {
+          gotWinner = true;
+        });
+        getWinner(score);
       }
 
       if(setupPlayers && playerInfotemp!=null){
@@ -618,6 +662,7 @@ _bounceController.addListener(() {
   }
 
   void stopGame(){
+    print('stopped game');
      _firebaseProvider.stopLobbyGame(widget.variables.currentUser.uid, widget.lobbyId);
   }
 
@@ -656,6 +701,46 @@ void handleTimeout() {  // callback function
         });
 }
 
+submitInitial(int initial)async{
+  if(widget.public){
+    await _firestore.collection('publicLobbies').doc(widget.lobbyId).collection('initialGuesses').add({'userName': widget.variables.currentUser.userName, 'guess': initial});
+  }
+  else{
+    await _firestore.collection('lobbies').doc(widget.lobbyId).collection('initialGuesses').add({'userName': widget.variables.currentUser.userName, 'guess': initial});
+  }
+  await _firestore.collection('users').doc(widget.variables.currentUser.uid).update({'coins': widget.variables.currentUser.coins - widget.rate});
+  User newUser = widget.variables.currentUser;
+  newUser.coins = widget.variables.currentUser.coins - widget.rate;
+  widget.variables.setCurrentUser(newUser);
+  setState(() {
+    
+  });
+  print(widget.variables.currentUser.coins);
+  print(' is the coins');
+
+}
+
+submitRandomized(int randomized, int winnings) async{
+  if(widget.public){
+    await _firestore.collection('publicLobbies').doc(widget.lobbyId).update({'randomized': randomized, 'active': true, 'winnings': winnings});
+  }
+  else{
+    await _firestore.collection('lobbies').doc(widget.lobbyId).update({'randomized': randomized, 'active': true, 'winnings': winnings});;
+  }
+  setState(() {
+    totalWinnings = winnings;
+  });
+}
+
+submitFinal(int finalNum, int winnings)async{
+  if(widget.public){
+    await _firestore.collection('publicLobbies').doc(widget.lobbyId).collection('initialGuesses').add({'userName': widget.variables.currentUser.userName, 'guess': finalNum});
+  }
+  else{
+    await _firestore.collection('lobbies').doc(widget.lobbyId).collection('initialGuesses').add({'userName': widget.variables.currentUser.userName, 'guess': finalNum});
+  }
+}
+
 Widget finalScreen(var width, var height, AsyncSnapshot snapshot){
   return Scaffold(
     body: Stack(
@@ -677,7 +762,7 @@ Widget finalScreen(var width, var height, AsyncSnapshot snapshot){
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                     SizedBox(
-                height: height*0.05,
+                height: height*0.1,
               ),
              Container(
               height: height*0.15,
@@ -702,7 +787,7 @@ Widget finalScreen(var width, var height, AsyncSnapshot snapshot){
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
-                'The Winner is: ', style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 25, fontWeight: FontWeight.w900, fontStyle: FontStyle.normal),
+                'The Winner is: ', style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 40, fontWeight: FontWeight.w900, fontStyle: FontStyle.normal),
               ),
             SizedBox(
               height: height*0.02,
@@ -711,7 +796,143 @@ Widget finalScreen(var width, var height, AsyncSnapshot snapshot){
            
               SizedBox(
               height: height*0.1,
-            ),]))
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                GestureDetector(
+            onTap: (){
+              // Navigator.pop(context);
+              setState(() {
+                submitted = false;
+                submitting = false;
+                finished = false;
+                exploded = false;
+                perfectScore = false;
+                gotWinner = false;
+                winner = null;
+                gameOver = false;
+                cardValues = [];
+                score = 0;
+                choiceNumber = null;
+                randomizedNumber = null;
+                _controller.text = '';
+                firstNum = 0;
+                secondNum = 0;
+                thirdNum = 0;
+                timeLeft = 6;
+              });
+              // _firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId, widget.rate);_firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId, widget.rate);
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.3,
+              height: height*0.06,
+              child: Center(
+                child: Text('Try Again', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            ),
+            ),
+            SizedBox(height: height*0.05,),
+            GestureDetector(
+            onTap: (){
+               cancel.play();
+              showDialog(
+                        context: context,
+                        builder: ((context) {
+                          return new AlertDialog(
+                            backgroundColor: Color(0xff240044),
+                            title: new Text(
+                              'Leaving the game',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Muli',
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w900),
+                            ),
+                            content: new Text(
+                              'Are you sure you want to leave the game? All progresses and bets will be lost.',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Muli',
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.normal),
+                            ),
+                            actions: <Widget>[
+                              new TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                  setState(() {
+                                    paused = false;
+                                  });
+                                }, // Closes the dialog
+                                child: new Text(
+                                  'No',
+                                  style: TextStyle(
+                                      color: Color(0xffff2389),
+                                      fontSize: 16,
+                                      fontFamily: 'Muli',
+                                      fontWeight: FontWeight.w900),
+                                ),
+                              ),
+                              new TextButton(
+                                onPressed: () {
+                                  cancel.play();
+                                  _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
+                                  if(lastPlayer && widget.public){
+                                    _firebaseProvider.stopPublicLobbyGame(widget.variables.currentUser.uid, widget.lobbyId);
+                                  }
+                                  else if(lastPlayer){
+                                    _firebaseProvider.stopLobbyGame(widget.variables.currentUser.uid, widget.lobbyId);
+                                  }
+                                  Navigator.pop(context);
+                                //  _bounceController.reset();
+                  // _animationController.reset();
+                  setState(() {
+                    disposed = true;
+                  });
+                  // handleTimeout();
+                  _navigator.pop(context);
+                  Future.delayed(Duration(seconds: 1)).then((value) {
+                cancel.stop();
+                });
+                                },
+                                child: new Text(
+                                  'Yes',
+                                  style: TextStyle(
+                                      color: Color(0xff23ff89),
+                                      fontSize: 16,
+                                      fontFamily: 'Muli',
+                                      fontWeight: FontWeight.w900),
+                                ),
+                              ),
+                            ],
+                          );
+                        }));
+                        Future.delayed(Duration(seconds: 1)).then((value) {
+                cancel.stop();
+                });
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Color(0xffff2389),
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.3,
+              height: height*0.06,
+              child: Center(
+                child: Text('Leave', style: TextStyle(color: Colors.white, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            ),
+            ),
+              ],
+            )
+            
+            
+            ]))
           :Center(
               child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -724,7 +945,14 @@ Widget finalScreen(var width, var height, AsyncSnapshot snapshot){
               height: height*0.15,
             ),
            Text(
-                'You have won with score ' + (exploded?score-addedScore:score).toString(), style: TextStyle(color: Color(0xffffffff), fontFamily: 'Muli', fontSize: 25, fontWeight: FontWeight.w900, fontStyle: FontStyle.normal),
+                'You have won with guess ' + choiceNumber.toString(), style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 25, fontWeight: FontWeight.w900, fontStyle: FontStyle.normal),
+              ),
+            
+              SizedBox(
+              height: height*0.1,
+            ),
+            Text(
+                'Wallet: ' + widget.variables.currentUser.coins.toString() + ' ETB', style: TextStyle(color: Color(0xffffffff), fontFamily: 'Muli', fontSize: 25, fontWeight: FontWeight.w900, fontStyle: FontStyle.normal),
               ),
             
               SizedBox(
@@ -744,11 +972,18 @@ Widget finalScreen(var width, var height, AsyncSnapshot snapshot){
                 perfectScore = false;
                 gotWinner = false;
                 winner = null;
+                gameOver = false;
                 cardValues = [];
                 score = 0;
+                choiceNumber = null;
+                randomizedNumber = null;
+                _controller.text = '';
+                firstNum = 0;
+                secondNum = 0;
+                thirdNum = 0;
                 timeLeft = 6;
               });
-              _firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId, widget.rate);_firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId, widget.rate);
+              // _firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId, widget.rate);_firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId, widget.rate);
             },
             child: Container(
               decoration: BoxDecoration(
@@ -1050,11 +1285,18 @@ Widget submittedScreen(var width, var height, AsyncSnapshot snapshot){
                 finished = false;
                 gotWinner = false;
                 winner = null;
+                gameOver = false;
                 cardValues = [];
+                choiceNumber = null;
+                randomizedNumber = null;
+                _controller.text = '';
+                firstNum = 0;
+                secondNum = 0;
+                thirdNum = 0;
                 score = 0;
                 timeLeft = 6;
               });
-              _firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId, widget.rate);_firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId, widget.rate);
+              // _firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId, widget.rate);_firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId, widget.rate);
             },
             child: Container(
               decoration: BoxDecoration(
@@ -1302,16 +1544,17 @@ Widget startScreen(var width, var height, AsyncSnapshot snapshot){
           playerListOnline = snapshot.data['players'];
           playerInfotemp = snapshot.data['playerInfo'];
           if(snapshot.data['players'].length<2){
-            lastPlayer = true;
-             
+            lastPlayer = true; 
           }
           else if(snapshot.data['players'].length <1){
             shouldGetWinner = true;
+
           }
 
           if(snapshot.data['active']){
              startDown = true;
-            
+             shouldGetWinner = true;
+             score = (snapshot.data['randomized'] - choiceNumber).abs();
           }
            
           else{
@@ -1321,7 +1564,7 @@ Widget startScreen(var width, var height, AsyncSnapshot snapshot){
 
         }
        
-        return closestScreen(width, height, snapshot);})
+        return gameOver?finalScreen(width, height, snapshot):closestScreen(width, height, snapshot);})
         );
    
    }
@@ -1672,6 +1915,163 @@ Widget startScreen(var width, var height, AsyncSnapshot snapshot){
  
    }
 
+   Widget winnerScreen(var width, var height, AsyncSnapshot snapshot){
+    
+    return Scaffold(
+      body: Stack(
+        children: [
+          Container(
+            width: width,
+            height: height,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/blackjack_wallpaper.png'),
+                fit: BoxFit.cover
+              )
+            ),
+          ),
+          Center(
+            
+            child: ListView(
+              children: [
+                 SizedBox(
+                height: height*0.05,
+              ),
+                 widget.variables.currentUser.userName == winner.data()['userName']
+                 ?winnerWidget(width, height, winner)
+                 :Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    GestureDetector(
+            onTap: (){
+               cancel.play();
+              showDialog(
+                        context: context,
+                        builder: ((context) {
+                          return new AlertDialog(
+                            backgroundColor: Color(0xff240044),
+                            title: new Text(
+                              'Leaving the game',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Muli',
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w900),
+                            ),
+                            content: new Text(
+                              'Are you sure you want to leave the game? All progresses and bets will be lost.',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Muli',
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.normal),
+                            ),
+                            actions: <Widget>[
+                              new TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                  setState(() {
+                                    paused = false;
+                                  });
+                                }, // Closes the dialog
+                                child: new Text(
+                                  'No',
+                                  style: TextStyle(
+                                      color: Color(0xffff2389),
+                                      fontSize: 16,
+                                      fontFamily: 'Muli',
+                                      fontWeight: FontWeight.w900),
+                                ),
+                              ),
+                              new TextButton(
+                                onPressed: () {
+                                  cancel.play();
+                                  
+                                  Navigator.pop(context);
+                                //  _bounceController.reset();
+                  // _animationController.reset();
+                  setState(() {
+                    disposed = true;
+                  });
+                  // handleTimeout();
+                  _navigator.pop(context);
+                  Future.delayed(Duration(seconds: 1)).then((value) {
+                cancel.stop();
+                });
+                                },
+                                child: new Text(
+                                  'Yes',
+                                  style: TextStyle(
+                                      color: Color(0xff23ff89),
+                                      fontSize: 16,
+                                      fontFamily: 'Muli',
+                                      fontWeight: FontWeight.w900),
+                                ),
+                              ),
+                            ],
+                          );
+                        }));
+                        Future.delayed(Duration(seconds: 1)).then((value) {
+                cancel.stop();
+                });
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Color(0xffff2389),
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.3,
+              height: height*0.06,
+              child: Center(
+                child: Text('Leave', style: TextStyle(color: Colors.white, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            ),
+            ),
+              
+            _controller.text.length>0 && !submitted && int.parse(_controller.text)>=1 && int.parse(_controller.text)<=400
+            ?GestureDetector(
+              onTap: (){
+                setState(() {
+                  choiceNumber = int.parse(_controller.text);
+                  submitted = true;
+                });
+                submitInitial(choiceNumber);
+              },
+              child: Container(
+              decoration: BoxDecoration(
+                color: Color(0xff23ff34),
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.3,
+              height: height*0.06,
+              child: Center(
+                child: Text('Submit', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            ),
+            )
+            :Container(
+              decoration: BoxDecoration(
+                color: Color(0xff444444),
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.3,
+              height: height*0.06,
+              child: Center(
+                child: Text('Submit', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            )
+                  ],
+                )
+                
+                ]
+              )
+            ), 
+            
+            ])
+          );
+   }
+
+
    Widget closestScreen(var width, var height, AsyncSnapshot snapshot){
     List<dynamic> playerLists = [];
     if(snapshot.data!=null){
@@ -1767,13 +2167,17 @@ Widget startScreen(var width, var height, AsyncSnapshot snapshot){
                   height: height*0.05,
                 ),
                 
-                MaterialButton(
+                submitted
+                ?MaterialButton(
                   onPressed: (){
                     int num = Random().nextInt(400);
                     setState(() {
                       randomizedNumber = num;
                     });
                     randomize(num);
+                    print(widget.rate);
+                    print(snapshot.data['players']);
+                    submitRandomized(num, (snapshot.data['players'].length)*widget.rate);
                   },
                   child:  Container(
               decoration: BoxDecoration(
@@ -1786,7 +2190,20 @@ Widget startScreen(var width, var height, AsyncSnapshot snapshot){
                 child: Text('Randomize', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
               ),
             ),
-                  ),
+                  )
+                  : MaterialButton(
+                    onPressed: (){},
+                    child: Container(
+              decoration: BoxDecoration(
+                color: Color(0xff444444),
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.3,
+              height: height*0.06,
+              child: Center(
+                child: Text('Randomize', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            )),
                 SizedBox(
                   height: height*0.1,
                 ),
@@ -1967,6 +2384,7 @@ Widget startScreen(var width, var height, AsyncSnapshot snapshot){
                   choiceNumber = int.parse(_controller.text);
                   submitted = true;
                 });
+                submitInitial(choiceNumber);
               },
               child: Container(
               decoration: BoxDecoration(
@@ -2560,6 +2978,56 @@ Widget startScreen(var width, var height, AsyncSnapshot snapshot){
     return Column(
       children: [
         Container(
+            width: width,
+            //  height: height*0.12,
+            child: Column(
+              children: [
+                Container(
+                  child: Center(
+                    child: Container(
+                    width: width,
+                    child: Text('@'+winner['userName'], style: TextStyle(color: Color(0xff63ff00), fontSize: width*0.11, fontFamily: 'Muli', fontWeight: FontWeight.w900, fontStyle: FontStyle.italic), textAlign: TextAlign.center),
+                  )),
+              width: width,
+              // height: height*0.1,
+              decoration: BoxDecoration(
+                shape: BoxShape.rectangle,
+                borderRadius: BorderRadius.circular(20),
+                color: Colors.transparent
+                 
+              ),
+            ),
+            SizedBox(
+              height: height*0.05,
+            ),
+            Container(
+                  child: Center(
+                    child: Container(
+                    width: width,
+                    child: Text('Winnings: '+ totalWinnings.toString() + ' ETB', style: TextStyle(color: Color(0xffffffff), fontSize: width*0.08, fontFamily: 'Muli', fontWeight: FontWeight.w900, fontStyle: FontStyle.normal), textAlign: TextAlign.center),
+                  )),
+              width: width,
+              height: height*0.1,
+              decoration: BoxDecoration(
+                shape: BoxShape.rectangle,
+                borderRadius: BorderRadius.circular(20),
+                color: Colors.transparent
+                 
+              ),
+            ),
+         
+              ],
+            ),
+          ),
+          SizedBox(height: height*0.03,),
+          
+    ]);
+   }
+
+   Widget congratsWidget(var width, var height, DocumentSnapshot winner){
+    return Column(
+      children: [
+        Container(
             width: width*0.6,
              height: height*0.12,
             child: Column(
@@ -2568,7 +3036,7 @@ Widget startScreen(var width, var height, AsyncSnapshot snapshot){
                   child: Center(
                     child: Container(
                     width: width*0.5,
-                    child: Text('@'+winner['userName'], style: TextStyle(color: Color(0xff63ff00), fontSize: width*0.09, fontFamily: 'Muli', fontWeight: FontWeight.w900, fontStyle: FontStyle.italic), textAlign: TextAlign.center),
+                    child: Text('CONGRATULATIONS', style: TextStyle(color: Color(0xff63ff00), fontSize: width*0.09, fontFamily: 'Muli', fontWeight: FontWeight.w900, fontStyle: FontStyle.italic), textAlign: TextAlign.center),
                   )),
               width: width*0.55,
               height: height*0.1,
@@ -2585,8 +3053,12 @@ Widget startScreen(var width, var height, AsyncSnapshot snapshot){
           ),
           SizedBox(height: height*0.03,),
           Center(
-            child: Text('Score: '+ winner['score'].toString(), style: TextStyle(color: Colors.white, fontSize: width*0.06, fontFamily: 'Muli', fontWeight: FontWeight.w900), textAlign: TextAlign.center),
-          )
+            child: Text('Your Score: '+ winner['score'].toString(), style: TextStyle(color: Colors.white, fontSize: width*0.06, fontFamily: 'Muli', fontWeight: FontWeight.w900), textAlign: TextAlign.center),
+          ),
+           SizedBox(height: height*0.03,),
+          Center(
+            child: Text('Wallet: '+ winner['score'].toString(), style: TextStyle(color: Colors.white, fontSize: width*0.06, fontFamily: 'Muli', fontWeight: FontWeight.w900), textAlign: TextAlign.center),
+          ),
     ]);
    }
 

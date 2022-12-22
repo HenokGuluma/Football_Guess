@@ -162,10 +162,10 @@ class _FootballersState extends State<Footballers>
   Color finalColor;
   final player = AudioPlayer(); 
   final correctPlayer = AudioPlayer();
+  final incorrectPlayer = AudioPlayer();
+  final selectPlayer = AudioPlayer();
+  final cancel = AudioPlayer();
 
-
-  
-  
 
  @override
   void dispose() {
@@ -319,9 +319,20 @@ _bounceController.addListener(() {
     var index = Random().nextInt(4);
     await player.setAsset(backgroundTracks[index]);
     await correctPlayer.setAsset('assets/sound-effects/correct.mp3');
+    await incorrectPlayer.setAsset('assets/sound-effects/wrong-answer.mp3');
     player.setVolume(0.04);
     correctPlayer.setVolume(0.2);
     correctPlayer.setSpeed(0.7);
+    incorrectPlayer.setVolume(0.9);
+    incorrectPlayer.setSpeed(0.7);
+    incorrectPlayer.play();
+    incorrectPlayer.stop();
+    await selectPlayer.setAsset('assets/sound-effects/option-click-confirm.wav');
+    await cancel.setAsset('assets/sound-effects/option-click.wav');
+    selectPlayer.setVolume(0.1);
+    cancel.setVolume(0.1);
+    cancel.play();
+    cancel.stop();
   }
 
   List<dynamic> concatenateList(List<dynamic> mainList, List<dynamic> addedList){
@@ -878,6 +889,7 @@ void handleTimeout() {  // callback function
           
              MaterialButton(
                 onPressed: (){
+                  selectPlayer.play();
                   showDialog(
                         context: context,
                         builder: ((context) {
@@ -918,6 +930,7 @@ void handleTimeout() {  // callback function
                               ),
                               new TextButton(
                                 onPressed: () {
+                                  cancel.play();
                                   widget.public?_firebaseProvider.removeUserFromPublicLobby(widget.variables.currentUser, widget.lobbyId):_firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
                                   Navigator.pop(context);
                                  _bounceController.reset();
@@ -930,7 +943,9 @@ void handleTimeout() {  // callback function
                   }
                   // handleTimeout();
                   _navigator.pop(context); player.stop(); widget.startBackground();
-                 
+                         Future.delayed(Duration(seconds: 1)).then((value) {
+                    cancel.stop();
+                  });
                                 },
                                 child: new Text(
                                   'Yes',
@@ -945,7 +960,9 @@ void handleTimeout() {  // callback function
                           );
                         }));
 
-
+                  Future.delayed(Duration(seconds: 1)).then((value) {
+                    selectPlayer.stop();
+                  });
                   // dispose();
                 },
                 child: Container(
@@ -1047,6 +1064,7 @@ void handleTimeout() {  // callback function
             
              MaterialButton(
                 onPressed: (){
+                  selectPlayer.play();
                   showDialog(
                         context: context,
                         builder: ((context) {
@@ -1087,6 +1105,7 @@ void handleTimeout() {  // callback function
                               ),
                               new TextButton(
                                 onPressed: () {
+                                  cancel.play();
                                   widget.public?_firebaseProvider.removeUserFromPublicLobby(widget.variables.currentUser, widget.lobbyId):_firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
                                   Navigator.pop(context);
                                  _bounceController.reset();
@@ -1094,11 +1113,14 @@ void handleTimeout() {  // callback function
                   setState(() {
                     disposed = true;
                   });
-                  // handleTimeout();
-                  _navigator.pop(context); player.stop(); widget.startBackground();
-                   if(lastPlayer){
+                  if(lastPlayer){
                     stopGame();
                   }
+                  // handleTimeout();
+                  _navigator.pop(context); player.stop(); widget.startBackground();
+                         Future.delayed(Duration(seconds: 1)).then((value) {
+                    cancel.stop();
+                  });
                                 },
                                 child: new Text(
                                   'Yes',
@@ -1113,7 +1135,9 @@ void handleTimeout() {  // callback function
                           );
                         }));
 
-
+                  Future.delayed(Duration(seconds: 1)).then((value) {
+                    selectPlayer.stop();
+                  });
                   // dispose();
                 },
                 child: Container(
@@ -1217,6 +1241,7 @@ void handleTimeout() {  // callback function
             
              MaterialButton(
                 onPressed: (){
+                  selectPlayer.play();
                   showDialog(
                         context: context,
                         builder: ((context) {
@@ -1257,6 +1282,7 @@ void handleTimeout() {  // callback function
                               ),
                               new TextButton(
                                 onPressed: () {
+                                  cancel.play();
                                   widget.public?_firebaseProvider.removeUserFromPublicLobby(widget.variables.currentUser, widget.lobbyId):_firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
                                   Navigator.pop(context);
                                  _bounceController.reset();
@@ -1264,11 +1290,14 @@ void handleTimeout() {  // callback function
                   setState(() {
                     disposed = true;
                   });
-                  // handleTimeout();
-                  _navigator.pop(context); player.stop(); widget.startBackground();
-                   if(lastPlayer){
+                  if(lastPlayer){
                     stopGame();
                   }
+                  // handleTimeout();
+                  _navigator.pop(context); player.stop(); widget.startBackground();
+                         Future.delayed(Duration(seconds: 1)).then((value) {
+                    cancel.stop();
+                  });
                                 },
                                 child: new Text(
                                   'Yes',
@@ -1283,7 +1312,9 @@ void handleTimeout() {  // callback function
                           );
                         }));
 
-
+                  Future.delayed(Duration(seconds: 1)).then((value) {
+                    selectPlayer.stop();
+                  });
                   // dispose();
                 },
                 child: Container(
@@ -1330,6 +1361,7 @@ void handleTimeout() {  // callback function
           
              MaterialButton(
                 onPressed: (){
+                  selectPlayer.play();
                   showDialog(
                         context: context,
                         builder: ((context) {
@@ -1370,7 +1402,8 @@ void handleTimeout() {  // callback function
                               ),
                               new TextButton(
                                 onPressed: () {
-                                 widget.public?_firebaseProvider.removeUserFromPublicLobby(widget.variables.currentUser, widget.lobbyId):_firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
+                                  cancel.play();
+                                  widget.public?_firebaseProvider.removeUserFromPublicLobby(widget.variables.currentUser, widget.lobbyId):_firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
                                   Navigator.pop(context);
                                  _bounceController.reset();
                   _animationController.reset();
@@ -1382,7 +1415,9 @@ void handleTimeout() {  // callback function
                   }
                   // handleTimeout();
                   _navigator.pop(context); player.stop(); widget.startBackground();
-                   
+                         Future.delayed(Duration(seconds: 1)).then((value) {
+                    cancel.stop();
+                  });
                                 },
                                 child: new Text(
                                   'Yes',
@@ -1397,7 +1432,9 @@ void handleTimeout() {  // callback function
                           );
                         }));
 
-
+                  Future.delayed(Duration(seconds: 1)).then((value) {
+                    selectPlayer.stop();
+                  });
                   // dispose();
                 },
                 child: Container(
@@ -1861,7 +1898,8 @@ void handleTimeout() {  // callback function
            widget.public
           ?GestureDetector(
                 onTap: (){
-                 showDialog(
+                  selectPlayer.play();
+                  showDialog(
                         context: context,
                         builder: ((context) {
                           return new AlertDialog(
@@ -1901,6 +1939,7 @@ void handleTimeout() {  // callback function
                               ),
                               new TextButton(
                                 onPressed: () {
+                                  cancel.play();
                                   widget.public?_firebaseProvider.removeUserFromPublicLobby(widget.variables.currentUser, widget.lobbyId):_firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
                                   Navigator.pop(context);
                                  _bounceController.reset();
@@ -1913,6 +1952,9 @@ void handleTimeout() {  // callback function
                   }
                   // handleTimeout();
                   _navigator.pop(context); player.stop(); widget.startBackground();
+                         Future.delayed(Duration(seconds: 1)).then((value) {
+                    cancel.stop();
+                  });
                                 },
                                 child: new Text(
                                   'Yes',
@@ -1927,7 +1969,10 @@ void handleTimeout() {  // callback function
                           );
                         }));
 
-
+                  Future.delayed(Duration(seconds: 1)).then((value) {
+                    selectPlayer.stop();
+                  });
+                  // dispose();
                 },
                 child: Container(
                   decoration: BoxDecoration(
@@ -2017,7 +2062,8 @@ void handleTimeout() {  // callback function
             
                GestureDetector(
                 onTap: (){
-                 showDialog(
+                  selectPlayer.play();
+                  showDialog(
                         context: context,
                         builder: ((context) {
                           return new AlertDialog(
@@ -2057,6 +2103,7 @@ void handleTimeout() {  // callback function
                               ),
                               new TextButton(
                                 onPressed: () {
+                                  cancel.play();
                                   widget.public?_firebaseProvider.removeUserFromPublicLobby(widget.variables.currentUser, widget.lobbyId):_firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
                                   Navigator.pop(context);
                                  _bounceController.reset();
@@ -2069,6 +2116,9 @@ void handleTimeout() {  // callback function
                   }
                   // handleTimeout();
                   _navigator.pop(context); player.stop(); widget.startBackground();
+                         Future.delayed(Duration(seconds: 1)).then((value) {
+                    cancel.stop();
+                  });
                                 },
                                 child: new Text(
                                   'Yes',
@@ -2083,7 +2133,10 @@ void handleTimeout() {  // callback function
                           );
                         }));
 
-
+                  Future.delayed(Duration(seconds: 1)).then((value) {
+                    selectPlayer.stop();
+                  });
+                  // dispose();
                 },
                 child: Container(
                   decoration: BoxDecoration(
@@ -2118,7 +2171,8 @@ void handleTimeout() {  // callback function
           JumpingDotsProgressIndicator(color: Color(0xff00ffff), fontSize: 70,),
           MaterialButton(
                 onPressed: (){
-                 showDialog(
+                  selectPlayer.play();
+                  showDialog(
                         context: context,
                         builder: ((context) {
                           return new AlertDialog(
@@ -2158,6 +2212,7 @@ void handleTimeout() {  // callback function
                               ),
                               new TextButton(
                                 onPressed: () {
+                                  cancel.play();
                                   widget.public?_firebaseProvider.removeUserFromPublicLobby(widget.variables.currentUser, widget.lobbyId):_firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
                                   Navigator.pop(context);
                                  _bounceController.reset();
@@ -2170,6 +2225,9 @@ void handleTimeout() {  // callback function
                   }
                   // handleTimeout();
                   _navigator.pop(context); player.stop(); widget.startBackground();
+                         Future.delayed(Duration(seconds: 1)).then((value) {
+                    cancel.stop();
+                  });
                                 },
                                 child: new Text(
                                   'Yes',
@@ -2184,7 +2242,10 @@ void handleTimeout() {  // callback function
                           );
                         }));
 
-
+                  Future.delayed(Duration(seconds: 1)).then((value) {
+                    selectPlayer.stop();
+                  });
+                  // dispose();
                 },
                 child: Container(
                   decoration: BoxDecoration(
@@ -2314,10 +2375,8 @@ void handleTimeout() {  // callback function
             ),
             GestureDetector(
                 onTap: (){
-                  setState(() {
-                    paused = false;
-                  });
-                   showDialog(
+                  selectPlayer.play();
+                  showDialog(
                         context: context,
                         builder: ((context) {
                           return new AlertDialog(
@@ -2357,15 +2416,21 @@ void handleTimeout() {  // callback function
                               ),
                               new TextButton(
                                 onPressed: () {
-                                  widget.public?_firebaseProvider.removeUserFromPublicLobby(widget.variables.currentUser, widget.lobbyId):_firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
+                                  cancel.play();
                                   Navigator.pop(context);
                                  _bounceController.reset();
                   _animationController.reset();
                   setState(() {
                     disposed = true;
                   });
+                  if(lastPlayer){
+                    stopGame();
+                  }
                   // handleTimeout();
                   _navigator.pop(context); player.stop(); widget.startBackground();
+                         Future.delayed(Duration(seconds: 1)).then((value) {
+                    cancel.stop();
+                  });
                                 },
                                 child: new Text(
                                   'Yes',
@@ -2380,8 +2445,9 @@ void handleTimeout() {  // callback function
                           );
                         }));
 
-
-                 
+                  Future.delayed(Duration(seconds: 1)).then((value) {
+                    selectPlayer.stop();
+                  });
                   // dispose();
                 },
                 child: Container(
@@ -2479,7 +2545,8 @@ void handleTimeout() {  // callback function
             SizedBox(height: height*0.05,),
              MaterialButton(
                 onPressed: (){
-                 showDialog(
+                  selectPlayer.play();
+                  showDialog(
                         context: context,
                         builder: ((context) {
                           return new AlertDialog(
@@ -2519,7 +2586,7 @@ void handleTimeout() {  // callback function
                               ),
                               new TextButton(
                                 onPressed: () {
-                                  // _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
+                                  cancel.play();
                                   Navigator.pop(context);
                                  _bounceController.reset();
                   _animationController.reset();
@@ -2531,6 +2598,9 @@ void handleTimeout() {  // callback function
                   }
                   // handleTimeout();
                   _navigator.pop(context); player.stop(); widget.startBackground();
+                         Future.delayed(Duration(seconds: 1)).then((value) {
+                    cancel.stop();
+                  });
                                 },
                                 child: new Text(
                                   'Yes',
@@ -2545,7 +2615,10 @@ void handleTimeout() {  // callback function
                           );
                         }));
 
-
+                  Future.delayed(Duration(seconds: 1)).then((value) {
+                    selectPlayer.stop();
+                  });
+                  // dispose();
                 },
                 child: Container(
                   decoration: BoxDecoration(
@@ -2584,10 +2657,8 @@ void handleTimeout() {  // callback function
             ),
             GestureDetector(
                 onTap: (){
-                  setState(() {
-                    paused = false;
-                  });
-                   showDialog(
+                  selectPlayer.play();
+                  showDialog(
                         context: context,
                         builder: ((context) {
                           return new AlertDialog(
@@ -2627,15 +2698,21 @@ void handleTimeout() {  // callback function
                               ),
                               new TextButton(
                                 onPressed: () {
-                                  // _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
+                                  cancel.play();
                                   Navigator.pop(context);
                                  _bounceController.reset();
                   _animationController.reset();
                   setState(() {
                     disposed = true;
                   });
+                  if(lastPlayer){
+                    stopGame();
+                  }
                   // handleTimeout();
                   _navigator.pop(context); player.stop(); widget.startBackground();
+                         Future.delayed(Duration(seconds: 1)).then((value) {
+                    cancel.stop();
+                  });
                                 },
                                 child: new Text(
                                   'Yes',
@@ -2650,8 +2727,9 @@ void handleTimeout() {  // callback function
                           );
                         }));
 
-
-                 
+                  Future.delayed(Duration(seconds: 1)).then((value) {
+                    selectPlayer.stop();
+                  });
                   // dispose();
                 },
                 child: Container(
@@ -2914,7 +2992,8 @@ void handleTimeout() {  // callback function
           widget.public
           ?GestureDetector(
                 onTap: (){
-                 showDialog(
+                  selectPlayer.play();
+                  showDialog(
                         context: context,
                         builder: ((context) {
                           return new AlertDialog(
@@ -2954,7 +3033,7 @@ void handleTimeout() {  // callback function
                               ),
                               new TextButton(
                                 onPressed: () {
-                                  widget.public?_firebaseProvider.removeUserFromPublicLobby(widget.variables.currentUser, widget.lobbyId):_firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
+                                  cancel.play();
                                   Navigator.pop(context);
                                  _bounceController.reset();
                   _animationController.reset();
@@ -2966,6 +3045,9 @@ void handleTimeout() {  // callback function
                   }
                   // handleTimeout();
                   _navigator.pop(context); player.stop(); widget.startBackground();
+                         Future.delayed(Duration(seconds: 1)).then((value) {
+                    cancel.stop();
+                  });
                                 },
                                 child: new Text(
                                   'Yes',
@@ -2980,7 +3062,10 @@ void handleTimeout() {  // callback function
                           );
                         }));
 
-
+                  Future.delayed(Duration(seconds: 1)).then((value) {
+                    selectPlayer.stop();
+                  });
+                  // dispose();
                 },
                 child: Container(
                   decoration: BoxDecoration(
@@ -3196,6 +3281,7 @@ void handleTimeout() {  // callback function
           });
         }
         else{
+          incorrectPlayer.play();
           setState(() {
             finalColor = colorAnimation.value;
           animate = true;
@@ -3207,6 +3293,7 @@ void handleTimeout() {  // callback function
         
       });
     });
+
     if(widget.solo){
       print('');
     }
@@ -3234,6 +3321,7 @@ void handleTimeout() {  // callback function
             defeated = true;
             
           });
+          incorrectPlayer.stop();
         });
         }
       },

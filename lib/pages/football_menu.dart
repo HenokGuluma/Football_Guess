@@ -26,12 +26,13 @@ class FootBallMenu extends StatefulWidget {
   bool editing;
   User thisUser;
   int gameCategory;
+  int priority;
   UserVariables variables;
   Function pauseBackground;
   Function startBackground;
 
 
-  FootBallMenu({this.creating, this.editing, this.public, this.uid, this.name, this.rate, this.gameCategory, this.thisUser, this.variables, this.pauseBackground, this.startBackground});
+  FootBallMenu({this.creating, this.priority, this.editing, this.public, this.uid, this.name, this.rate, this.gameCategory, this.thisUser, this.variables, this.pauseBackground, this.startBackground});
   @override
   _FootBallMenuState createState() => _FootBallMenuState();
 }
@@ -294,6 +295,8 @@ void handleTimeout() {  // callback function
                   titleText: Text('Successfully edited the lobby', style: TextStyle(color: Colors.black, fontSize: 16, fontFamily: 'Muli')),
                 );
 
+                widget.pauseBackground();
+
                  Navigator.pushAndRemoveUntil(
                               context,
                               MaterialPageRoute(
@@ -303,7 +306,7 @@ void handleTimeout() {  // callback function
               });
                 }
                 else{
-                 _firebaseProvider.addPublicLobby(lobby).then((value) {
+                 _firebaseProvider.addPublicLobby(lobby, widget.priority).then((value) {
                 
                 Flushbar(
                   title: 'Created a Lobby',

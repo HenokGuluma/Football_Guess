@@ -370,6 +370,22 @@ void handleTimeout() {  // callback function
                 joining = true;
               });
               if(widget.public){
+                if(widget.lobby.gameType == 4){
+                  _firebaseProvider.addUserToClosestPublicLobby(widget.variables.currentUser, widget.lobby.uid, widget.rate).then((value) {
+                
+                 Navigator.push(context, MaterialPageRoute( 
+          builder: (BuildContext context) {
+                         
+                          return ClosestMultiplayer(category: '0', public: false, rate: widget.lobby.rate.toInt(), lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId, startBackground: widget.startBackground,);
+                          },
+                        )).then((value) {
+                          setState(() {
+                  joining = false;
+                });
+                        });
+              });
+                }
+                else{
                  _firebaseProvider.addUserToPublicLobby(widget.variables.currentUser, widget.lobby.uid, widget.rate).then((value) {
                 widget.stopBackground();
                  Navigator.push(context, MaterialPageRoute( 
@@ -393,24 +409,16 @@ void handleTimeout() {  // callback function
                         });
               });
               }
+              }
               else{
-                 _firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobby.uid, widget.rate).then((value) {
+
+                if(widget.lobby.gameType == 4){
+                  _firebaseProvider.addUserToClosestLobby(widget.variables.currentUser, widget.lobby.uid, widget.rate).then((value) {
                 
                  Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
-                          if(widget.lobby.gameType == 0){
-                            return Footballers(category: categoryId[widget.lobby.gameCategory], public: false, lobbyId: widget.lobby.uid, solo: false, creatorId: widget.lobby.creatorId, variables: widget.variables, categoryNo: widget.lobby.gameCategory, startBackground: widget.startBackground,);
-                          }
-                          else if (widget.lobby.gameType ==1){
-                            return BlackJackMultiplayer(category: '0', public: false, lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId, startBackground: widget.startBackground,);
-                          }
-                          else if (widget.lobby.gameType ==2){
-                            return BankeruMultiplayer(category: '0',public: false, lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId, startBackground: widget.startBackground,);
-                          }
-                          else if (widget.lobby.gameType == 3){
-                            return SpinningBaby(public: widget.public, category: '0', lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId, startBackground: widget.startBackground,);
-                          }
-                          return ClosestMultiplayer(category: '0',public: false, lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId, startBackground: widget.startBackground,);
+                         
+                          return ClosestMultiplayer(category: '0', public: false, rate: widget.lobby.rate.toInt(), lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId, startBackground: widget.startBackground,);
                           },
                         )).then((value) {
                           setState(() {
@@ -418,6 +426,33 @@ void handleTimeout() {  // callback function
                 });
                         });
               });
+                }
+                else{
+                  _firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobby.uid, widget.rate).then((value) {
+                
+                 Navigator.push(context, MaterialPageRoute( 
+          builder: (BuildContext context) {
+                          if(widget.lobby.gameType == 0){
+                            return Footballers(category: categoryId[widget.lobby.gameCategory], rate: widget.lobby.rate.toInt(), public: false, lobbyId: widget.lobby.uid, solo: false, creatorId: widget.lobby.creatorId, variables: widget.variables, categoryNo: widget.lobby.gameCategory, startBackground: widget.startBackground,);
+                          }
+                          else if (widget.lobby.gameType ==1){
+                            return BlackJackMultiplayer(category: '0', rate: widget.lobby.rate.toInt(), public: false, lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId, startBackground: widget.startBackground,);
+                          }
+                          else if (widget.lobby.gameType ==2){
+                            return BankeruMultiplayer(category: '0', rate: widget.lobby.rate.toInt(),public: false, lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId, startBackground: widget.startBackground,);
+                          }
+                          else if (widget.lobby.gameType == 3){
+                            return SpinningBaby(public: widget.public, rate: widget.lobby.rate.toInt(),category: '0', lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId, startBackground: widget.startBackground,);
+                          }
+                          return ClosestMultiplayer(category: '0', public: false, rate: widget.lobby.rate.toInt(), lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId, startBackground: widget.startBackground,);
+                          },
+                        )).then((value) {
+                          setState(() {
+                  joining = false;
+                });
+                        });
+              });
+                } 
               }
 
               User newUser = widget.variables.currentUser;

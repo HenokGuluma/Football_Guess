@@ -18,6 +18,7 @@ import 'package:instagram_clone/pages/add_public_lobby.dart';
 import 'package:instagram_clone/pages/football_menu.dart';
 import 'package:instagram_clone/pages/footballers.dart';
 import 'package:instagram_clone/pages/insta_profile_screen.dart';
+import 'package:instagram_clone/pages/join_lobby.dart';
 import 'package:instagram_clone/pages/lobby_details.dart';
 import 'package:instagram_clone/pages/lobby_menu.dart';
 import 'package:just_audio/just_audio.dart';
@@ -27,8 +28,9 @@ class LobbyCategory extends StatefulWidget {
  
  UserVariables variables;
  Function stopBackground;
+ bool public;
 
- LobbyCategory({this.variables, this.stopBackground});
+ LobbyCategory({this.variables, this.stopBackground, this.public});
   @override
   _LobbyCategoryState createState() => _LobbyCategoryState();
 }
@@ -419,7 +421,7 @@ getPublicLobbies(){
         print(widget.stopBackground); print(' is the background');
          Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
-                          return LobbyMenu(variables: widget.variables, stopBackground: widget.stopBackground, gameCategory: category, gameType: type,);
+                          return JoinLobby(variables: widget.variables, stopBackground: widget.stopBackground, gameCategory: category, gameType: type,);
                         },
                         ));
                          Future.delayed(Duration(seconds: 1)).then((value) {

@@ -10,11 +10,12 @@ class Lobby {
   int creationDate;
   String creatorName;
   String creatorId;
+  int winnings;
   Map<String, dynamic> creator;
   int gameType;
   int gameCategory;
 
-   Lobby({this.uid, this.activeUser, this.name, this.rate, this.creationDate, this.players, this.gameCategory, this.creator, this.gameType, this.creatorId, this.creatorName});
+   Lobby({this.uid, this.activeUser, this.winnings, this.name, this.rate, this.creationDate, this.players, this.gameCategory, this.creator, this.gameType, this.creatorId, this.creatorName});
 
     Map toMap(Lobby lobby) {
     var data = Map<String, dynamic>();
@@ -22,6 +23,7 @@ class Lobby {
     data['name'] = lobby.name;
     data['activeUser'] = lobby.activeUser;
     data['rate'] = lobby.rate;
+    data['winnings'] = lobby.winnings;
     data['players'] = lobby.players;
     data['creationDate'] = lobby.creationDate;
     data['creatorName'] = lobby.creatorName;
@@ -38,6 +40,7 @@ class Lobby {
     this.activeUser = mapData['activeUser'];
     this.rate = mapData['rate'];
     this.players = mapData['players'];
+    this.winnings = mapData['winnings'];
     this.creationDate = mapData['creationDate'];
     this.creatorId = mapData['creatorId'];
     this.creatorName = mapData['creatorName'];
@@ -50,6 +53,7 @@ class Lobby {
       this.uid = doc['uid'];
       this.name = doc['name'];
       this.rate = doc['rate'];
+      this.winnings = doc['winnings'];
       this.activeUser = doc['activeUser'];
       this.players = doc['players'];
       this.creationDate = doc['creationDate'];

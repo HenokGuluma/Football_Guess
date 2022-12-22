@@ -264,6 +264,8 @@ flutter:
     - assets/sound-effects/this-girl.mp3
     - assets/sound-effects/you-like-it.mp3
     - assets/sound-effects/correct.mp3
+    - assets/sound-effects/wrong-answer.mp3
+    - assets/sound-effects/winner.mp3
     - assets/jackpot.png
     - assets/withdraw.png
 

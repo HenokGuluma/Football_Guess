@@ -442,7 +442,7 @@ void handleTimeout() {  // callback function
                Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           // return SelectLobby();
-                          return  LobbyCategory(variables: widget.variables, stopBackground: widget.pauseBackground);
+                          return  LobbyCategory(variables: widget.variables, stopBackground: widget.pauseBackground, public: true,);
                         },
                         ));
                          Future.delayed(Duration(seconds: 1)).then((value) {
@@ -488,7 +488,7 @@ void handleTimeout() {  // callback function
           ),
 
           SizedBox(
-            height: searchedLobby!=null?height*0.07:height*0.12,
+            height: searchedLobby!=null?height*0.03:height*0.12,
           ),
          
         Container(
@@ -600,7 +600,7 @@ void handleTimeout() {  // callback function
       },
       child: Container(
         width: width*0.5,
-        height: height*0.3,
+        height: height*0.4,
         child: Column(
           children: [
             SizedBox(
@@ -626,12 +626,14 @@ void handleTimeout() {  // callback function
           )],
               ),
             ),
-                ],
+
+             ],
               )
             ),
             SizedBox(
               height: height*0.03,
             ),
+            
             Container(
               width: width*0.45,
               child: Center(
@@ -646,7 +648,31 @@ void handleTimeout() {  // callback function
               child: Center(
                 child: Text(snapshot.uid+ '(' + snapshot.rate.toString() + ' ETB)', style: TextStyle(fontFamily: 'Muli', color: Colors.white, fontSize: 16, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic), overflow: TextOverflow.ellipsis,),
               ),
-            )
+            ),
+            SizedBox(
+              height: height*0.03,
+            ),
+
+            MaterialButton(
+              onPressed: (){
+                setState(() {
+                  controller.text = '';
+                  searchedLobby = null;
+                });
+              },
+              child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.2,
+              height: height*0.05,
+              child: Center(
+                child: Text('Back', style: TextStyle(color: Colors.black, fontSize: 16, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            ),
+              )
+               ,
           ],
         ),
       ),

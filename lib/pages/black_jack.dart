@@ -838,8 +838,8 @@ void handleTimeout() {  // callback function
              SizedBox(height: height*0.05,),
             GestureDetector(
             onTap: (){
-              
-              showDialog(
+                  selectPlayer.play();
+                  showDialog(
                         context: context,
                         builder: ((context) {
                           return new AlertDialog(
@@ -879,15 +879,21 @@ void handleTimeout() {  // callback function
                               ),
                               new TextButton(
                                 onPressed: () {
-                                  
+                                  cancel.play();
                                   Navigator.pop(context);
-                                //  _bounceController.reset();
+                  //                _bounceController.reset();
                   // _animationController.reset();
                   setState(() {
                     disposed = true;
                   });
+                  if(lastPlayer){
+                    stopGame();
+                  }
                   // handleTimeout();
-                  _navigator.pop(context);
+                  _navigator.pop(context); player.stop();
+                         Future.delayed(Duration(seconds: 1)).then((value) {
+                    cancel.stop();
+                  });
                                 },
                                 child: new Text(
                                   'Yes',
@@ -902,9 +908,12 @@ void handleTimeout() {  // callback function
                           );
                         }));
 
-             
-            },
-            child: Container(
+                  Future.delayed(Duration(seconds: 1)).then((value) {
+                    selectPlayer.stop();
+                  });
+                  // dispose();
+                },
+                child: Container(
               decoration: BoxDecoration(
                 color: Color(0xffff2389),
                 borderRadius: BorderRadius.circular(20)
@@ -1079,7 +1088,7 @@ void handleTimeout() {  // callback function
               )
             ), 
           SizedBox(height: height*0.05,),
-            GestureDetector(
+            /* GestureDetector(
             onTap: (){
               Navigator.pop(context);
             },
@@ -1094,7 +1103,7 @@ void handleTimeout() {  // callback function
                 child: Text('Submit', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
               ),
             ),
-            ),
+            ), */
            
             
             ])
