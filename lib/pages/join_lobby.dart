@@ -18,6 +18,7 @@ import 'package:instagram_clone/pages/add_public_lobby.dart';
 import 'package:instagram_clone/pages/football_menu.dart';
 import 'package:instagram_clone/pages/footballers.dart';
 import 'package:instagram_clone/pages/insta_profile_screen.dart';
+import 'package:instagram_clone/pages/joining.dart';
 import 'package:instagram_clone/pages/lobby_details.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:progress_indicators/progress_indicators.dart';
@@ -56,8 +57,8 @@ class _JoinLobbyState extends State<JoinLobby>
 
   List<String> menuImages = ['assets/football2.jpg', 'assets/football3.jpg','assets/football4.jpg',  'assets/football1.png'];
   List<String> modes = ['assets/football2.jpg', 'assets/football3.jpg','assets/football4.jpg',  'assets/football1.png', 'assets/blackjack-option.png', 'assets/bank_vault.png', 'assets/roulette.png', 'assets/jackpot.png'];
-  List<String> modeNames = ['Rapid-Jersey', 'Rapid-Goals', 'Rapid-Age', 'Rapid-Height', 'BlackJack', 'Bankeru', 'Spinner-Wheel', 'JackPot',];
-  List<String> rateChoices = ['100 ETB', '50 ETB', '20 ETB', '5 ETB'];
+  List<String> modeNames = ['Rapid-Jersey', 'Rapid-Goals', 'Rapid-Age', 'Rapid-Height', 'BlackJack', 'Bankeru', 'Spinner', 'JackPot',];
+  List<int> rateChoices = [100, 50, 20, 5];
   List<String> rateNames = ['Legends', 'Pro', 'Plus', 'Basic'];
   AnimationController _animationController;
   AnimationController _bounceController;
@@ -84,6 +85,7 @@ class _JoinLobbyState extends State<JoinLobby>
   
   @override
   void initState() {
+    print(' game type is'); print(widget.gameType);
     super.initState();
     _animationController = AnimationController(vsync: this, duration: Duration(milliseconds: 500), upperBound: 1.2, lowerBound: 1);
      _animationController.repeat(reverse: true);
@@ -371,11 +373,11 @@ getPublicLobbies(){
       onTap: (){
         player.play();
         print(widget.stopBackground); print(' is the background');
-        /*  Navigator.push(context, MaterialPageRoute( 
+         Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
-                          return LobbyDetails(variables: widget.variables, lobby: lobby, public: true, stopBackground: widget.stopBackground);
+                          return Joining(variables: widget.variables, rate: rateChoices[index], stopBackground: widget.stopBackground, gameCategory: widget.gameCategory, gameType: widget.gameType);
                         },
-                        )); */
+                        ));
                          Future.delayed(Duration(seconds: 1)).then((value) {
                           player.stop();
                         });
@@ -397,7 +399,7 @@ getPublicLobbies(){
                 shape: BoxShape.circle,
                 color: Colors.black,
                 image: DecorationImage(
-                  image: AssetImage(widget.gameType==0?menuImages[widget.gameCategory]:modes[widget.gameType]),
+                  image: AssetImage(widget.gameType==0?menuImages[widget.gameCategory]:modes[widget.gameType+3]),
                   fit: BoxFit.cover
                 ),
                  boxShadow: [BoxShadow(
@@ -416,7 +418,7 @@ getPublicLobbies(){
             Container(
               width: width*0.45,
               child: Center(
-                child: Text(widget.gameType==0?modeNames[widget.gameCategory] + rateNames[index]:modeNames[widget.gameType] + rateNames[index], style: TextStyle(fontFamily: 'Muli', color: Color(0xffff4399), fontSize: 20, fontWeight: FontWeight.w900), overflow: TextOverflow.ellipsis,),
+                child: Text(widget.gameType==0?modeNames[widget.gameCategory] + ' '+ rateNames[index]:modeNames[(widget.gameType)+3] + ' '+ rateNames[index], style: TextStyle(fontFamily: 'Muli', color: Color(0xffff4399), fontSize: 18, fontWeight: FontWeight.w900), overflow: TextOverflow.ellipsis,),
               ),
             ),
             SizedBox(

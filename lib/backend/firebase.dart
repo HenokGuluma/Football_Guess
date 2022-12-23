@@ -415,6 +415,16 @@ Future<User> fetchUserDetailsById(String uid) async {
     return;
   }
 
+  Future<Lobby> getPublicLobbyWithSpecs(int gameType, int gameCategory, int rate) async{
+    QuerySnapshot snap = await _firestore.collection('publicLobbies')
+    .where('active', isEqualTo: false)
+    .where('gameType', isEqualTo: gameType)
+    .where('gameCategory', isEqualTo: gameCategory)
+    .where('rate', isEqualTo: rate)
+    .limit(1).get();
+    return Lobby.fromDoc(snap.docs[0]);
+  }
+
    Future<void> addUserToBankeruLobby (User user, String lobbyId, int rate) async{
     DocumentSnapshot snap = await _firestore.collection('lobbies').doc(lobbyId).get();
     List<dynamic> playerList = snap.data()['players'];
