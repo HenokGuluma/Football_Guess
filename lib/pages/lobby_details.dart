@@ -33,8 +33,9 @@ class LobbyDetails extends StatefulWidget {
  Function stopBackground;
  bool public;
  int rate;
+ Function returnBack;
 
- LobbyDetails({this.variables, this.lobby, this.rate, this.startBackground, this.stopBackground, this.public});
+ LobbyDetails({this.variables, this.lobby, this.returnBack, this.rate, this.startBackground, this.stopBackground, this.public});
   @override
   _LobbyDetailsState createState() => _LobbyDetailsState();
 }
@@ -345,6 +346,7 @@ void handleTimeout() {  // callback function
             onTap: (){
               cancel.play();
               Navigator.pop(context);
+              widget.returnBack();
               Future.delayed(Duration(seconds: 1)).then((value) {
                 cancel.stop();
               });

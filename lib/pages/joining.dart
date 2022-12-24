@@ -66,7 +66,11 @@ getPublicLobby(){
   _firebaseProvider.getPublicLobbyWithSpecs(widget.gameType, widget.gameCategory, widget.rate).then((lobby) {
     setState(() {
       publicLobby = lobby;
-      loading = false;
+    });
+    Future.delayed(Duration(milliseconds: 500)).then((value) {
+      setState(() {
+        loading = false;
+      });
     });
   });
 }
@@ -78,14 +82,14 @@ void startSkipTimer() {
     oneSec,
     (Timer timer) {
       
-    if(!loading && publicLobby!=null && !navigated){
+    if(publicLobby!=null && !navigated){
       setState(() {
         navigated = true;
       });
         // print('eeerrrrooooorrrrrrrrr');
          Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
-                          return LobbyDetails(variables: widget.variables, lobby: publicLobby, rate: widget.rate, public: true, stopBackground: widget.stopBackground,);
+                          return LobbyDetails(variables: widget.variables, returnBack: returnBack, lobby: publicLobby, rate: widget.rate, public: true, stopBackground: widget.stopBackground,);
                         },
                         ));
       }
@@ -103,6 +107,10 @@ void startSkipTimer() {
     super.dispose();
 
   }
+
+  returnBack(){
+    Navigator.pop(context);
+   }
    
 
   @override
@@ -132,17 +140,25 @@ void startSkipTimer() {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
            
-             Center(
+             loading
+             ?Center(
               child: Text(
                 'Searching for available lobby...', style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 25, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic), textAlign: TextAlign.center
               ),
-            ),
+            )
+            :Center(
+              child: Text(
+                'No available lobbies at the time.', style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 25, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic), textAlign: TextAlign.center
+              ),
+            )
+            ,
             SizedBox(
               height: height*0.1,
             ),
             GestureDetector(
               onTap: (){
                 Navigator.pop(context);
+                
               },
             child: Container(
               decoration: BoxDecoration(

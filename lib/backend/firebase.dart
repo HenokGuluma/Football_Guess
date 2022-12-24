@@ -241,6 +241,8 @@ Future<User> fetchUserDetailsById(String uid) async {
     setMap['betsPlaced'] = {};
     setMap['roundCompleted'] = false;
     setMap['betLeft'] = 0;
+    setMap['initialCards'] = [];
+    setMap['finalCard'] = null;
     setMap['vault'] = 0;
     print(setMap);
     await _firestore.collection('users').doc(creatorId.uid).collection('lobby').doc(id).set(setMap);
@@ -422,7 +424,11 @@ Future<User> fetchUserDetailsById(String uid) async {
     .where('gameCategory', isEqualTo: gameCategory)
     .where('rate', isEqualTo: rate)
     .limit(1).get();
-    return Lobby.fromDoc(snap.docs[0]);
+    Lobby returnedLobby;
+    if (snap.docs.length!=0){
+      returnedLobby = Lobby.fromDoc(snap.docs[0]);
+    }
+    return returnedLobby;
   }
 
    Future<void> addUserToBankeruLobby (User user, String lobbyId, int rate) async{
