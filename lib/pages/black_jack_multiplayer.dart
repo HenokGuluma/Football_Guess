@@ -29,9 +29,10 @@ class BlackJackMultiplayer extends StatefulWidget {
   bool solo;
   UserVariables variables;
   Function startBackground;
+  Function returnBack;
  
   BlackJackMultiplayer({
-    this.category, this.lobbyId, this.public, this.rate, this.solo, this.variables, this.startBackground, this.creatorId, this.categoryNo,
+    this.category, this.lobbyId, this.returnBack, this.public, this.rate, this.solo, this.variables, this.startBackground, this.creatorId, this.categoryNo,
   });
 
   @override
@@ -855,7 +856,7 @@ Widget finalScreen(var width, var height, AsyncSnapshot snapshot){
                     disposed = true;
                   });
                   // handleTimeout();
-                  _navigator.pop(context);
+                  _navigator.pop(context);  widget.returnBack();
                   Future.delayed(Duration(seconds: 1)).then((value) {
                 cancel.stop();
                 });
@@ -976,7 +977,7 @@ Widget finalScreen(var width, var height, AsyncSnapshot snapshot){
                     disposed = true;
                   });
                   // handleTimeout();
-                  _navigator.pop(context);
+                  _navigator.pop(context);  widget.returnBack();
                   Future.delayed(Duration(seconds: 1)).then((value) {
                 cancel.stop();
                 });
@@ -1279,7 +1280,7 @@ Widget startScreen(var width, var height, AsyncSnapshot snapshot){
                     disposed = true;
                   });
                   // handleTimeout();
-                  _navigator.pop(context); player.stop(); widget.startBackground();
+                  _navigator.pop(context); player.stop(); widget.startBackground(); widget.returnBack();
                                 },
                                 child: new Text(
                                   'Yes',
@@ -1873,7 +1874,7 @@ Widget startScreen(var width, var height, AsyncSnapshot snapshot){
                     disposed = true;
                   });
                   // handleTimeout();
-                  _navigator.pop(context);
+                  _navigator.pop(context);  widget.returnBack();
                                 },
                                 child: new Text(
                                   'Yes',

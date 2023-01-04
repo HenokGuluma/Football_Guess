@@ -314,6 +314,8 @@ void handleTimeout() {  // callback function
                   titleText: Text('Successfully created the lobby', style: TextStyle(color: Colors.black, fontSize: 16, fontFamily: 'Muli')),
                 );
 
+                 widget.pauseBackground();
+
                  Navigator.pushAndRemoveUntil(
                               context,
                               MaterialPageRoute(
@@ -335,6 +337,8 @@ void handleTimeout() {  // callback function
                   titleText: Text('Successfully edited the lobby', style: TextStyle(color: Colors.black, fontSize: 16, fontFamily: 'Muli')),
                 );
 
+                 widget.pauseBackground();
+
                  Navigator.pushAndRemoveUntil(
                               context,
                               MaterialPageRoute(
@@ -347,7 +351,7 @@ void handleTimeout() {  // callback function
                   _firebaseProvider.addLobbyById(widget.uid, lobby, widget.thisUser).then((value) {
                 widget.variables.setLobby(lobby);
                 
-                
+                 widget.pauseBackground();
                 Flushbar(
                   title: 'Created a Lobby',
                   backgroundColor: Color(0xff00ffff),
@@ -406,7 +410,7 @@ void handleTimeout() {  // callback function
         else{
           // _fadeController.forward();
           player.play();
-          widget.pauseBackground();
+          // widget.pauseBackground();
           Future.delayed(Duration(milliseconds: 300)).then((value) {
               Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {

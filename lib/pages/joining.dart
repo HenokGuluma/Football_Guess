@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:async/async.dart';
 import 'package:animated_check/animated_check.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -13,12 +14,17 @@ import 'package:flutter_countdown_timer/countdown.dart';
 import 'package:instagram_clone/backend/firebase.dart';
 import 'package:instagram_clone/main.dart';
 import 'package:instagram_clone/models/lobby.dart';
+import 'package:instagram_clone/models/user.dart';
 import 'package:instagram_clone/pages/add_lobby.dart';
 import 'package:instagram_clone/pages/add_public_lobby.dart';
+import 'package:instagram_clone/pages/bankeru_multiplayer.dart';
+import 'package:instagram_clone/pages/black_jack_multiplayer.dart';
+import 'package:instagram_clone/pages/closest_number_multiplayer.dart';
 import 'package:instagram_clone/pages/football_menu.dart';
 import 'package:instagram_clone/pages/footballers.dart';
 import 'package:instagram_clone/pages/insta_profile_screen.dart';
 import 'package:instagram_clone/pages/lobby_details.dart';
+import 'package:instagram_clone/pages/spinning_wheel.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:progress_indicators/progress_indicators.dart';
 
@@ -29,6 +35,7 @@ class Joining extends StatefulWidget {
  int gameType;
  int gameCategory;
  int rate;
+ 
 
  Joining({this.variables, this.rate, this.stopBackground, this.gameCategory, this.gameType});
   @override
@@ -42,6 +49,7 @@ class _JoiningState extends State<Joining>
   List<String> modes = ['assets/football2.jpg', 'assets/football3.jpg','assets/football4.jpg',  'assets/football1.png', 'assets/blackjack-option.png', 'assets/bank_vault.png', 'assets/roulette.png', 'assets/jackpot.png'];
   List<String> modeNames = ['Rapid-Jersey', 'Rapid-Goals', 'Rapid-Age', 'Rapid-Height', 'BlackJack', 'Bankeru', 'Spinner', 'JackPot',];
   List<String> rateChoices = ['100 ETB', '50 ETB', '20 ETB', '5 ETB'];
+   List<String> categoryId = ['jersey', 'goals', 'age', 'height'];
   List<String> rateNames = ['Legends', 'Pro', 'Plus', 'Basic'];
   FirebaseProvider _firebaseProvider = FirebaseProvider();
   Lobby publicLobby;
@@ -49,6 +57,8 @@ class _JoiningState extends State<Joining>
   Timer _timer;
   bool disposed = false;
   bool navigated = false;
+    final cancel = AudioPlayer();
+  final selectPlayer = AudioPlayer();
   
   
   @override
@@ -57,6 +67,16 @@ class _JoiningState extends State<Joining>
     super.initState();
     startSkipTimer();
     getPublicLobby();
+    setupSound();
+  }
+
+   Future<void> setupSound() async{
+    await selectPlayer.setAsset('assets/sound-effects/option-click-confirm.wav');
+    await cancel.setAsset('assets/sound-effects/option-click.wav');
+    selectPlayer.setVolume(0.1);
+    cancel.setVolume(0.1);
+    cancel.play();
+    cancel.stop();
   }
 
  
@@ -75,6 +95,26 @@ getPublicLobby(){
   });
 }
 
+   void showFlushbar(BuildContext context) {
+    Flushbar(
+      padding: EdgeInsets.all(10),
+      borderRadius: 0,
+      //flushbarPosition: FlushbarPosition.,
+      backgroundGradient: LinearGradient(
+        colors: [Color(0xff00ffff), Color(0xff00ffff)],
+        stops: [0.6, 1],
+      ),
+      duration: Duration(seconds: 2),
+      dismissDirection: FlushbarDismissDirection.HORIZONTAL,
+      forwardAnimationCurve: Curves.fastLinearToSlowEaseIn,
+      messageText: Center(
+          child: Text(
+        'You do not have enough balance in your wallet to join this lobby.',
+        style: TextStyle(fontFamily: 'Muli', color: Colors.black), textAlign: TextAlign.center
+      )),
+    )..show(context);
+  }
+
 void startSkipTimer() {
   
   const oneSec = const Duration(milliseconds: 100);
@@ -82,16 +122,62 @@ void startSkipTimer() {
     oneSec,
     (Timer timer) {
       
-    if(publicLobby!=null && !navigated){
+    if(publicLobby.uid!=null && !navigated){
       setState(() {
         navigated = true;
       });
-        // print('eeerrrrooooorrrrrrrrr');
-         Navigator.push(context, MaterialPageRoute( 
+        selectPlayer.play();
+              print(publicLobby.gameCategory); print(' is the category');
+              if(widget.variables.currentUser.coins < publicLobby.rate.toInt()){
+                showFlushbar(context);
+              }
+              else {
+                if(publicLobby.gameType == 4){
+                  _firebaseProvider.addUserToClosestPublicLobby(widget.variables.currentUser, publicLobby.uid, widget.rate).then((value) {
+                
+                 Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
-                          return LobbyDetails(variables: widget.variables, returnBack: returnBack, lobby: publicLobby, rate: widget.rate, public: true, stopBackground: widget.stopBackground,);
-                        },
-                        ));
+                         
+                          return ClosestMultiplayer(category: '0', public: true,  returnBack: returnBack, rate: publicLobby.rate.toInt(), lobbyId: publicLobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: publicLobby.creatorId);
+                          },
+                        )).then((value) {
+                         
+                        });
+              });
+                }
+                else{
+                 _firebaseProvider.addUserToPublicLobby(widget.variables.currentUser, publicLobby.uid, widget.rate).then((value) {
+                widget.stopBackground();
+                 Navigator.push(context, MaterialPageRoute( 
+          builder: (BuildContext context) {
+                          if(publicLobby.gameType == 0){
+                            return Footballers(public: true, returnBack: returnBack, category: categoryId[publicLobby.gameCategory], lobbyId: publicLobby.uid, solo: false, creatorId: publicLobby.creatorId, variables: widget.variables, categoryNo: publicLobby.gameCategory, rate: publicLobby.rate.toInt(),);
+                          }
+                          else if (publicLobby.gameType ==1){
+                           
+                            return BlackJackMultiplayer(public: true, returnBack: returnBack, category: '0', lobbyId: publicLobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: publicLobby.creatorId, rate: publicLobby.rate.toInt(),);
+                          }
+                          else if (publicLobby.gameType ==2){
+                            return BankeruMultiplayer(public: true, returnBack: returnBack, category: '0', lobbyId: publicLobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: publicLobby.creatorId, rate: publicLobby.rate.toInt());
+                          }
+                          return SpinningBaby(public: true, returnBack: returnBack, category: '0', lobbyId: publicLobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: publicLobby.creatorId, rate: publicLobby.rate.toInt());
+                          },
+                        )).then((value) {
+                         
+                        });
+              });
+              }
+              }
+              
+
+              User newUser = widget.variables.currentUser;
+              int wallet = newUser.coins;
+              wallet = wallet - widget.rate;
+              widget.variables.setCurrentUser(newUser);
+              
+              Future.delayed(Duration(seconds: 1)).then((value) {
+                selectPlayer.stop();
+              });
       }
       else{
         
@@ -110,6 +196,7 @@ void startSkipTimer() {
 
   returnBack(){
     Navigator.pop(context);
+    print('returnedddd');
    }
    
 
@@ -146,9 +233,15 @@ void startSkipTimer() {
                 'Searching for available lobby...', style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 25, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic), textAlign: TextAlign.center
               ),
             )
-            :Center(
+            :publicLobby==null
+            ?Center(
               child: Text(
                 'No available lobbies at the time.', style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 25, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic), textAlign: TextAlign.center
+              ),
+            )
+            :Center(
+              child: Text(
+                'Joining the lobby momentarily', style: TextStyle(color: Color(0xff00ffff), fontFamily: 'Muli', fontSize: 25, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic), textAlign: TextAlign.center
               ),
             )
             ,

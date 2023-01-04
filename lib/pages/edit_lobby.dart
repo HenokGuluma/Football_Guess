@@ -95,7 +95,7 @@ _animationController.addListener(() {
      });
      _nameController.text = widget.lobby.name;
      _uidController.text = widget.lobby.uid;
-     _rateController.text = widget.lobby.rate.toString();
+     _rateController.text = widget.lobby.rate.toInt().toString();
     gameCategory = widget.lobby.gameCategory;
     gameType = widget.lobby.gameType;
   }

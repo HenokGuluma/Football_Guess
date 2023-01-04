@@ -31,9 +31,10 @@ class BankeruMultiplayer extends StatefulWidget {
   bool public;
   UserVariables variables;
   Function startBackground;
+  Function returnBack;
  
   BankeruMultiplayer({
-    this.category, this.lobbyId, this.public, this.rate, this.startBackground, this.solo, this.variables, this.creatorId, this.categoryNo,
+    this.category, this.lobbyId, this.returnBack, this.public, this.rate, this.startBackground, this.solo, this.variables, this.creatorId, this.categoryNo,
   });
 
   @override
@@ -62,6 +63,7 @@ class BankeruMultiplayerState extends State<BankeruMultiplayer>
   Map<int, dynamic> cardMap = {
     0: 'A', 10: 'J', 11: 'Q', 12: 'K'
   };
+
 
   Map<int, Color> colorMap = {
     0: Color(0xffffffff), 1: Color(0xfffffff)
@@ -101,6 +103,9 @@ class BankeruMultiplayerState extends State<BankeruMultiplayer>
       {'name': 'Mohammed Salah', 'age': 30, 'image':'assets/Mohammed-Salah.png', 'height': 1.77, 'jersey': 10, 'goals': 306 },
     ]
   ];
+
+  List<Map<String, dynamic>> tempCards = [{'value': 12, 'type': 0}, {'value': 9, 'type': 2}];
+  Map<String, dynamic> tempCard = {'value': 6, 'type': 1};
 
   List<String> menuImages = ['assets/football2.jpg', 'assets/football3.jpg','assets/football4.jpg',  'assets/football1.png'];
 
@@ -154,6 +159,9 @@ class BankeruMultiplayerState extends State<BankeruMultiplayer>
   List<dynamic> playerListOnline = [];
   List<Widget> drawnCards = [];
   Timer _timer;
+  Timer _gameTimer;
+  Timer turnTimer;
+  Timer _skipTimer;
   int _start = 800;
   bool randomizing = true;
   bool showRandomizing = true;
@@ -161,6 +169,8 @@ class BankeruMultiplayerState extends State<BankeruMultiplayer>
    List<Map<String, dynamic>> cardValues = [];
    List<dynamic> onlineCardValues = [];
    Map<String, dynamic> middleCard = {};
+   List<Map<String, dynamic>> displayCards = [];
+   Map<String ,dynamic> displayMiddleCard = {};
    dynamic onlinefinalCard = {};
    bool middleCardDrawn = false;
    int score = 0;
@@ -179,6 +189,7 @@ class BankeruMultiplayerState extends State<BankeruMultiplayer>
   int skipTimer = 10;
   bool shouldStartSkipTimer = false;
   bool startedSkipTimer = false;
+  bool shouldCheckBet = true;
   bool skipButton = false;
   bool turnCancelled = false;
   bool skipped = false;
@@ -186,7 +197,17 @@ class BankeruMultiplayerState extends State<BankeruMultiplayer>
   bool shouldRandomize = false;
   bool didRandomize = false;
   int bankVault = 0;
-  int betLeft = 0;
+  bool timeAdjusted = false;
+  bool timeLeftAdjusted = false;
+  int betLeftOnline = 0;
+  int betLeft = 5;
+  int displayWinnings = 0;
+  bool initialStart = true;
+  int playerTurns = 0;
+  int betAmount = 0;
+  bool emptyScreen = false;
+  var focusNode = FocusNode();
+  bool emptyScreenToggled = false;
 
 
  @override
@@ -238,7 +259,9 @@ _bounceController.addListener(() {
     _colorController.dispose();
     // startTimer();
     _timer.cancel();
-   
+   _gameTimer.cancel();
+   turnTimer.cancel();
+   _skipTimer.cancel();
     super.dispose();
   }
 
@@ -253,17 +276,22 @@ _bounceController.addListener(() {
   }
 
   Future<void> changeActiveUser(String userId) async{
+    var increment = FieldValue.increment(1);
     if(widget.public){
-      await _firestore.collection('publicLobbies').doc(widget.lobbyId).update({'activeUser': userId});
+      await _firestore.collection('publicLobbies').doc(widget.lobbyId).update({'activeUser': userId, 'playerTurns': increment});
     }
     else{
-      await _firestore.collection('lobbies').doc(widget.lobbyId).update({'activeUser': userId});
+      await _firestore.collection('lobbies').doc(widget.lobbyId).update({'activeUser': userId, 'playerTurns': increment});
     }
     setState(() {
       skipTimer = 10;
-      shouldSkip = true;
       switchedTurn = false;
       switchTurn = false;
+    });
+    Future.delayed(Duration(seconds: 2)).then((value) {
+      setState(() {
+        shouldSkip = true;
+      });
     });
    return; 
   }
@@ -290,13 +318,22 @@ _bounceController.addListener(() {
         missedChance = missedChance+1;
       });
     }
-    changeActiveUser(nextUser);
-    if(playerList.indexOf(player) == playerList.length-1 || betLeft == 0){
+    print(' turn is '); print(playerTurns);
+    print(' length is '); print(playerList.length -1 );
+    if(playerTurns == playerList.length-1 || betLeft == 0){
       roundCompleteLobby(widget.variables.currentUser.uid, widget.lobbyId);
+      int cardValue1 = rng.nextInt(13);
+      int cardType1 = rng.nextInt(3);
+      finalCard({'type': cardType1, 'value': cardValue1});
+       Future.delayed(Duration(seconds: 6)).then((value) {
+        resetLobby(widget.variables.currentUser.uid, widget.lobbyId, bankVault);
+      });
     }
      else{
       print(' not randomizing');
     }
+    changeActiveUser(nextUser);
+    
   }
 
 
@@ -322,6 +359,80 @@ _bounceController.addListener(() {
     return;
   }
 
+  Future<void> handleWin(int winning) async{
+    int added = (winning*0.95*2).toInt();
+    var increment = FieldValue.increment(added);
+    var decrement = FieldValue.increment(0-winning);
+    setState(() {
+      displayWinnings = added;
+      winnings = added;
+    });
+    print(' let us goooooo.');
+     if(widget.public){
+      await _firestore.collection('publicLobbies').doc(widget.lobbyId).update({'vault': decrement});
+    }
+    else{
+      await _firestore.collection('lobbies').doc(widget.lobbyId).update({'vault': decrement});
+    }
+    
+    await _firestore.collection('users').doc(widget.variables.currentUser.uid).update({'coins': increment});
+
+  }
+
+   Future<void> handleLose(int winnings) async{
+    var increment = FieldValue.increment(winnings);
+    var decrement = FieldValue.increment(0-winnings);
+     if(widget.public){
+      await _firestore.collection('publicLobbies').doc(widget.lobbyId).update({'vault': increment});
+    }
+    else{
+      await _firestore.collection('lobbies').doc(widget.lobbyId).update({'vault': increment});
+    }
+    
+    // await _firestore.collection('users').doc(widget.variables.currentUser.uid).update({'coins': decrement});
+  }
+
+  Future<void> resetLobby (String userId, String lobbyId, int vault) async{
+
+    if(widget.public){
+      await _firestore.collection('publicLobbies').doc(lobbyId).update({'roundCompleted': false, 'betsPlaced': {}, 'playerTurns': 0, 'betsLeft': vault, 'initialCards': [], 'finalCard': {}, 'active': false, });
+    }
+    else{
+      await _firestore.collection('lobbies').doc(lobbyId).update({'roundCompleted': false, 'betsPlaced': {}, 'playerTurns': 0,'betsLeft': vault, 'initialCards': [], 'finalCard': {}, 'active': false});
+    }
+    setState(() {
+      didRandomize = false;
+      cardValues = [];
+      middleCard = {};
+      middleCardDrawn = false;
+      skipTimer = 10;
+      gamePlayTimeLeft = 3;
+      _start = 400;
+      skipped = false;
+      missedChance = 0;
+      betPlaced = false;
+      betting = false;
+      randomizeBool = true;
+      shouldCheckBet = true;
+      gameStarted = false;
+      switchedTurn = false;
+      timeAdjusted = false;
+      betLeft = 5;
+      timeLeftAdjusted = false;
+      // gamePlayTimeLeft = 0;
+      betPlaced = false;
+      
+    });
+
+    Future.delayed(Duration(seconds: 5)).then((value) {
+      setState(() {
+         displayCards = [];
+      displayMiddleCard = {};
+      });
+    });
+    return;
+  }
+
   void startTimer() {
   
   const oneSec = const Duration(milliseconds: 10);
@@ -342,8 +453,19 @@ _bounceController.addListener(() {
         timer.cancel();
         cards.add(value);
         if(!middleCardDrawn){
-          // cardValues.add(onlineCardValues[0]);
-          cardValues.add({'value': value, 'type': type});
+          if(cardValues.length == 0){
+            cardValues.add(onlineCardValues[0]);
+            displayCards.add(onlineCardValues[0]);
+          }
+          else if(cardValues.length ==1){
+            cardValues.add(onlineCardValues[1]);
+            displayCards.add(onlineCardValues[1]);
+          }
+          // cardValues.add({'value': value, 'type': type});
+        }
+        else{
+          middleCard = onlinefinalCard;
+          // displayMiddleCard = onlinefinalCard;
         }
         
            if (cardValues.length<2){
@@ -352,24 +474,47 @@ _bounceController.addListener(() {
               score = score+added;
             });
           }
-          else if(middleCardDrawn && betPlaced){
+          else if(middleCardDrawn /* && betPlaced */){
             print('shabobom');
              int low = cardValues[0]['value'];
             int high = cardValues[1]['value'];
+            int thisValue = onlinefinalCard['value'];
             bool winner;
-            if((low<value) && (value<high) || (high<value) && (value<low)){
+            if(((low<thisValue) && (thisValue<high)) || ((high<thisValue) && (thisValue<low))){
               winner = true;
             }
             else{
               winner = false;
             }
-             setState(() {
+            if(winner && betPlaced){
+              print('winnner1');
+              handleWin(betAmount);
+            }
+            else if (!winner && betPlaced){
+              print('loserrrrr');
+              handleLose(betAmount);
+            }
+             /* setState(() {
             middleCard = {'value': value, 'type': type};
+          }); */
+          Future.delayed(Duration(seconds: 2)).then((value){
+            setState(() {
             gameOver = true;
             win = winner;
             randomizing = false;
+            });
           });
+
           print(middleCard);
+          Future.delayed(Duration(seconds: 8)).then((value) {
+            setState(() {
+              gameOver = false;
+              win = false;
+              middleCard = {};
+              betPlaced = false;
+              skipped = false;
+            });
+          });
           }
           else{
            
@@ -381,6 +526,7 @@ _bounceController.addListener(() {
             score = score+added;
             randomizing = false;
             showRandomizing = true;
+            timeLeft = 8;
           });
           startGameTimer();
           });
@@ -404,10 +550,12 @@ _bounceController.addListener(() {
  void startTurnTimer(List<dynamic> playerLists) {
   print('turn timer started');
   const oneSec = const Duration(milliseconds: 1000);
-  _timer = new Timer.periodic(
+  turnTimer = new Timer.periodic(
     oneSec,
     (Timer timer) {
-      if(turnCancelled || skipped || !gameStarted || betPlaced || disposed){
+      // print(gameStarted); print(' is game started');
+      // print(timeLeftAdjusted);
+      if(turnCancelled || skipped || !gameStarted || !timeLeftAdjusted || betPlaced || disposed || didRandomize){
         // print('whoops');
       }
       else if (timeLeft == 0) {
@@ -434,16 +582,17 @@ void startGameTimer() {
   print('started game timer');
   print(gameStarted); print(switchedTurn); print(switchTurn);
   const oneSec = const Duration(milliseconds: 10);
-  _timer = new Timer.periodic(
+  _gameTimer = new Timer.periodic(
     oneSec,
     (Timer timer) {
       
       if (disposed) {
         
-      } else if (gameStarted && !switchedTurn && switchTurn) {
+      } else if (gameStarted && !switchedTurn && switchTurn && !timeAdjusted) {
         print('booom');
         setState(() {
           timeLeft = 8;
+          timeAdjusted = true;
           turnCancelled = false;
           skipped = false;
         });
@@ -458,11 +607,11 @@ void startGameTimer() {
 void startSkipTimer() {
   
   const oneSec = const Duration(milliseconds: 1000);
-  _timer = new Timer.periodic(
+  _skipTimer = new Timer.periodic(
     oneSec,
     (Timer timer) {
       
-      if (disposed) {
+      if (disposed || didRandomize || !gameStarted) {
         
       } 
       else if(skipTimer == 0 && shouldSkip){
@@ -566,7 +715,7 @@ void startSkipTimer() {
        else if(paused){
 
       }
-      else if(!startDown && !widget.solo){
+      else if(!startDown){
        
       }
       else if(gamePlayTimeLeft >0){
@@ -592,6 +741,14 @@ void startSkipTimer() {
       }
 
       else{
+
+        if(!timeLeftAdjusted){
+          print('adjusted the time');
+          setState(() {
+            timeLeftAdjusted = true;
+            timeLeft = 8;
+          });
+        }
         
         setState(() {
           gameStarted = true;
@@ -708,30 +865,57 @@ void startSkipTimer() {
         await _firestore.collection('publicLobbies').doc(widget.lobbyId).update({'shuffle': false});
       });
     }
+
+    setState(() {
+      displayMiddleCard = card;
+    });
     
+  }
+
+  Future<void>vaultBet() async{
+    var increment = FieldValue.increment(widget.rate);
+    var decrement = FieldValue.increment(0-widget.rate);
+     if(widget.public){
+      await _firestore.collection('publicLobbies').doc(widget.lobbyId).update({'vault': increment, 'betsLeft': increment,});
+    }
+    else{
+      await _firestore.collection('lobbies').doc(widget.lobbyId).update({'vault': increment, 'betsLeft': increment,});
+    }
+
+    await _firestore.collection('users').doc(widget.variables.currentUser.uid).update({'coins': decrement});
   }
 
   placeBet(int amount, AsyncSnapshot snapshot) async{
     Map<String, dynamic> betsPlaced = snapshot.data['betsPlaced'];
-    int betLeft = snapshot.data['betLeft'];
+    int betLeftHere = snapshot.data['betLeft'];
     betsPlaced[widget.variables.currentUser.userName] = amount;
-    betLeft = betLeft - amount;
-    var increment = FieldValue.increment(0-amount);
+    betLeftHere = betLeftOnline - amount;
+    setState(() {
+      betAmount = amount;
+    });
+    var increment = FieldValue.increment(amount);
+    var decrement = FieldValue.increment(0-amount);
     if(widget.public){
-      await _firestore.collection('publicLobbies').doc(widget.lobbyId).update({'betsPlaced': betsPlaced, 'betLeft': betLeft});
+      await _firestore.collection('publicLobbies').doc(widget.lobbyId).update({'betsPlaced': betsPlaced, 'betsLeft': betLeftHere,});
     }
     else{
-      await _firestore.collection('lobbies').doc(widget.lobbyId).update({'betsPlaced': betsPlaced, 'betLeft': betLeft});
+      await _firestore.collection('lobbies').doc(widget.lobbyId).update({'betsPlaced': betsPlaced, 'betsLeft': betLeftHere,});
     }
-    await _firestore.collection('users').doc(widget.variables.currentUser.uid).update({'coins': increment});
+    await _firestore.collection('users').doc(widget.variables.currentUser.uid).update({'coins': decrement});
     /* User user = widget.variables.currentUser;
     user.coins = user.coins - amount;
     widget.variables.setCurrentUser(user);
     setState(() {
       
     }); */
-     if(playerList.indexOf(widget.variables.currentUser.uid) == playerList.length-1 || betLeft == 0){
+      if(playerTurns == playerList.length-1 || betLeft == 0){
       roundCompleteLobby(widget.variables.currentUser.uid, widget.lobbyId);
+      int cardValue1 = rng.nextInt(13);
+      int cardType1 = rng.nextInt(3);
+      finalCard({'type': cardType1, 'value': cardValue1});
+      Future.delayed(Duration(seconds: 6)).then((value) {
+        resetLobby(widget.variables.currentUser.uid, widget.lobbyId, bankVault);
+      });
     }
      else{
       print(' not randomizing');
@@ -842,7 +1026,7 @@ void startSkipTimer() {
       });
       }
 
-      if(randomizeBool && gameStarted){
+      if(randomizeBool && gameStarted && !disposed){
         randomize();
         setState(() {
           randomizeBool = false;
@@ -850,13 +1034,13 @@ void startSkipTimer() {
       }
 
       if(shouldStartSkipTimer && !startedSkipTimer){
+        print('major error');
         setState(() {
           skipTimer = 10;
         });
         setState(() {
           shouldSkip = true;
-          startedSkipTimer = true;
-          
+          startedSkipTimer = true;  
         });
         startSkipTimer();
       }
@@ -865,8 +1049,23 @@ void startSkipTimer() {
         
         setState(() {
           didRandomize = true;
+          middleCardDrawn = true;
         });
         randomize();
+      }
+
+      if(shouldCheckBet && betLeftOnline == 0 && !disposed){
+        setState(() {
+          betLeft = 0;
+          shouldCheckBet = false;
+        });
+      }
+
+      if(!emptyScreenToggled && bankVault <= 0 && !disposed){
+        setState(() {
+          emptyScreen = true;
+          emptyScreenToggled = true;
+        });
       }
       // print(playerAmount); print(' is the amount');
 
@@ -878,7 +1077,7 @@ void startSkipTimer() {
   }
 
 void checkGameStatus(){
-  if(lastPlayer){
+  if(playerList.length<3){
     stopGame();
   }
 }
@@ -949,7 +1148,7 @@ void handleTimeout() {  // callback function
           if(snapshot.data['activeUser'] == widget.variables.currentUser.uid){
             switchTurn = true;
           }
-          else if (snapshot.data['activeUser'] != activeUser){
+          else if (snapshot.data['activeUser'] != activeUser && gameStarted){
             shouldStartSkipTimer = true;
             switchTurn = false;
           }
@@ -976,13 +1175,14 @@ void handleTimeout() {  // callback function
           onlineCardValues = snapshot.data['initialCards'];
           onlinefinalCard = snapshot.data['finalCard'];
           bankVault = snapshot.data['vault'];
-          betLeft = snapshot.data['betLeft'];
+          betLeftOnline = snapshot.data['betsLeft'];
+          playerTurns = snapshot.data['playerTurns'];
           
         }
         else{
          print('bowwwnce');
         }
-        return gameOver?finalScreen(width, height, snapshot):gameScreen(width, height, snapshot);})
+        return gameOver?finalScreen(width, height, snapshot):(bankVault<1 && !snapshot.data['active']) || (emptyScreen && !betPlaced)?betScreen(width, height, snapshot):gameScreen(width, height, snapshot);})
         );
    
    }
@@ -1031,15 +1231,122 @@ void handleTimeout() {  // callback function
                 itemCount: playerList.length,
                 ),
             ),
-             SizedBox(
-                height: height*0.1,
-              ),
-              win
+            
+              !betPlaced
               ?Center(
               child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            
+            SizedBox(
+              height: height*0.02,
+            ),
+             Text(
+                'Round Over', style: TextStyle(color: Color(0xff63ff00), fontFamily: 'Muli', fontSize: 50, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
+              ),
+            SizedBox(
+              height: height*0.01,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                 Transform.scale(
+                  child: Container(
+              width: width*0.5,
+              height: height*0.3,
+              child: Center(
+                child: Stack(
+            alignment: displayCards.length>1?Alignment.centerLeft:Alignment.center,
+              // scrollDirection: Axis.horizontal,
+              children: 
+                displayCards.map((item) {
+                                      return card(width, height, item, displayCards.indexOf(item));
+                                    }).toList()
+              
+        
+          )
+          ,
+              )
+            ),
+                  scale: 0.6,
+                 ),
+                 Transform.scale(
+                  scale: 0.6,
+                  child: card(width, height, displayMiddleCard, 0),
+                 )
+
+              ],
+            ),
+            Stack(
+              children: [
+                Opacity(
+                  opacity: 0.2,
+                  child:  Container(
+              width: width*0.7,
+              height: height*0.25,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                color: Colors.white
+              ),
+            ),
+                  ), 
+            Container(
+              width: width*0.7,
+              height: height*0.25,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: ListView(
+                children: [
+                 Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Text('Bank Vault', style: TextStyle(color: Color(0xff00ffff), fontSize: 20, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                      Text(snapshot.data['vault'] == null?'0 ETB':snapshot.data['vault'].toString()+ ' ETB', style: TextStyle(color: Color(0xffffffff), fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                    ],
+                  ),
+                  SizedBox(
+                    height: height*0.02,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                       Text('Bet Left', style: TextStyle(color: Color(0xff00ffff), fontSize: 20, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                          // Text(snapshot.data['betLeft'] == null?'0 ETB':snapshot.data['betLeft'].toString()+ ' ETB', style: TextStyle(color: Color(0xffffffff), fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                          Text(betLeftOnline == null?'0 ETB':betLeftOnline.toString()+ ' ETB', style: TextStyle(color: Color(0xffffffff), fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                          
+                    ],
+                  ),
+                   SizedBox(
+                    height: height*0.02,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                       Text('Wallet', style: TextStyle(color: Color(0xff23ff34), fontSize: 20, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                          Text(widget.variables.currentUser.coins.toString() + ' ETB', style: TextStyle(color: Color(0xffffffff), fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900))
+                    ],
+                  ),
+                ],
+              ),
+            )
+              ],
+            ),
+             /*  SizedBox(
+              height: height*0.1,
+            ), */
+            ]))
+              
+              :win
+              ?Center(
+              child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+             SizedBox(
+              height: height*0.15,
+            ),
              Text(
                 'Congratulations', style: TextStyle(color: Color(0xff63ff00), fontFamily: 'Muli', fontSize: 50, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
               ),
@@ -1054,147 +1361,27 @@ void handleTimeout() {  // callback function
               height: height*0.1,
             ),
              Text(
-                'Total Winnings: ' + winnings.toString(), style: TextStyle(color: Color(0xffffffff), fontFamily: 'Muli', fontSize: 25, fontWeight: FontWeight.w900, fontStyle: FontStyle.normal),
+                'Total Winnings: ' + displayWinnings.toString(), style: TextStyle(color: Color(0xffffffff), fontFamily: 'Muli', fontSize: 25, fontWeight: FontWeight.w900, fontStyle: FontStyle.normal),
               ),
             
               SizedBox(
               height: height*0.1,
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                GestureDetector(
-            onTap: (){
-              // Navigator.pop(context);
-              setState(() {
-                middleCardDrawn = false;
-                finished = false;
-                win = false;
-                betPlaced = false;
-                gotWinner = false;
-                middleCard = {};
-                winner = null;
-                cardValues = [];
-                score = 0;
-                timeLeft = 6;
-              });
-              _firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId, widget.rate);_firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId, widget.rate);
-            },
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20)
-              ),
-              width: width*0.3,
-              height: height*0.06,
-              child: Center(
-                child: Text('Try Again', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
-              ),
-            ),
-            ),
-            SizedBox(height: height*0.05,),
-            GestureDetector(
-            onTap: (){
-               cancel.play();
-              showDialog(
-                        context: context,
-                        builder: ((context) {
-                          return new AlertDialog(
-                            backgroundColor: Color(0xff240044),
-                            title: new Text(
-                              'Leaving the game',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontFamily: 'Muli',
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w900),
-                            ),
-                            content: new Text(
-                              'Are you sure you want to leave the game? All progresses and bets will be lost.',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontFamily: 'Muli',
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.normal),
-                            ),
-                            actions: <Widget>[
-                              new TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                  setState(() {
-                                    paused = false;
-                                  });
-                                }, // Closes the dialog
-                                child: new Text(
-                                  'No',
-                                  style: TextStyle(
-                                      color: Color(0xffff2389),
-                                      fontSize: 16,
-                                      fontFamily: 'Muli',
-                                      fontWeight: FontWeight.w900),
-                                ),
-                              ),
-                              new TextButton(
-                                onPressed: () {
-                                  cancel.play();
-                                  _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
-                                  if(lastPlayer && widget.public){
-                                    _firebaseProvider.stopPublicLobbyGame(widget.variables.currentUser.uid, widget.lobbyId);
-                                  }
-                                  else if(lastPlayer){
-                                    _firebaseProvider.stopLobbyGame(widget.variables.currentUser.uid, widget.lobbyId);
-                                  }
-                                  Navigator.pop(context);
-                                //  _bounceController.reset();
-                  // _animationController.reset();
-                  setState(() {
-                    disposed = true;
-                  });
-                  // handleTimeout();
-                  _navigator.pop(context);
-                  Future.delayed(Duration(seconds: 1)).then((value) {
-                cancel.stop();
-                });
-                                },
-                                child: new Text(
-                                  'Yes',
-                                  style: TextStyle(
-                                      color: Color(0xff23ff89),
-                                      fontSize: 16,
-                                      fontFamily: 'Muli',
-                                      fontWeight: FontWeight.w900),
-                                ),
-                              ),
-                            ],
-                          );
-                        }));
-                        Future.delayed(Duration(seconds: 1)).then((value) {
-                cancel.stop();
-                });
-            },
-            child: Container(
-              decoration: BoxDecoration(
-                color: Color(0xffff2389),
-                borderRadius: BorderRadius.circular(20)
-              ),
-              width: width*0.3,
-              height: height*0.06,
-              child: Center(
-                child: Text('Leave', style: TextStyle(color: Colors.white, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
-              ),
-            ),
-            ),
-              ],
-            )
             ]))
               :Center(
               child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            SizedBox(
+              height: height*0.15,
+            ),
              Text(
                 'Tough Luck', style: TextStyle(color: Color(0xffff2340), fontFamily: 'Muli', fontSize: 50, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
               ),
+               SizedBox(
+              height: height*0.05,
+            ),
             Text(
                 'You lost this round.', style: TextStyle(color: Color(0xffffffff), fontFamily: 'Muli', fontSize: 25, fontWeight: FontWeight.w900, fontStyle: FontStyle.normal),
               ),
@@ -1212,42 +1399,82 @@ void handleTimeout() {  // callback function
               SizedBox(
               height: height*0.1,
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            ]))
+          
+            ])),
+      ],
+    ),
+  );
+}
+   
+   Widget betScreen(var width, var height, AsyncSnapshot snapshot){
+  return Scaffold(
+    body: Stack(
+      children: [
+        Container(
+            width: width,
+            height: height,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/blackjack_wallpaper.png'),
+                fit: BoxFit.cover
+              )
+            ),
+          ),
+          Center(
+            
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                GestureDetector(
-            onTap: (){
-              // Navigator.pop(context);
-              setState(() {
-                middleCardDrawn = false;
-                finished = false;
-                win = false;
-                betPlaced = false;
-                gotWinner = false;
-                middleCard = {};
-                winner = null;
-                cardValues = [];
-                score = 0;
-                timeLeft = 6;
-              });
-              _firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId, widget.rate);_firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId, widget.rate);
-            },
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20)
+                    SizedBox(
+                height: height*0.05,
               ),
-              width: width*0.3,
-              height: height*0.06,
-              child: Center(
-                child: Text('Try Again', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+             Container(
+              height: height*0.15,
+              child: ListView.builder(
+                itemBuilder: (BuildContext context, int index) { 
+                    return profileCircle(width, height, index, playerInfos[playerList[index]], snapshot);
+                    //return CircularProgressIndicator();
+                  },
+                scrollDirection: Axis.horizontal,
+                itemCount: playerList.length,
+                ),
+            ),
+             SizedBox(
+                height: height*0.1,
               ),
+             Center(
+              child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+             Text(
+                'Vault Is Empty', style: TextStyle(color: Color(0xffffffff), fontFamily: 'Muli', fontSize: 50, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
+              ),
+            SizedBox(
+              height: height*0.05,
             ),
-            ),
-            SizedBox(height: height*0.05,),
-            GestureDetector(
+           Text('Would you like to Bet more?', style: TextStyle(color: Color(0xff00ffff), fontSize: 25, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                           SizedBox(
+                            height: height*0.1,
+                          ),
+                          Text('Bet Amount: ' + widget.rate.toString() + ' ETB', style: TextStyle(color: Color(0xffffffff), fontSize: 30, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                          // Text(snapshot.data['betLeft'] == null?'0 ETB':snapshot.data['betLeft'].toString()+ ' ETB', style: TextStyle(color: Color(0xffffffff), fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                          
+                          SizedBox(
+                            height: height*0.03,
+                          ),
+                          Text('Wallet: ' + widget.variables.currentUser.coins.toString() + ' ETB', style: TextStyle(color: Color(0xff23ff34), fontSize: 20, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                         SizedBox(
+                            height: height*0.05,
+                          ), 
+            Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                     GestureDetector(
             onTap: (){
-               cancel.play();
+              cancel.play();
               showDialog(
                         context: context,
                         builder: ((context) {
@@ -1289,13 +1516,8 @@ void handleTimeout() {  // callback function
                               new TextButton(
                                 onPressed: () {
                                   cancel.play();
+                                  checkGameStatus();
                                   _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
-                                  if(lastPlayer && widget.public){
-                                    _firebaseProvider.stopPublicLobbyGame(widget.variables.currentUser.uid, widget.lobbyId);
-                                  }
-                                  else if(lastPlayer){
-                                    _firebaseProvider.stopLobbyGame(widget.variables.currentUser.uid, widget.lobbyId);
-                                  }
                                   Navigator.pop(context);
                                 //  _bounceController.reset();
                   // _animationController.reset();
@@ -1303,7 +1525,7 @@ void handleTimeout() {  // callback function
                     disposed = true;
                   });
                   // handleTimeout();
-                  _navigator.pop(context);
+                  _navigator.pop(context); widget.returnBack();
                   Future.delayed(Duration(seconds: 1)).then((value) {
                 cancel.stop();
                 });
@@ -1336,10 +1558,33 @@ void handleTimeout() {  // callback function
               ),
             ),
             ),
-              ],
+           
+            GestureDetector(
+            onTap: (){
+              vaultBet().then((value){
+                setState(() {
+                  emptyScreen = false;
+                });
+              });
+                         },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.3,
+              height: height*0.06,
+              child: Center(
+                child: Text('Bet', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            ),
             )
+           ],
+                 ),
+             
+             
             ]))
-          
+             
             ])),
       ],
     ),
@@ -1413,32 +1658,72 @@ void handleTimeout() {  // callback function
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          SizedBox(
-                            height: height*0.02,
-                          ),
-                          Text('Bank Vault', style: TextStyle(color: Color(0xff00ffff), fontSize: 20, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
-                          Text(snapshot.data['vault'] == null?'0 ETB':snapshot.data['vault'].toString()+ ' ETB', style: TextStyle(color: Color(0xffffffff), fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
-                           SizedBox(
-                            height: height*0.02,
-                          ),
-                          Text('Bet Left', style: TextStyle(color: Color(0xff00ffff), fontSize: 20, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
-                          Text(snapshot.data['betLeft'] == null?'0 ETB':snapshot.data['betLeft'].toString()+ ' ETB', style: TextStyle(color: Color(0xffffffff), fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
-                          SizedBox(
-                            height: height*0.02,
-                          ),
-                          Text('Wallet', style: TextStyle(color: Color(0xff23ff34), fontSize: 20, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                      Stack(
+              children: [
+                Opacity(
+                  opacity: 0.2,
+                  child:  Container(
+              width: width*0.5,
+              height: height*0.2,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                color: Colors.white
+              ),
+            ),
+                  ), 
+            Container(
+              width: width*0.5,
+              height: height*0.2,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Center(
+                child: ListView(
+                children: [
+                  SizedBox(
+                    height: height*0.02,
+                  ),
+                 Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Text('Bank Vault', style: TextStyle(color: Color(0xff00ffff), fontSize: 20, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                      Text(snapshot.data['vault'] == null?'0 ETB':snapshot.data['vault'].toString()+ ' ETB', style: TextStyle(color: Color(0xffffffff), fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                    ],
+                  ),
+                  SizedBox(
+                    height: height*0.02,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                       Text('Bet Left', style: TextStyle(color: Color(0xff00ffff), fontSize: 20, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                          // Text(snapshot.data['betLeft'] == null?'0 ETB':snapshot.data['betLeft'].toString()+ ' ETB', style: TextStyle(color: Color(0xffffffff), fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                          Text(betLeftOnline == null?'0 ETB':betLeftOnline.toString()+ ' ETB', style: TextStyle(color: Color(0xffffffff), fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+                          
+                    ],
+                  ),
+                   SizedBox(
+                    height: height*0.02,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                       Text('Wallet', style: TextStyle(color: Color(0xff23ff34), fontSize: 20, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
                           Text(widget.variables.currentUser.coins.toString() + ' ETB', style: TextStyle(color: Color(0xffffffff), fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900))
-          ,
-                        ],
-                      ),
+                    ],
+                  ),
+                ],
+              ),
+            
+              ))
+              ],
+            ),
+            
                       randomizing || middleCardDrawn
                 ?Center(
                   child: Container(
                     height: height*0.3,
-                    child: (showRandomizing?randomizing?card(width, height, {'value': value, 'type': type}, 0):cardBack(width, height):Center()),
+                    child: (randomizing || middleCardDrawn?card(width, height, onlinefinalCard['value'] == null || _start != 0?{'value': value, 'type': type}:{'value': onlinefinalCard['value'], 'type': onlinefinalCard['type']}, 0):cardBack(width, height)),
                   )
                 )
                 :Row(
@@ -1612,7 +1897,7 @@ void handleTimeout() {  // callback function
                     disposed = true;
                   });
                   // handleTimeout();
-                  _navigator.pop(context);
+                  _navigator.pop(context); widget.returnBack();
                   Future.delayed(Duration(seconds: 1)).then((value) {
                 cancel.stop();
                 });
@@ -1657,14 +1942,20 @@ void handleTimeout() {  // callback function
             SizedBox(
               width: width*0.05,
             ),
-            skipButton
+            skipButton && skipTimer <= 0
             ?GestureDetector(
             onTap: (){
               changeActiveUser(nextUser);
-               if(playerList.indexOf(activeUser) == playerList.length-1|| betLeft == 0){
+              if(playerTurns == playerList.length-1 || betLeft == 0){
       roundCompleteLobby(widget.variables.currentUser.uid, widget.lobbyId);
+      int cardValue1 = rng.nextInt(13);
+      int cardType1 = rng.nextInt(3);
+      finalCard({'type': cardType1, 'value': cardValue1});
+       Future.delayed(Duration(seconds: 6)).then((value) {
+        resetLobby(widget.variables.currentUser.uid, widget.lobbyId, bankVault);
+      });
     }
-    else{
+     else{
       print(' not randomizing');
     }
               setState(() {
@@ -1687,7 +1978,18 @@ void handleTimeout() {  // callback function
               ),
             ),
             )
-            :Center()
+            :Container(
+              decoration: BoxDecoration(
+                color: Color(0xff666666),
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.3,
+              height: height*0.06,
+              child: Center(
+                child: Text('Next Player', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            ),
+            
             ],
            ) 
            :Row(
@@ -1697,48 +1999,39 @@ void handleTimeout() {  // callback function
             ?Container(
               decoration: BoxDecoration(
                 // color: Color(0xff23ff34),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.white)
+                // borderRadius: BorderRadius.circular(20),
+                border: Border(
+      bottom: BorderSide(width: 1.0, color: Colors.white),
+    ),
               ),
               width: width*0.3,
               height: height*0.06,
               child: Center(
-                child: TextField(
-                              style: TextStyle(
-                                  fontFamily: 'Muli',
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w900), textAlign: TextAlign.center,
-                              controller: controller,
-                              keyboardType: TextInputType.number,
-                              cursorColor: Colors.white,
-                              autofocus: false,
-                              focusNode: FocusNode(),
-                              cursorHeight: 20,
-                              maxLength: 20,
-                              cursorWidth: 0.5,
-                              onChanged: searchQuery,
-                               inputFormatters: [
-                  FilteringTextInputFormatter.deny(
-                      RegExp(r'\s')),
-              ],
-                              decoration: InputDecoration(
-                                
-                                  hintText: 'Bet in ETB',
-                                  // contentPadding: EdgeInsets.only(bottom: 20),
-                                  focusedBorder: InputBorder.none,
-                                  enabledBorder: InputBorder.none,
-                                  errorBorder: InputBorder.none,
-                                  disabledBorder: InputBorder.none,
-                                  counterText: '',
-                                  border: InputBorder.none,
-                                  hintStyle: TextStyle(
-                                      fontFamily: 'Muli',
-                                      color: Color(0xff999999),
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w900)),
-                            ),
-            
+                child: Padding(
+                  padding: EdgeInsets.only(top: height*0.025, ),
+                  child: TextFormField(
+                    focusNode: focusNode,
+                  keyboardType: TextInputType.number,
+                    style: TextStyle(fontFamily: 'Muli', color: Colors.white, fontSize: 20, fontWeight: FontWeight.w900),
+                    textAlign: TextAlign.center,
+                    controller: controller,
+                    enabled: true,
+                    maxLength: 5,
+                    decoration: InputDecoration(
+                       enabledBorder: UnderlineInputBorder(      
+                      borderSide: BorderSide(color: Colors.transparent),   
+                      ),  
+              focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.transparent),),
+                        hintText: 'Place Bet',
+                        hintStyle: TextStyle(
+                            fontFamily: 'Muli',
+                            color: Colors.grey,
+                            fontSize: 20.0), 
+                        ),
+                    onChanged: searchQuery),
+                ),
+              
               ))
             :betPlaced
             ?Center()
@@ -1747,6 +2040,7 @@ void handleTimeout() {  // callback function
               setState(() {
                 betting = true;
               });
+              focusNode.requestFocus();
                selectPlayer.play();
                
              
@@ -1767,7 +2061,31 @@ void handleTimeout() {  // callback function
             ),
             ),
             betting
-            ?GestureDetector(
+            ?Column(
+              children: [
+                GestureDetector(
+            onTap: (){
+              setState(() {
+                betting = false;
+              });
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Color(0xff00ffff),
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.35,
+              height: height*0.06,
+              child: Center(
+                child: Text('Cancel', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            ),
+            ),
+            SizedBox(
+              height: height*0.01,
+            ),
+            
+                GestureDetector(
             onTap: (){
              
               int bet = int.parse(controller.text);
@@ -1805,7 +2123,9 @@ void handleTimeout() {  // callback function
               ),
             ),
             )
-            :betPlaced
+            
+              ]
+            ):betPlaced
             ?Text('Bet Placed: ' + controller.text + ' ETB', style: TextStyle(color: Colors.white, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900))
             :GestureDetector(
             onTap: (){
@@ -1885,7 +2205,7 @@ void handleTimeout() {  // callback function
                     disposed = true;
                   });
                   // handleTimeout();
-                  _navigator.pop(context);
+                  _navigator.pop(context); widget.returnBack();
                   Future.delayed(Duration(seconds: 1)).then((value) {
                 cancel.stop();
                 });
@@ -1980,8 +2300,23 @@ void handleTimeout() {  // callback function
             )
                           :MaterialButton(
                 onPressed: (){
-                  _firebaseProvider.addMoneyToVault(snapshot.data['players'].length * widget.rate, widget.lobbyId);
-                  _firebaseProvider.startBankeruLobbyGame(widget.creatorId, widget.lobbyId);
+                  if(initialStart){
+                    _firebaseProvider.addMoneyToVault(snapshot.data['players'].length * widget.rate, widget.lobbyId);
+                  }
+                  if(widget.public){
+                    _firebaseProvider.startPublicBankeruLobbyGame(widget.creatorId, widget.lobbyId);
+                  }
+                  else{
+                    _firebaseProvider.startBankeruLobbyGame(widget.creatorId, widget.lobbyId);
+                  }
+                  setState(() {
+                    initialStart = false;
+                  });
+                   int cardValue1 = rng.nextInt(13);
+                   int cardValue2 = rng.nextInt(13);
+                   int cardType1 = rng.nextInt(3);
+                   int cardType2 = rng.nextInt(3);
+                  twoCards([{'type': cardType1, 'value': cardValue1}, {'type': cardType2, 'value': cardValue2}]);
                 },
                 child:  Container(
                    width: width*0.4,
@@ -2062,7 +2397,7 @@ void handleTimeout() {  // callback function
                     disposed = true;
                   });
                   // handleTimeout();
-                  _navigator.pop(context); player.stop(); widget.startBackground();
+                  _navigator.pop(context); widget.returnBack(); player.stop(); widget.startBackground();
                                 },
                                 child: new Text(
                                   'Yes',
@@ -2153,13 +2488,13 @@ void handleTimeout() {  // callback function
                                   checkGameStatus();
                                   _firebaseProvider.removeUserFromLobby(widget.variables.currentUser, widget.lobbyId);
                                   Navigator.pop(context);
-                                 _bounceController.reset();
-                  _animationController.reset();
+                  //                _bounceController.reset();
+                  // _animationController.reset();
                   setState(() {
                     disposed = true;
                   });
                   // handleTimeout();
-                  _navigator.pop(context); player.stop(); widget.startBackground();
+                  _navigator.pop(context); widget.returnBack(); player.stop(); widget.startBackground();
                                 },
                                 child: new Text(
                                   'Yes',
@@ -2336,37 +2671,6 @@ void handleTimeout() {  // callback function
           SizedBox(
             height: width*0.01,
           ),
-         /* Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Padding(
-              padding: EdgeInsets.only(left: width*0.02),
-              child: Container(
-                width: width*0.08,
-                height: width*0.08,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage('assets/banker-removed.png'),
-                    fit: BoxFit.cover
-                  )
-                ),
-              ),
-              ),
-              Padding(
-              padding: EdgeInsets.only(right: width*0.02),
-              child: Container(
-                width: width*0.08,
-                height: width*0.08,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage('assets/banker-removed.png'),
-                    fit: BoxFit.cover
-                  )
-                ),
-              ),
-              ),
-          ],
-         ), */
           Center(
             child: Container(
                 width: width*0.3,
@@ -2379,38 +2683,6 @@ void handleTimeout() {  // callback function
                 ),
               ),
           ),
-          /* Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Padding(
-              padding: EdgeInsets.only(left: width*0.02),
-              child: Container(
-                width: width*0.08,
-                height: width*0.08,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage('assets/banker-removed.png'),
-                    fit: BoxFit.cover
-                  )
-                ),
-              ),
-              ),
-              Padding(
-              padding: EdgeInsets.only(right: width*0.02),
-              child: Container(
-                width: width*0.08,
-                height: width*0.08,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage('assets/banker-removed.png'),
-                    fit: BoxFit.cover
-                  )
-                ),
-              ),
-              ),
-          ],
-         ),
-           */
           SizedBox(
             height: width*0.01,
           )

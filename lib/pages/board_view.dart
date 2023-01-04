@@ -27,9 +27,9 @@ class _BoardViewState extends State<BoardView> {
 
   double _rotote(int index) => ((index / widget.players.length) * 2 * pi);
   List<Color> colorPalette = [
-    Colors.accents[0], Colors.accents[6], Colors.accents[14], Colors.accents[7], Colors.accents[2],
-    Colors.accents[4], Colors.accents[12], Colors.accents[10], Colors.accents[8], Colors.accents[1],
-    Colors.accents[5], Colors.accents[3],
+    Colors.accents[0], Colors.accents[10], Colors.accents[14], Colors.accents[5], Colors.accents[2],
+    Colors.accents[4], Colors.accents[12], Colors.accents[6], Colors.accents[8], Colors.accents[1],
+    Colors.accents[7], Colors.accents[3],
   ];
 
   @override

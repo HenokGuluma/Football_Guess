@@ -253,6 +253,21 @@ Future<User> fetchUserDetailsById(String uid) async {
     return _firestore.collection("lobbies").doc(id).set(setMap);
   }
 
+   Future<void> addClosestLobbyById(String id, Lobby lobby, User creatorId) async{
+    print(creatorId); print('stage1');
+    Map<String, dynamic> setMap = lobby.toMap(lobby);
+    Map<String, dynamic> info = {creatorId.uid: creatorId.toMap(creatorId)};
+    setMap['playerInfo'] = info;
+    setMap['active'] = false;
+    setMap['betsPlaced'] = {};
+    print(setMap);
+    await _firestore.collection('users').doc(creatorId.uid).collection('lobby').doc(id).set(setMap);
+    print(creatorId); print('stage2');
+    await _firestore.collection('users').doc(creatorId.uid).update({'hasLobby': true, 'lobbyId': lobby.uid});
+    print(creatorId); print('stage3');
+    setMap['creator'] = creatorId.toMap(creatorId);
+    return _firestore.collection("lobbies").doc(id).set(setMap);
+  }
   Future<void> editLobbyById(String id, Lobby lobby, User creatorId) async{
     print(creatorId); print('stage1');
     Map<String, dynamic> setMap = lobby.toMap(lobby);
@@ -298,6 +313,17 @@ Future<User> fetchUserDetailsById(String uid) async {
     setMap['roundCompleted'] = false;
     setMap['betLeft'] = 0;
     setMap['vault'] = 0;
+    print(setMap);
+    return _firestore.collection("publicLobbies").add(setMap).then((value) {
+      _firestore.collection("publicLobbies").doc(value.id).update({'uid': value.id});
+    });
+  }
+
+   Future<void> addClosestPublicLobby(Lobby lobby) async{
+    Map<String, dynamic> setMap = lobby.toMap(lobby);
+    setMap['active'] = false;
+    setMap['playerInfo'] = {};
+    setMap['betsPlaced'] = {};
     print(setMap);
     return _firestore.collection("publicLobbies").add(setMap).then((value) {
       _firestore.collection("publicLobbies").doc(value.id).update({'uid': value.id});
@@ -350,7 +376,7 @@ Future<User> fetchUserDetailsById(String uid) async {
       userMap['idle'] = true;
       playerInfo[user.uid] = userMap;
     }
-    Map<String, dynamic> updateMap = {'players': playerList, 'playerInfo': playerInfo, 'winnings': increment};
+    Map<String, dynamic> updateMap = {'players': playerList, 'playerInfo': playerInfo, 'winnings': increment, 'betsLeft': increment, 'vault': increment,'activeUser': user.uid};
     await _firestore.collection('lobbies').doc(lobbyId).update(updateMap);
     await _firestore.collection('users').doc(user.uid).update({'coins': user.coins - rate});
     return;
@@ -489,6 +515,16 @@ Future<User> fetchUserDetailsById(String uid) async {
     await _firestore.collection('publicLobbies').doc(lobbyId).collection('playerScores').doc(user.uid).set({'userId': user.uid, 'score': score, 'userName': user.userName, 'time': currentTime });
   }
 
+   Future<void> submitClosestUserScore(User user, int number, String lobbyId, int score) async{
+    var currentTime = DateTime.now().millisecondsSinceEpoch;
+    await _firestore.collection('lobbies').doc(lobbyId).collection('initialGuesses').doc(number.toString()).set({'userId': user.uid, 'score': score, 'userName': user.userName, 'time': currentTime });
+  }
+
+  Future<void> submitClosestPublicUserScore(User user, int number, String lobbyId, int score) async{
+    var currentTime = DateTime.now().millisecondsSinceEpoch;
+    await _firestore.collection('publicLobbies').doc(lobbyId).collection('initialGuesses').doc(number.toString()).set({'userId': user.uid, 'score': score, 'userName': user.userName, 'time': currentTime });
+  }
+
   Future<void> submitBlackUserScore(User user, String lobbyId, int score, bool exploded) async{
     var currentTime = DateTime.now().millisecondsSinceEpoch;
     await _firestore.collection('lobbies').doc(lobbyId).collection('playerScores').doc(user.uid).set({'userId': user.uid, 'score': score, 'exploded': exploded, 'userName': user.userName, 'time': currentTime });
@@ -500,26 +536,26 @@ Future<User> fetchUserDetailsById(String uid) async {
   }
 
   Future<DocumentSnapshot> getLobbyWinner(String lobbyId) async{
-    QuerySnapshot snapshot = await _firestore.collection('lobbies').doc(lobbyId).collection('playerScores').orderBy('score', descending: true).limit(1).get();
+    QuerySnapshot snapshot = await _firestore.collection('lobbies').doc(lobbyId).collection('playerScores').orderBy('score', descending: true).orderBy('time', descending: false).limit(1).get();
     return snapshot.docs[0];
   }
 
     Future<DocumentSnapshot> getClosestLobbyWinner(String lobbyId) async{
-    QuerySnapshot snapshot = await _firestore.collection('lobbies').doc(lobbyId).collection('playerScores').orderBy('score', descending: true).limit(1).get();
+    QuerySnapshot snapshot = await _firestore.collection('lobbies').doc(lobbyId).collection('initialGuesses').orderBy('score', descending: false).limit(1).get();
     return snapshot.docs[0];
   }
   Future<DocumentSnapshot> getPublicLobbyWinner(String lobbyId) async{
-    QuerySnapshot snapshot = await _firestore.collection('publicLobbies').doc(lobbyId).collection('playerScores').orderBy('score', descending: false).limit(1).get();
+    QuerySnapshot snapshot = await _firestore.collection('publicLobbies').doc(lobbyId).collection('playerScores').orderBy('score', descending: false).orderBy('time', descending: false).limit(1).get();
     return snapshot.docs[0];
   }
    Future<DocumentSnapshot> getPublicClosestLobbyWinner(String lobbyId) async{
-    QuerySnapshot snapshot = await _firestore.collection('publicLobbies').doc(lobbyId).collection('playerScores').orderBy('score', descending: false).limit(1).get();
+    QuerySnapshot snapshot = await _firestore.collection('publicLobbies').doc(lobbyId).collection('initialGuesses').orderBy('score', descending: false).limit(1).get();
     return snapshot.docs[0];
   }
 
   Future<DocumentSnapshot> getBlackLobbyWinner(String lobbyId) async{
     QuerySnapshot snapshot = await _firestore.collection('lobbies').doc(lobbyId).collection('playerScores').orderBy('score', descending: true).orderBy('time', descending: false).limit(1).get();
-    QuerySnapshot snapshot2 = await _firestore.collection('lobbies').doc(lobbyId).collection('playerScores').orderBy('time', descending: false).where('exploded', isEqualTo: false).limit(1).get();
+    QuerySnapshot snapshot2 = await _firestore.collection('lobbies').doc(lobbyId).collection('playerScores').orderBy('score', descending: true).orderBy('time', descending: false).where('exploded', isEqualTo: false).limit(1).get();
     DocumentSnapshot documentSnapshot;
     if(snapshot2.docs.length<1){
       documentSnapshot = snapshot.docs[0];
@@ -531,7 +567,7 @@ Future<User> fetchUserDetailsById(String uid) async {
   }
   Future<DocumentSnapshot> getBlackPublicLobbyWinner(String lobbyId) async{
     QuerySnapshot snapshot = await _firestore.collection('publicLobbies').doc(lobbyId).collection('playerScores').orderBy('score', descending: true).orderBy('time', descending: false).limit(1).get();
-    QuerySnapshot snapshot2 = await _firestore.collection('publicLobbies').doc(lobbyId).collection('playerScores').orderBy('time', descending: false).where('exploded', isEqualTo: false).limit(1).get();
+    QuerySnapshot snapshot2 = await _firestore.collection('publicLobbies').doc(lobbyId).collection('playerScores').orderBy('score', descending: true).orderBy('time', descending: false).where('exploded', isEqualTo: false).limit(1).get();
     DocumentSnapshot documentSnapshot;
     if(snapshot2.docs.length<1){
       documentSnapshot = snapshot.docs[0];
@@ -647,7 +683,7 @@ Future<User> fetchUserDetailsById(String uid) async {
   }
 
    Future<void> stopBankeruLobbyGame (String userId, String lobbyId) async{
-    Map<String, dynamic> updateMap = {'active': false, 'betsPlaced': {}};
+    Map<String, dynamic> updateMap = {'active': false, 'betsPlaced': {}, 'playerTurns': 0, 'vault': 0, 'betsLeft': 0};
     await _firestore.collection('lobbies').doc(lobbyId).update(updateMap);
   }
 
@@ -662,6 +698,32 @@ Future<User> fetchUserDetailsById(String uid) async {
 
    Future<void> stopPublicLobbyGame (String userId, String lobbyId) async{
     Map<String, dynamic> updateMap = {'active': false, 'startedCountdown': false};
+    await _firestore.collection('publicLobbies').doc(lobbyId).update(updateMap);
+  }
+  Future<void> resetClosestGame (String userId, String lobbyId) async{
+    await _firestore.collection('lobbies').doc(lobbyId).collection('initialGuesses').get().then((documentList) {
+      for (DocumentSnapshot ds in documentList.docs){
+        if(ds.id !='playerAmount'){
+          ds.reference.delete();
+        }
+      }
+      
+    });
+    await _firestore.collection('lobbies').doc(lobbyId).collection('initialGuesses').doc('playerAmount').update({'playerAmount': 0});
+     Map<String, dynamic> updateMap = {'active': false,};
+    await _firestore.collection('lobbies').doc(lobbyId).update(updateMap);
+  }
+
+  Future<void> resetPublicClosestGame (String userId, String lobbyId) async{
+    await _firestore.collection('publicLobbies').doc(lobbyId).collection('initialGuesses').get().then((documentList) {
+      for (DocumentSnapshot ds in documentList.docs){
+        if(ds.id !='playerAmount'){
+          ds.reference.delete();
+        }
+      }
+    });
+    await _firestore.collection('lobbies').doc(lobbyId).collection('initialGuesses').doc('playerAmount').update({'playerAmount': 0});
+     Map<String, dynamic> updateMap = {'active': false,};
     await _firestore.collection('publicLobbies').doc(lobbyId).update(updateMap);
   }
 

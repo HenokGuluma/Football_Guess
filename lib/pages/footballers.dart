@@ -30,10 +30,11 @@ class Footballers extends StatefulWidget {
   UserVariables variables;
    Function pauseBackground;
   Function startBackground;
+  Function returnBack;
 
  
   Footballers({
-    this.category, this.lobbyId, this.rate, this.solo, this.public, this.variables, this.creatorId, this.categoryNo, this.pauseBackground, this.startBackground
+    this.category, this.lobbyId, this.rate, this.returnBack, this.solo, this.public, this.variables, this.creatorId, this.categoryNo, this.pauseBackground, this.startBackground
   });
 
   @override
@@ -309,7 +310,7 @@ _bounceController.addListener(() {
    startGamePlayCountDown();
     startSecondCountDown();
     setupSound().then((value) {
-      player.play();
+      // player.play();
     });
     // scheduleTimeout(second * 1000);
     
@@ -942,7 +943,7 @@ void handleTimeout() {  // callback function
                     stopGame();
                   }
                   // handleTimeout();
-                  _navigator.pop(context); player.stop(); widget.startBackground();
+                  _navigator.pop(context);  widget.returnBack(); player.stop(); widget.startBackground();
                          Future.delayed(Duration(seconds: 1)).then((value) {
                     cancel.stop();
                   });
@@ -1117,7 +1118,7 @@ void handleTimeout() {  // callback function
                     stopGame();
                   }
                   // handleTimeout();
-                  _navigator.pop(context); player.stop(); widget.startBackground();
+                  _navigator.pop(context);  widget.returnBack(); player.stop(); widget.startBackground();
                          Future.delayed(Duration(seconds: 1)).then((value) {
                     cancel.stop();
                   });
@@ -1294,7 +1295,7 @@ void handleTimeout() {  // callback function
                     stopGame();
                   }
                   // handleTimeout();
-                  _navigator.pop(context); player.stop(); widget.startBackground();
+                  _navigator.pop(context); widget.returnBack(); player.stop(); widget.startBackground();
                          Future.delayed(Duration(seconds: 1)).then((value) {
                     cancel.stop();
                   });
@@ -1414,7 +1415,7 @@ void handleTimeout() {  // callback function
                     stopGame();
                   }
                   // handleTimeout();
-                  _navigator.pop(context); player.stop(); widget.startBackground();
+                  _navigator.pop(context);  widget.returnBack(); player.stop(); widget.startBackground();
                          Future.delayed(Duration(seconds: 1)).then((value) {
                     cancel.stop();
                   });
@@ -1632,7 +1633,7 @@ void handleTimeout() {  // callback function
                     disposed = true;
                   });
                   // handleTimeout();
-                  _navigator.pop(context); player.stop(); widget.startBackground();
+                  _navigator.pop(context); widget.returnBack(); player.stop(); widget.startBackground();
                                 },
                                 child: new Text(
                                   'Yes',
@@ -1832,7 +1833,7 @@ void handleTimeout() {  // callback function
                     disposed = true;
                   });
                   // handleTimeout();
-                  _navigator.pop(context); player.stop(); widget.startBackground();
+                  _navigator.pop(context); widget.returnBack(); player.stop(); widget.startBackground(); 
                                 },
                                 child: new Text(
                                   'Yes',
@@ -1951,7 +1952,7 @@ void handleTimeout() {  // callback function
                     stopGame();
                   }
                   // handleTimeout();
-                  _navigator.pop(context); player.stop(); widget.startBackground();
+                  _navigator.pop(context); widget.returnBack();player.stop(); widget.startBackground();
                          Future.delayed(Duration(seconds: 1)).then((value) {
                     cancel.stop();
                   });
@@ -2115,7 +2116,7 @@ void handleTimeout() {  // callback function
                     stopGame();
                   }
                   // handleTimeout();
-                  _navigator.pop(context); player.stop(); widget.startBackground();
+                  _navigator.pop(context); widget.returnBack(); player.stop(); widget.startBackground();
                          Future.delayed(Duration(seconds: 1)).then((value) {
                     cancel.stop();
                   });
@@ -2224,7 +2225,7 @@ void handleTimeout() {  // callback function
                     stopGame();
                   }
                   // handleTimeout();
-                  _navigator.pop(context); player.stop(); widget.startBackground();
+                  _navigator.pop(context); widget.returnBack(); player.stop(); widget.startBackground();
                          Future.delayed(Duration(seconds: 1)).then((value) {
                     cancel.stop();
                   });
@@ -2427,7 +2428,7 @@ void handleTimeout() {  // callback function
                     stopGame();
                   }
                   // handleTimeout();
-                  _navigator.pop(context); player.stop(); widget.startBackground();
+                  _navigator.pop(context);  widget.returnBack(); player.stop(); widget.startBackground();
                          Future.delayed(Duration(seconds: 1)).then((value) {
                     cancel.stop();
                   });
@@ -2597,7 +2598,7 @@ void handleTimeout() {  // callback function
                     stopGame();
                   }
                   // handleTimeout();
-                  _navigator.pop(context); player.stop(); widget.startBackground();
+                  _navigator.pop(context); widget.returnBack(); player.stop(); widget.startBackground();
                          Future.delayed(Duration(seconds: 1)).then((value) {
                     cancel.stop();
                   });
@@ -2709,7 +2710,7 @@ void handleTimeout() {  // callback function
                     stopGame();
                   }
                   // handleTimeout();
-                  _navigator.pop(context); player.stop(); widget.startBackground();
+                  _navigator.pop(context); widget.returnBack(); player.stop(); widget.startBackground();
                          Future.delayed(Duration(seconds: 1)).then((value) {
                     cancel.stop();
                   });
@@ -3044,7 +3045,7 @@ void handleTimeout() {  // callback function
                     stopGame();
                   }
                   // handleTimeout();
-                  _navigator.pop(context); player.stop(); widget.startBackground();
+                  _navigator.pop(context); widget.returnBack(); player.stop(); widget.startBackground();
                          Future.delayed(Duration(seconds: 1)).then((value) {
                     cancel.stop();
                   });

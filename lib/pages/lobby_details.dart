@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:async/async.dart';
 import 'package:animated_check/animated_check.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -147,6 +148,26 @@ _animationController.addListener(() {
      setupSound();
   }
 
+    void showFlushbar(BuildContext context) {
+    Flushbar(
+      padding: EdgeInsets.all(10),
+      borderRadius: 0,
+      //flushbarPosition: FlushbarPosition.,
+      backgroundGradient: LinearGradient(
+        colors: [Color(0xff00ffff), Color(0xff00ffff)],
+        stops: [0.6, 1],
+      ),
+      duration: Duration(seconds: 2),
+      dismissDirection: FlushbarDismissDirection.HORIZONTAL,
+      forwardAnimationCurve: Curves.fastLinearToSlowEaseIn,
+      messageText: Center(
+          child: Text(
+        'You do not have enough balance in your wallet to join this lobby.',
+        style: TextStyle(fontFamily: 'Muli', color: Colors.black), textAlign: TextAlign.center
+      )),
+    )..show(context);
+  }
+
   Future<void> setupSound() async{
     await player.setAsset('assets/glass.mp3');
     await selectPlayer.setAsset('assets/sound-effects/option-click-confirm.wav');
@@ -155,6 +176,10 @@ _animationController.addListener(() {
     cancel.setVolume(0.1);
     cancel.play();
     cancel.stop();
+  }
+
+  returnBack(){
+
   }
   
   Timer scheduleTimeout(milliseconds) =>
@@ -371,14 +396,17 @@ void handleTimeout() {  // callback function
               setState(() {
                 joining = true;
               });
-              if(widget.public){
+              if(widget.variables.currentUser.coins < widget.lobby.rate.toInt()){
+                showFlushbar(context);
+              }
+              else if(widget.public){
                 if(widget.lobby.gameType == 4){
                   _firebaseProvider.addUserToClosestPublicLobby(widget.variables.currentUser, widget.lobby.uid, widget.rate).then((value) {
                 
                  Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                          
-                          return ClosestMultiplayer(category: '0', public: false, rate: widget.lobby.rate.toInt(), lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId, startBackground: widget.startBackground,);
+                          return ClosestMultiplayer(category: '0', returnBack: returnBack, public: false, rate: widget.lobby.rate.toInt(), lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId, startBackground: widget.startBackground,);
                           },
                         )).then((value) {
                           setState(() {
@@ -393,16 +421,16 @@ void handleTimeout() {  // callback function
                  Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           if(widget.lobby.gameType == 0){
-                            return Footballers(public: widget.public, category: categoryId[widget.lobby.gameCategory], lobbyId: widget.lobby.uid, solo: false, creatorId: widget.lobby.creatorId, variables: widget.variables, categoryNo: widget.lobby.gameCategory, startBackground: widget.startBackground, rate: widget.lobby.rate.toInt(),);
+                            return Footballers(public: widget.public, returnBack: returnBack, category: categoryId[widget.lobby.gameCategory], lobbyId: widget.lobby.uid, solo: false, creatorId: widget.lobby.creatorId, variables: widget.variables, categoryNo: widget.lobby.gameCategory, startBackground: widget.startBackground, rate: widget.lobby.rate.toInt(),);
                           }
                           else if (widget.lobby.gameType ==1){
                             print(widget.public); print(' is the public');
-                            return BlackJackMultiplayer(public: widget.public, category: '0', lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId, startBackground: widget.startBackground, rate: widget.lobby.rate.toInt(),);
+                            return BlackJackMultiplayer(public: widget.public, returnBack: returnBack, category: '0', lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId, startBackground: widget.startBackground, rate: widget.lobby.rate.toInt(),);
                           }
                           else if (widget.lobby.gameType ==2){
-                            return BankeruMultiplayer(public: widget.public, category: '0', lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId, startBackground: widget.startBackground, rate: widget.lobby.rate.toInt());
+                            return BankeruMultiplayer(public: widget.public, returnBack: returnBack, category: '0', lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId, startBackground: widget.startBackground, rate: widget.lobby.rate.toInt());
                           }
-                          return SpinningBaby(public: widget.public, category: '0', lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId, startBackground: widget.startBackground, rate: widget.lobby.rate.toInt());
+                          return SpinningBaby(public: widget.public, returnBack: returnBack, category: '0', lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId, startBackground: widget.startBackground, rate: widget.lobby.rate.toInt());
                           },
                         )).then((value) {
                           setState(() {
@@ -420,7 +448,7 @@ void handleTimeout() {  // callback function
                  Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                          
-                          return ClosestMultiplayer(category: '0', public: false, rate: widget.lobby.rate.toInt(), lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId, startBackground: widget.startBackground,);
+                          return ClosestMultiplayer(category: '0',  returnBack: returnBack, public: false, rate: widget.lobby.rate.toInt(), lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId, startBackground: widget.startBackground,);
                           },
                         )).then((value) {
                           setState(() {
@@ -435,18 +463,18 @@ void handleTimeout() {  // callback function
                  Navigator.push(context, MaterialPageRoute( 
           builder: (BuildContext context) {
                           if(widget.lobby.gameType == 0){
-                            return Footballers(category: categoryId[widget.lobby.gameCategory], rate: widget.lobby.rate.toInt(), public: false, lobbyId: widget.lobby.uid, solo: false, creatorId: widget.lobby.creatorId, variables: widget.variables, categoryNo: widget.lobby.gameCategory, startBackground: widget.startBackground,);
+                            return Footballers(category: categoryId[widget.lobby.gameCategory],  returnBack: returnBack, rate: widget.lobby.rate.toInt(), public: false, lobbyId: widget.lobby.uid, solo: false, creatorId: widget.lobby.creatorId, variables: widget.variables, categoryNo: widget.lobby.gameCategory, startBackground: widget.startBackground,);
                           }
                           else if (widget.lobby.gameType ==1){
-                            return BlackJackMultiplayer(category: '0', rate: widget.lobby.rate.toInt(), public: false, lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId, startBackground: widget.startBackground,);
+                            return BlackJackMultiplayer(category: '0',  returnBack: returnBack, rate: widget.lobby.rate.toInt(), public: false, lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId, startBackground: widget.startBackground,);
                           }
                           else if (widget.lobby.gameType ==2){
-                            return BankeruMultiplayer(category: '0', rate: widget.lobby.rate.toInt(),public: false, lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId, startBackground: widget.startBackground,);
+                            return BankeruMultiplayer(category: '0', returnBack: returnBack, rate: widget.lobby.rate.toInt(),public: false, lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId, startBackground: widget.startBackground,);
                           }
                           else if (widget.lobby.gameType == 3){
-                            return SpinningBaby(public: widget.public, rate: widget.lobby.rate.toInt(),category: '0', lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId, startBackground: widget.startBackground,);
+                            return SpinningBaby(public: widget.public, returnBack: returnBack, rate: widget.lobby.rate.toInt(),category: '0', lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId, startBackground: widget.startBackground,);
                           }
-                          return ClosestMultiplayer(category: '0', public: false, rate: widget.lobby.rate.toInt(), lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId, startBackground: widget.startBackground,);
+                          return ClosestMultiplayer(category: '0', returnBack: returnBack, public: false, rate: widget.lobby.rate.toInt(), lobbyId: widget.lobby.uid, solo: false, variables: widget.variables, categoryNo: 0, creatorId: widget.lobby.creatorId, startBackground: widget.startBackground,);
                           },
                         )).then((value) {
                           setState(() {

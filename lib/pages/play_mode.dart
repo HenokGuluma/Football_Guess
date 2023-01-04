@@ -64,9 +64,11 @@ class _PlayModeState extends State<PlayMode>
   User currentUser = User();
   bool loading = true;
   List<String> phoneList = [];
+  bool changeBackground = false;
   List<String> backgroundTracks = [
     'assets/sound-effects/adderall.mp3', 'assets/sound-effects/just-a-lil-bit.mp3', 'assets/sound-effects/middle.mp3',
-    'assets/sound-effects/roses.mp3', 'assets/sound-effects/you-like-it.mp3',
+    'assets/sound-effects/roses.mp3', 'assets/sound-effects/you-like-it.mp3', 'assets/sound-effects/sugar.mp3', 'assets/sound-effects/on&on.mp3', 'assets/sound-effects/runaway.mp3',
+    'assets/sound-effects/this-girl.mp3', 'assets/sound-effects/spectre.mp3',
   ];
   
 
@@ -115,8 +117,20 @@ class _PlayModeState extends State<PlayMode>
     print('nope');
    } */
    setupSound().then((value) {
-    player.play();
+    playBackGroundMusic();
    });
+  }
+
+  playBackGroundMusic() async{
+    Future.delayed(Duration(seconds: 2)).then((value) async {
+      await player.play().then((value) {
+        setState(() {
+          changeBackground = true;
+        });
+      // selectSound();
+    });
+    });
+    
   }
 
   pauseBackgroundMusic(){
@@ -124,19 +138,31 @@ class _PlayModeState extends State<PlayMode>
   }
 
   startBackgroundMusic() async{
-    int index = Random().nextInt(4);
+    int index = Random().nextInt(9);
     await player.setAsset(backgroundTracks[index]);
     player.play();
   }
 
      Future<void> setupSound() async{
-    int index = Random().nextInt(4);
+    int index = Random().nextInt(9);
     await selectPlayer.setAsset('assets/sound-effects/option-click-confirm.wav');
     await player.setAsset(backgroundTracks[index]);
     player.setVolume(0.1);
     selectPlayer.setVolume(0.1);
     selectPlayer.play();
     selectPlayer.stop();
+  }
+
+  selectSound() async{
+    int index = Random().nextInt(9);
+    await player.setAsset(backgroundTracks[index]);
+    if(changeBackground){
+      playBackGroundMusic();
+      setState(() {
+        changeBackground = false;
+      });
+    }
+    
   }
 
   Timer scheduleTimeout(milliseconds) =>

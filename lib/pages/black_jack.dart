@@ -104,6 +104,12 @@ class _BlackJackState extends State<BlackJack>
   int value;
   int color;
   int type;
+  int value1;
+  int color1;
+  int type1;
+  int value2;
+  int color2;
+  int type2;
   final player = AudioPlayer(); 
   final cancel = AudioPlayer();
   final selectPlayer = AudioPlayer();
@@ -157,6 +163,8 @@ class _BlackJackState extends State<BlackJack>
    int addedScore = 0;
    bool exploded = false;
    bool perfectScore = false;
+   bool submitted = false;
+   int botScore = 0;
 
 
 
@@ -335,10 +343,16 @@ void startTimer(var width, var height, Function shatter) {
 
   @override
   void initState() {
-  
-    value = rng.nextInt(12);
+    value = rng.nextInt(13);
     color = rng.nextInt(2);
     type = rng.nextInt(3);
+    value1 = rng.nextInt(13);
+    color1 = rng.nextInt(2);
+    type1 = rng.nextInt(3);
+    value2 = rng.nextInt(13);
+    color2 = rng.nextInt(2);
+    type2= rng.nextInt(3);
+    calculateBotScore();
     // initialRandomize();
     setupSound();
      _navigator = Navigator.of(context);
@@ -359,6 +373,30 @@ void startTimer(var width, var height, Function shatter) {
     cancel.setVolume(0.1);
     cancel.play();
     cancel.stop();
+  }
+
+  calculateBotScore(){
+    List<int> values = [value1, value2];
+    int scorez = 0;
+    for (int i = 0; i<2; i++){
+      int added = 0;
+      value = values[i];
+      if(value == 0){
+        added = 11;
+      }
+      else if(value <9){
+        added = value+1;
+      }
+      else{
+        added = 10;
+      }
+      scorez = scorez + added;
+    }
+
+    setState(() {
+      botScore = scorez;
+    });
+    
   }
 
   Future<void> getWinner() async{
@@ -622,7 +660,7 @@ void handleTimeout() {  // callback function
  
     return WillPopScope(
     onWillPop: () async => false,
-    child: gameScreen(width, height)
+    child: submitted?submittedScreen(width, height):gameScreen(width, height)
         );
    
    }
@@ -669,6 +707,13 @@ void handleTimeout() {  // callback function
                 cardValues = [];
                 score = 0;
                 player.stop();
+                value1 = rng.nextInt(13);
+                color1 = rng.nextInt(2);
+                type1 = rng.nextInt(3);
+                value2 = rng.nextInt(13);
+                color2 = rng.nextInt(2);
+                type2= rng.nextInt(3);
+                showRandomizing = true;
               });
             },
             child: Container(
@@ -821,6 +866,13 @@ void handleTimeout() {  // callback function
                 cardValues = [];
                 score = 0;
                 player.stop();
+                value1 = rng.nextInt(13);
+                color1 = rng.nextInt(2);
+                type1 = rng.nextInt(3);
+                value2 = rng.nextInt(13);
+                color2 = rng.nextInt(2);
+                type2= rng.nextInt(3);
+                showRandomizing = true;
               });
             },
             child: Container(
@@ -935,6 +987,226 @@ void handleTimeout() {  // callback function
       ));
  
    }
+
+Widget submittedScreen(var width, var height){
+  return Scaffold(
+    body: Stack(
+      children: [
+        Container(
+            width: width,
+            height: height,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/blackjack_wallpaper.png'),
+                fit: BoxFit.cover
+              )
+            ),
+          ),
+          Center(
+            
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                    SizedBox(
+                height: height*0.05,
+              ),
+             SizedBox(
+                height: height*0.2,
+              ),
+               score>=botScore
+               ?Container(
+                width: width*0.9,
+                child: Center(
+                child: Text(
+                'CONGRATULATIONS', style: TextStyle(color: Color(0xff63ff00), fontFamily: 'Muli', fontSize: 38, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic), textAlign: TextAlign.center
+              ),
+               ),
+               )
+               :Container(
+                width: width*0.9,
+                child: Center(
+                child: Text(
+                'TOUGH LUCK', style: TextStyle(color: Color(0xffff2363), fontFamily: 'Muli', fontSize: 40, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic), textAlign: TextAlign.center
+              ),
+               ),
+               )
+               ,
+               SizedBox(
+                height: height*0.1,
+              ),
+              Text(
+                'Final Score: '+ score.toInt().toString(), style: TextStyle(color: Colors.white, fontFamily: 'Muli', fontSize: 30, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
+              ),
+              SizedBox(
+                height: height*0.05,
+              ),
+              Text(
+                'Bot Score: '+ botScore.toInt().toString(), style: TextStyle(color: Colors.white, fontFamily: 'Muli', fontSize: 30, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic),
+              ),
+              SizedBox(
+                height: height*0.05,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  GestureDetector(
+            onTap: (){
+              cancel.play();
+              showDialog(
+                        context: context,
+                        builder: ((context) {
+                          return new AlertDialog(
+                            backgroundColor: Color(0xff240044),
+                            title: new Text(
+                              'Leaving the game',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Muli',
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w900),
+                            ),
+                            content: new Text(
+                              'Are you sure you want to leave the game? All progresses and bets will be lost.',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Muli',
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.normal),
+                            ),
+                            actions: <Widget>[
+                              new TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                  setState(() {
+                                    paused = false;
+                                  });
+                                }, // Closes the dialog
+                                child: new Text(
+                                  'No',
+                                  style: TextStyle(
+                                      color: Color(0xffff2389),
+                                      fontSize: 16,
+                                      fontFamily: 'Muli',
+                                      fontWeight: FontWeight.w900),
+                                ),
+                              ),
+                              new TextButton(
+                                onPressed: () {
+                                  cancel.play();
+                                  Navigator.pop(context);
+                                //  _bounceController.reset();
+                  // _animationController.reset();
+                  setState(() {
+                    disposed = true;
+                  });
+                  // handleTimeout();
+                  _navigator.pop(context);
+                  Future.delayed(Duration(seconds: 1)).then((value) {
+                cancel.stop();
+                });
+                                },
+                                child: new Text(
+                                  'Yes',
+                                  style: TextStyle(
+                                      color: Color(0xff23ff89),
+                                      fontSize: 16,
+                                      fontFamily: 'Muli',
+                                      fontWeight: FontWeight.w900),
+                                ),
+                              ),
+                            ],
+                          );
+                        }));
+                        Future.delayed(Duration(seconds: 1)).then((value) {
+                cancel.stop();
+                });
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Color(0xffff2389),
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.3,
+              height: height*0.06,
+              child: Center(
+                child: Text('Leave', style: TextStyle(color: Colors.white, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            ),
+            ),
+           GestureDetector(
+            onTap: (){
+              // Navigator.pop(context);
+              setState(() {
+                exploded = false;
+                perfectScore = false;
+                cardValues = [];
+                score = 0;
+                player.stop();
+                submitted = false;
+                finished = false;
+                timeLeft = 6;
+                value1 = rng.nextInt(13);
+                color1 = rng.nextInt(2);
+                type1 = rng.nextInt(3);
+                value2 = rng.nextInt(13);
+                color2 = rng.nextInt(2);
+                type2= rng.nextInt(3);
+                showRandomizing = true;
+              });
+              calculateBotScore();
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.3,
+              height: height*0.06,
+              child: Center(
+                child: Text('Try Again', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            ),
+            ),
+
+                ],
+              ),
+              
+              /* GestureDetector(
+            onTap: (){
+              // Navigator.pop(context);
+              setState(() {
+                exploded = false;
+                perfectScore = false;
+                submitted = false;
+                submitting = false;
+                finished = false;
+                gotWinner = false;
+                winner = null;
+                cardValues = [];
+                score = 0;
+                timeLeft = 6;
+              });
+              _firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId);_firebaseProvider.addUserToLobby(widget.variables.currentUser, widget.lobbyId);
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.3,
+              height: height*0.06,
+              child: Center(
+                child: Text('Try Again', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            ),
+            ),
+             */])),
+      ],
+    ),
+  );
+}
+
 
    Widget gameScreen(var width, var height){
     return exploded
@@ -1059,12 +1331,50 @@ void handleTimeout() {  // callback function
                  SizedBox(
                   height: height*0.08,
                 ),
-                Center(
+                 randomizing
+                ?Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                     Center(
                   child: Container(
                     height: height*0.3,
                     child: (showRandomizing?randomizing?card(width, height, {'value': value, 'type': type}, 0):cardBack(width, height, shatter):Center()),
                   )
                 ),
+                    Container(
+              width: width*0.5,
+              height: height*0.3,
+              child: Center(
+                child: cardValues.length>0 || randomizing
+                ?Stack(
+            alignment: cardValues.length>1?Alignment.centerLeft:Alignment.center,
+              // scrollDirection: Axis.horizontal,
+              children: [
+                cardBack(width, height, shatter),
+                card2(width, height, {'type': type2, 'color': color2, 'value': value2}, 1),
+              ]
+          )
+          :Text('You gonna draw?', style: TextStyle(color: Color(0xff00ffff), fontSize: 25, fontFamily: 'Muli', fontWeight: FontWeight.w900))
+          ,
+              )
+            ), 
+           
+                  ],
+                )
+                :Container(
+              width: width*0.5,
+              height: height*0.3,
+              child: Center(
+                child: Stack(
+            alignment: cardValues.length>1?Alignment.centerLeft:Alignment.center,
+              // scrollDirection: Axis.horizontal,
+              children: [
+                cardBack(width, height, shatter),
+                card2(width, height, {'type': type2, 'color': color2, 'value': value2}, 1),
+              ]
+          )
+              )
+            ), 
                 SizedBox(
                   height: height*0.05,
                 ),
@@ -1083,14 +1393,19 @@ void handleTimeout() {  // callback function
               
         
           )
-          :Text('Press the deck to draw', style: TextStyle(color: Color(0xff00ffff), fontSize: 25, fontFamily: 'Muli', fontWeight: FontWeight.w900))
+          :Text('You gonna draw?', style: TextStyle(color: Color(0xff00ffff), fontSize: 25, fontFamily: 'Muli', fontWeight: FontWeight.w900))
           ,
               )
             ), 
           SizedBox(height: height*0.05,),
-            /* GestureDetector(
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+               GestureDetector(
             onTap: (){
-              Navigator.pop(context);
+              setState(() {
+                submitted = true;
+              });
             },
             child: Container(
               decoration: BoxDecoration(
@@ -1103,7 +1418,26 @@ void handleTimeout() {  // callback function
                 child: Text('Submit', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
               ),
             ),
-            ), */
+            ),
+             GestureDetector(
+            onTap: (){
+              randomize(width, height, shatter);
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20)
+              ),
+              width: width*0.3,
+              height: height*0.06,
+              child: Center(
+                child: Text(cardValues.length<1?'Draw Cards':'Hit me', style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: 'Muli', fontWeight: FontWeight.w900)),
+              ),
+            ),
+            ),
+            ],
+          )
+           
            
             
             ])
@@ -1218,7 +1552,7 @@ void handleTimeout() {  // callback function
 
     return GestureDetector(
          onTap: (){
-        randomize(width, height, shatter);
+        // randomize(width, height, shatter);
       },
       child: Container(
       width: width*0.35,
@@ -1352,6 +1686,75 @@ void handleTimeout() {  // callback function
 
     return Padding(
       padding: EdgeInsets.only(left: cardValues.length>4?index*width*0.1:index*width*0.15),
+      child: Container(
+      width: width*0.35,
+      height: height*0.3,
+      decoration: BoxDecoration(
+               
+                color: Colors.black,
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  stops: [0.0, 0.5, 1.0],
+                  colors: [Colors.white, Color(0xffe2ffff), Color(0xffbbffff)]
+                ),
+                /*  boxShadow: [BoxShadow(
+            color: Colors.white,
+            blurRadius: 3,
+            spreadRadius: 3
+          )], */
+          borderRadius: BorderRadius.circular(15),
+          border: Border.all(color: Colors.black)
+              ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          SizedBox(
+            height: width*0.007,
+          ),
+          Align(
+            alignment: Alignment.topLeft,
+            child: symbolLetter(cardValue, cardColor, type, width, height),
+          ),
+          SvgPicture.asset(typeMap[type], color: cardColor, width: width*0.2, height: width*0.2,),
+          Align(
+             alignment: Alignment.bottomRight,
+             child: Transform(
+              alignment: Alignment.center,
+              transform: Matrix4.rotationZ(pi),
+              child: symbolLetter(cardValue, cardColor, type, width, height),
+             ),
+          ),
+          SizedBox(
+            height: width*0.007,
+          )
+        ]
+      ),
+    ));
+   }
+
+   Widget card2(var width, var height, Map<String, dynamic> item, int index){
+    String cardValue = '';
+    var value = item['value'];
+    var color = Colors.black;
+    var type = item['type'];
+    Map<int, String> map;
+    if (value <1 || value >9){
+      cardValue = cardMap[value];
+    }
+    else{
+      cardValue = (value+1).toString();
+    }
+
+
+    Color cardColor = Colors.black;
+
+    if(type ==2 || type ==3){
+      cardColor = Colors.red;
+    }
+
+    return Padding(
+      padding: EdgeInsets.only(left: index*width*0.1),
       child: Container(
       width: width*0.35,
       height: height*0.3,
